@@ -1,4 +1,4 @@
-package com.hallvardlaerum.base.ui;
+package com.hallvardlaerum.basis;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.notification.Notification;

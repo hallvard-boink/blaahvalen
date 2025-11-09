@@ -1,4 +1,4 @@
-package com.hallvardlaerum.base.ui.component;
+package com.hallvardlaerum.basis;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;

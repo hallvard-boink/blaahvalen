@@ -1,0 +1,79 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class Post {
+    PostklasseEnum:
+    \t[Normal, Budsjettpost]
+    NormalposttypeEnum:
+    \t[Normal, Delpost, Utelates, Kredittkortpost] //Brukes kun til vanlige poster//
+    NormalpoststatusEnum:
+    \t[Ubehandlet, Under_Arbeid, Ferdig] //Brukes kun til vanlige poster//
+    BudsjettpoststatusEnum:
+    \t[Foreslått, Tildelt]
+    LocalDate dato
+    String tekstFraBanken  //Kun poster//
+    String beskrivelse //Tidligere egenBeskrivelse//
+    Integer mentForAar  //Kun budsjettposter//
+    Integer mentForMaaned  //Kun budsjettposter//
+    finnForelder()  //Egentlig kategori//
+    hentBeskrivendeTittel()
+    Integer innPaaKonto
+    Integer utFraKonto
+}
+
+class Kategori {
+    String kategoriTittel
+    String underkategoriTittel
+    String uuidHovedkategori
+    Integer nivaa [1 eller 2]]
+    String Beskrivelse
+    boolean erAktiv
+    boolean brukesTilBudsjett
+    boolean brukesTilRegnskap
+    boolean brukesTilFasteUtgifter  //Trengs denne?//
+    hentPoster()   //Kan brukes når kategorier skal slås sammen//
+
+}
+
+class Periode {
+    PeriodeTypeEnum: AarsRegnskap, MaanedsRegnskap, MaanedsMal
+    LocalDate datoFra
+    LocalDate datoTil
+    String beskrivelse
+    Integer sumBudsjettInntekter
+    Integer sumBudsjettUtgifter
+    Integer sumBudsjettResultat
+    Integer sumRegnskapUtgifter
+    Integer sumRegnskapInntekter
+    Integer sumRegnskapResultat
+    Integer sumDifferanseResultatBudsjettRegnskap
+    oppdaterSummer()
+    finnTilknyttedeBudsjettposter()
+    finnTilknyttedeNormalposter()
+    finnTilknyttedePeriodeposter()
+}
+
+class Periodepost {
+    PeriodepostTypeEnum:
+        \t[Aarsoversiktpost, Aarsoversiktbudsjettpost,
+        \t Maanedsoversiktpost, Maanedsoversiktbudsjettpost
+        \t Kostnadspakke, Budsjettgruppe]
+    LocalDate datoFra
+    LocalDate datoTil
+    String beskrivelse
+    Integer sumBudsjettInntekter  //Brukes til faste inntekter og regnskap//
+    Integer sumBudsjettUtgifter  //Brukes til faste utgifter og regnskap//
+    Integer sumRegnskapInntekter //Brukes til regnskap//
+    Integer sumRegnskapUtgifter  //Brukes til regnskap//
+    Integer sumRegnskapResultat  //Brukes til regnskap//
+    oppdaterSummer()
+    finnTilknyttedePoster()
+}
+
+Post --o Kategori
+Periodepost --o Kategori
+Periodepost --o Periode
+
+
+
+@enduml

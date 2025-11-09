@@ -1,1 +1,17 @@
 /* Add your styles here */
+
+/* Add this to your global CSS, for example in: */
+/* frontend/theme/[my-theme]/styles.css */
+/* 2025-11-08: Disse virker bare delvis */
+
+vaadin-grid::part(utelates) {
+    background: linear-gradient(var(--lumo-tertiary-color-10pct), var(--lumo-tertiary-color-10pct)) var(--lumo-base-color);
+}
+
+vaadin-grid::part(ubehandlet) {
+    background: linear-gradient(var(--lumo-error-color-10pct), var(--lumo-error-color-10pct)) var(--lumo-base-color);
+}
+
+vaadin-grid::part(delpost) {
+    background: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct)) var(--lumo-base-color);
+}

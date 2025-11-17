@@ -2,7 +2,7 @@ package com.hallvardlaerum.regnskap.data;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 
-public enum PosttypeEnum implements EnumAktig {
+public enum NormalposttypeEnum implements EnumAktig {
     NORMAL("Normal","Vanlig post, slik den fremgår av kontoutskriften fra banken"),
     DELPOST("Delpost","Er splittet ut fra en annen post, og er mer detaljert enn en vanlig post. Forelderposten skal være satt til status 'Utelates'"),
     UTELATES("Utelates","Tas med for historikkens del, men skal ikke tas med i utregninger."),
@@ -11,7 +11,7 @@ public enum PosttypeEnum implements EnumAktig {
     private String tittel;
     private String beskrivelse;
 
-    PosttypeEnum(String tittel, String beskrivelse) {
+    NormalposttypeEnum(String tittel, String beskrivelse) {
         this.tittel = tittel;
         this.beskrivelse = beskrivelse;
     }

@@ -6,9 +6,9 @@ import com.hallvardlaerum.grunndata.service.KategoriService;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
 
-import com.hallvardlaerum.regnskap.data.Post;
-import com.hallvardlaerum.regnskap.data.PoststatusEnum;
-import com.hallvardlaerum.regnskap.data.PosttypeEnum;
+import com.hallvardlaerum.regnskap.data.NormalpoststatusEnum;
+import com.hallvardlaerum.regnskap.data.NormalposttypeEnum;
+import com.hallvardlaerum.felles.Post;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -25,11 +25,13 @@ public class PostRedigeringsomraade extends RedigeringsomraadeMal<Post> implemen
     private TextField egenbeskrivelseTextField;
     private IntegerField innPaaKontoIntegerField;
     private IntegerField utFraKontoIntegerField;
-    private ComboBox<PosttypeEnum> posttypeComboBox;
-    private ComboBox<PoststatusEnum> poststatusComboBox;
+    private ComboBox<NormalposttypeEnum> normalposttypeComboBox;
+    private ComboBox<NormalpoststatusEnum> normalpoststatusComboBox;
     private ComboBox<Kategori> kategoriComboBox;
     private KategoriService kategoriService;
     private TextArea ekstraInfoTextArea;
+    private TextField uuidTextField;
+    private TextField forelderPostUUID;
 
     public void initier(KategoriService kategoriservice) {
         this.kategoriService = kategoriservice;
@@ -44,34 +46,65 @@ public class PostRedigeringsomraade extends RedigeringsomraadeMal<Post> implemen
     }
 
     @Override
+    public void aktiver(Boolean blnAktiver) {
+        super.aktiver(blnAktiver);
+        ((PostView)getViewSomDenneHoererTil()).aktiverDelpostknapperHvisAktuelt(blnAktiver);
+    }
+
+    @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
 
     }
 
     @Override
     public void instansOpprettFelter() {
-        datoDatePicker = super.leggTilRedigeringsfelt(new DatePicker("Dato"));
-        tekstFraBankenTextField = super.leggTilRedigeringsfelt(new TextField("Tekst fra banken"));
-        meldingKIDFaktnrTextField = super.leggTilRedigeringsfelt(new TextField("Melding/KID/Fakturanr"));
-        egenbeskrivelseTextField = super.leggTilRedigeringsfelt(new TextField("Egen beskrivelse"));
-        innPaaKontoIntegerField = super.leggTilRedigeringsfelt(new IntegerField("Inn på konto"));
-        utFraKontoIntegerField = super.leggTilRedigeringsfelt(new IntegerField("Ut fra konto"));
+        String hovedtabString= "Hoved";
+        String ekstratabString = "Ekstra";
 
-        posttypeComboBox = super.leggTilRedigeringsfelt(new ComboBox<>("Posttype"));
-        posttypeComboBox.setItemLabelGenerator(PosttypeEnum::getTittel);
-        posttypeComboBox.setItems(PosttypeEnum.values());
+        tekstFraBankenTextField = super.leggTilRedigeringsfelt(new TextField("Tekst fra banken"),hovedtabString);
+        settColspan(tekstFraBankenTextField,3);
 
-        poststatusComboBox = super.leggTilRedigeringsfelt(new ComboBox<>("Poststatus"));
-        poststatusComboBox.setItemLabelGenerator(PoststatusEnum::getTittel);
-        poststatusComboBox.setItems(PoststatusEnum.values());
+        datoDatePicker = new DatePicker("Dato");
+        innPaaKontoIntegerField = new IntegerField("Inn på konto");
+        utFraKontoIntegerField = new IntegerField("Ut fra konto");
 
-        kategoriComboBox = super.leggTilRedigeringsfelt(new ComboBox<>("Kategori"));
+        datoDatePicker = new DatePicker("Dato");
+        innPaaKontoIntegerField = new IntegerField("Inn på konto");
+        utFraKontoIntegerField = new IntegerField("Ut fra konto");
+        super.leggTilRedigeringsfelter(hovedtabString, datoDatePicker, innPaaKontoIntegerField, utFraKontoIntegerField);
+
+        egenbeskrivelseTextField = super.leggTilRedigeringsfelt(new TextField("Egen beskrivelse"),hovedtabString);
+        settColspan(egenbeskrivelseTextField,3);
+
+        kategoriComboBox = new ComboBox<>("Kategori");
         kategoriComboBox.setItems(kategoriService.finnAlle());
         kategoriComboBox.setItemLabelGenerator(Kategori::getTittel);
+        kategoriComboBox.addValueChangeListener(kategori -> {
+            if (kategori != null && getEntitet()!=null) {
+                if (normalpoststatusComboBox.getValue()==NormalpoststatusEnum.UBEHANDLET) {
+                    normalpoststatusComboBox.setValue(NormalpoststatusEnum.FERDIG);
+                }
+            }
+        });
 
-        ekstraInfoTextArea = super.leggTilRedigeringsfelt(new TextArea("Ekstra info"));
+        normalposttypeComboBox = new ComboBox<>("Posttype");
+        normalposttypeComboBox.setItemLabelGenerator(NormalposttypeEnum::getTittel);
+        normalposttypeComboBox.setItems(NormalposttypeEnum.values());
 
-        setFokusComponent(datoDatePicker);
+        normalpoststatusComboBox = new ComboBox<>("Poststatus");
+        normalpoststatusComboBox.setItemLabelGenerator(NormalpoststatusEnum::getTittel);
+        normalpoststatusComboBox.setItems(NormalpoststatusEnum.values());
+        super.leggTilRedigeringsfelter(hovedtabString, kategoriComboBox, normalposttypeComboBox, normalpoststatusComboBox);
+
+
+        meldingKIDFaktnrTextField = super.leggTilRedigeringsfelt(new TextField("Melding/KID/Fakturanr"),ekstratabString);
+        ekstraInfoTextArea = super.leggTilRedigeringsfelt(new TextArea("Ekstra info"),ekstratabString);
+        uuidTextField = super.leggTilRedigeringsfelt(new TextField("UUID"),ekstratabString);
+        forelderPostUUID = super.leggTilRedigeringsfelt(new TextField("ForelderpostUUID"),ekstratabString);
+
+        super.leggTilDatofeltTidOpprettetOgRedigert(ekstratabString);
+
+        setFokusComponent(egenbeskrivelseTextField);
     }
 
     @Override
@@ -80,13 +113,14 @@ public class PostRedigeringsomraade extends RedigeringsomraadeMal<Post> implemen
         binder.bind(datoDatePicker, Post::getDatoLocalDate, Post::setDatoLocalDate);
         binder.bind(tekstFraBankenTextField, Post::getTekstFraBankenString, Post::setTekstFraBankenString);
         binder.bind(meldingKIDFaktnrTextField, Post::getMeldingKIDFaktnrString, Post::setMeldingKIDFaktnrString);
-        binder.bind(egenbeskrivelseTextField, Post::getEgenbeskrivelseString, Post::setEgenbeskrivelseString);
+        binder.bind(egenbeskrivelseTextField, Post::getBeskrivelseString, Post::setBeskrivelseString);
         binder.bind(innPaaKontoIntegerField, Post::getInnPaaKontoInteger, Post::setInnPaaKontoInteger);
         binder.bind(utFraKontoIntegerField, Post::getUtFraKontoInteger, Post::setUtFraKontoInteger);
-        binder.bind(posttypeComboBox, Post::getPosttypeEnum, Post::setPosttypeEnum);
-        binder.bind(poststatusComboBox, Post::getPoststatusEnum, Post::setPoststatusEnum);
+        binder.bind(normalposttypeComboBox, Post::getNormalPosttypeEnum, Post::setNormalPosttypeEnum);
+        binder.bind(normalpoststatusComboBox, Post::getNormalPoststatusEnum, Post::setNormalPoststatusEnum);
         binder.bind(kategoriComboBox, Post::getKategori, Post::setKategori);
         binder.bind(ekstraInfoTextArea, Post::getEkstraInfoString, Post::setEkstraInfoString);
-
+        binder.bind(uuidTextField, Post::getUuidString, Post::setUuidStringFake);
+        binder.bind(forelderPostUUID, Post::getForelderPostUUID, Post::setForelderPostUUID);
     }
 }

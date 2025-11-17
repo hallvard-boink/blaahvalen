@@ -8,7 +8,9 @@ public class Versjonskyklop extends Versjonskyklopmal {
 
     @Override
     public void byggOppVersjoner() {
-        super.leggTilVersjon("0.3","2025-11-08","Stil på lista med poster","Triksing med Lumo og css.");
+        super.leggTilVersjon("0.3.1","2025-11-17","Delposter","Utvidelse av PostView og korreksjon av import.");
+        super.leggTilVersjon("0.3","2025-11-09","Budsjettposter","Datastruktur og import");
+        super.leggTilVersjon("0.2.1","2025-11-08","Stil på lista med poster","Triksing med Lumo og css.");
         super.leggTilVersjon("0.2","2025-11-06","Importert kategorier og poster","Hentet fra eksporterte excel-data fra Mendix");
         super.leggTilVersjon("0.1","2025-11-03","Opprettet kategorier og poster","De første entitetene");
         super.leggTilVersjon("0.0.1","2025-10-25","Skjelett","Få rammeverket opp og stå");

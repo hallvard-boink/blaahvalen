@@ -1,6 +1,5 @@
 package com.hallvardlaerum.verktoy;
 
-import com.hallvardlaerum.regnskap.data.Post;
 import com.hallvardlaerum.regnskap.service.PostService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;

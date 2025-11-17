@@ -3,13 +3,11 @@ package com.hallvardlaerum.grunndata.data;
 import com.hallvardlaerum.libs.database.AbstraktEntitet;
 import com.hallvardlaerum.libs.database.EntitetMedBarnAktig;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;
-import com.hallvardlaerum.regnskap.data.Post;
-import jakarta.persistence.CascadeType;
+import com.hallvardlaerum.felles.Post;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Entity

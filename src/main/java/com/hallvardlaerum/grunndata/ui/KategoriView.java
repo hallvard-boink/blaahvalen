@@ -3,6 +3,7 @@ package com.hallvardlaerum.grunndata.ui;
 import com.hallvardlaerum.grunndata.data.Kategori;
 import com.hallvardlaerum.grunndata.data.KategoriType;
 import com.hallvardlaerum.grunndata.service.KategoriService;
+import com.hallvardlaerum.libs.felter.TekstKyklop;
 import com.hallvardlaerum.libs.ui.BooleanCombobox;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -43,7 +44,7 @@ public class KategoriView extends MasterDetailViewmal<Kategori> {
 
 
         if (!tittelFilterTextField.getValue().isEmpty()) {
-            listDataView.addFilter(k -> inneholderTekst(k.getTittel(), tittelFilterTextField.getValue()));
+            listDataView.addFilter(k -> TekstKyklop.hent().inneholderTekst(k.getTittel(), tittelFilterTextField.getValue()));
         }
 
 

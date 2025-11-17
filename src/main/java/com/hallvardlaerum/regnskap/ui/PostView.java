@@ -1,16 +1,15 @@
 package com.hallvardlaerum.regnskap.ui;
 
+import com.hallvardlaerum.felles.Post;
 import com.hallvardlaerum.grunndata.data.Kategori;
 import com.hallvardlaerum.grunndata.service.KategoriService;
 import com.hallvardlaerum.libs.database.SearchCriteria;
 import com.hallvardlaerum.libs.felter.Datokyklop;
-import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.regnskap.data.*;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.regnskap.service.PostService;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -19,7 +18,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.Lumo;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.data.domain.Sort;
 
@@ -37,11 +35,13 @@ public class PostView extends MasterDetailViewmal<Post> {
     private TextField egenbeskrivelseFilterTextField;
     private IntegerField innpaakontoFilterIntegerField;
     private IntegerField utfrakontoFilterIntegerField;
-    private ComboBox<PoststatusEnum> poststatusFilterCombobox;
-    private ComboBox<PosttypeEnum> posttypeFilterCombobox;
+    private ComboBox<NormalpoststatusEnum> normalpoststatusFilterCombobox;
+    private ComboBox<NormalposttypeEnum> normalposttypeFilterCombobox;
     private ComboBox<Kategori> kategoriFilterComboBox;
-    private KategoriService kategoriService;
 
+
+    private KategoriService kategoriService;
+    private PostViewDelpostMester postViewDelpostMester;
 
     public PostView(PostService postService, KategoriService kategoriService) {
         super();
@@ -50,21 +50,37 @@ public class PostView extends MasterDetailViewmal<Post> {
         this.postRedigeringsomraade = (PostRedigeringsomraade) postService.hentRedigeringsomraadeAktig();
         postRedigeringsomraade.setDelAvView(this);
         opprettLayout(postService, postRedigeringsomraade, SplitLayout.Orientation.VERTICAL);
+        initierGridMedNormalSoek();
+        postViewDelpostMester = new PostViewDelpostMester(this, postService);
 
+    }
+
+    public void aktiverDelpostknapperHvisAktuelt(Boolean blnAktiver){
+        if (postViewDelpostMester!=null) {
+            postViewDelpostMester.aktiverKnapperForEntity(blnAktiver);
+        }
+        super.hentLagreButton().setEnabled(blnAktiver);
+        super.hentSlettButton().setEnabled(blnAktiver);
+    }
+
+    public void initierGridMedNormalSoek(){
         super.initierCallbackDataProviderIGrid(
                 q -> postService.finnEntiteterMedSpecification(
                         q.getOffset(),
                         q.getLimit(),
                         postService.getEntityFilterSpecification(),
                         Sort.by("datoLocalDate").descending().and(Sort.by("tekstFraBankenString"))
-                        ),
+                ),
 
                 query -> postService.tellAntallMedSpecification(
                         query.getOffset(),
                         query.getLimit(),
                         postService.getEntityFilterSpecification())
         );
+
     }
+
+
 
 
     @Override
@@ -93,12 +109,12 @@ public class PostView extends MasterDetailViewmal<Post> {
             filtre.add(new SearchCriteria("utFraKontoInteger",">",utfrakontoFilterIntegerField.getValue()));
         }
 
-        if (poststatusFilterCombobox.getValue()!=null) {
-            filtre.add(new SearchCriteria("poststatusEnum",":",poststatusFilterCombobox.getValue()));
+        if (normalpoststatusFilterCombobox.getValue()!=null) {
+            filtre.add(new SearchCriteria("normalpoststatusEnum",":", normalpoststatusFilterCombobox.getValue()));
         }
 
-        if (posttypeFilterCombobox.getValue()!=null) {
-            filtre.add(new SearchCriteria("posttypeEnum",":",posttypeFilterCombobox.getValue()));
+        if (normalposttypeFilterCombobox.getValue()!=null) {
+            filtre.add(new SearchCriteria("normalposttypeEnum",":", normalposttypeFilterCombobox.getValue()));
         }
 
         if (kategoriFilterComboBox.getValue()!=null) {
@@ -112,28 +128,29 @@ public class PostView extends MasterDetailViewmal<Post> {
     @Override
     public void instansOpprettGrid() {
         grid = super.hentGrid();
-        grid.addColumn(Post::getDatoLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer());
-        grid.addColumn(Post::getTekstFraBankenString).setHeader("Tekst fra banken").setRenderer(opprettTekstFraBankenRenderer());
-        grid.addColumn(Post::getEgenbeskrivelseString).setHeader("Egen beskrivelse").setRenderer(opprettEgenbeskrivelseRenderer());
-        grid.addColumn(Post::getKategori).setHeader("Kategori").setRenderer(opprettKategoriRenderer());
-        //grid.addColumn(Post::getInnPaaKontoInteger).setHeader("Inn på konto").setTextAlign(ColumnTextAlign.END);
-        grid.addColumn(Post::getInnPaaKontoInteger).setHeader("Inn på konto").setRenderer(opprettInnPaaKontoRenderer());
-        grid.addColumn(Post::getUtFraKontoInteger).setHeader("Ut fra konto").setRenderer(opprettUtFraKontoRenderer());
-        grid.addColumn(Post::getPoststatusEnum).setHeader("Status").setRenderer(opprettPoststatusRenderer());
-        grid.addColumn(Post::getPosttypeEnum).setHeader("Type").setRenderer(opprettPosttypeRenderer());
+        grid.addColumn(Post::getDatoLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer()).setWidth("60px");
+        grid.addColumn(Post::getTekstFraBankenString).setHeader("Tekst fra banken").setRenderer(opprettTekstFraBankenRenderer()).setWidth("400px");
+        grid.addColumn(Post::getInnPaaKontoInteger).setHeader("Inn på konto").setRenderer(opprettInnPaaKontoRenderer()).setWidth("60px");
+        grid.addColumn(Post::getUtFraKontoInteger).setHeader("Ut fra konto").setRenderer(opprettUtFraKontoRenderer()).setWidth("60px");
+
+        grid.addColumn(Post::getKategori).setHeader("Kategori").setRenderer(opprettKategoriRenderer()).setWidth("100px");
+        grid.addColumn(Post::getBeskrivelseString).setHeader("Egen beskrivelse").setRenderer(opprettEgenbeskrivelseRenderer()).setWidth("200px");
+        grid.addColumn(Post::getNormalPoststatusEnum).setHeader("Status").setRenderer(opprettPoststatusRenderer()).setWidth("50px");
+        grid.addColumn(Post::getNormalPosttypeEnum).setHeader("Type").setRenderer(opprettPosttypeRenderer()).setWidth("50px");
 
         // Denne klarer å sette bakgrunnen i hele raden
-        grid.setPartNameGenerator(post -> {
-            if (post.getPoststatusEnum() == PoststatusEnum.UBEHANDLET) {
-                return "ubehandlet";
-            } else if (post.getPosttypeEnum() == PosttypeEnum.UTELATES) {
-                return "utelates";
-            } else if (post.getPosttypeEnum() == PosttypeEnum.DELPOST) {
-                return "delpost";
-            } else {
-                return "";
-            }
-        });
+//        grid.setPartNameGenerator(post -> {
+//            if (post.getNormalPoststatusEnum() == NormalpoststatusEnum.UBEHANDLET) {
+//                return "ubehandlet";
+//            } else if (post.getNormalPosttypeEnum() == NormalposttypeEnum.UTELATES) {
+//                return "utelates";
+//            } else if (post.getNormalPosttypeEnum() == NormalposttypeEnum.DELPOST) {
+//                //return "delpost"; //for mye markering
+//                return "";
+//            } else {
+//                return "";
+//            }
+//        });
     }
 
     private void settStil(Span span, Post post) {
@@ -141,15 +158,39 @@ public class PostView extends MasterDetailViewmal<Post> {
             return;
         }
 
-        if (post.getPoststatusEnum()==PoststatusEnum.UBEHANDLET) {
-            span.setClassName(LumoUtility.TextColor.ERROR);
+        if (post.getNormalPoststatusEnum()== NormalpoststatusEnum.UBEHANDLET) {
+            span.addClassName(LumoUtility.TextColor.ERROR);
             //span.setClassName(LumoUtility.Background.ERROR);  //Tok bare teksten, ikke hele cellen
-        } else if (post.getPosttypeEnum()==PosttypeEnum.UTELATES) {
-            span.setClassName(LumoUtility.TextColor.TERTIARY);
-            span.setClassName(LumoUtility.FontWeight.BOLD);
-        } else if (post.getPosttypeEnum()==PosttypeEnum.DELPOST) {
-            span.setClassName(LumoUtility.TextColor.PRIMARY);
+        } else if (post.getNormalPosttypeEnum()== NormalposttypeEnum.UTELATES) {
+            span.addClassName(LumoUtility.TextColor.TERTIARY);
+//        } else if (post.getNormalPosttypeEnum()== NormalposttypeEnum.DELPOST) {  //Trengs ikke, blir for mye markering
+//            span.setClassName(LumoUtility.TextColor.PRIMARY);
         }
+    }
+
+
+    @Override
+    public void instansOpprettFilterFelter() {
+        datoFilterDatePicker = leggTilFilterfelt(0, new DatePicker(),"< dato");
+        tekstfrabankenFilterTextField = leggTilFilterfelt(1, new TextField(),"tekst");
+
+        innpaakontoFilterIntegerField = leggTilFilterfelt(2, new IntegerField(),"> tall");
+        utfrakontoFilterIntegerField = leggTilFilterfelt(3, new IntegerField(), "> tall");
+
+        kategoriFilterComboBox = leggTilFilterfelt(4, new ComboBox<>(),"Velg");
+        kategoriFilterComboBox.setItems(kategoriService.finnAlle());
+        kategoriFilterComboBox.setItemLabelGenerator(Kategori::hentBeskrivendeNavn);
+
+        egenbeskrivelseFilterTextField = leggTilFilterfelt(5,new TextField(), "tekst");
+
+        normalpoststatusFilterCombobox = leggTilFilterfelt(6, new ComboBox<>(),"Velg");
+        normalpoststatusFilterCombobox.setItems(NormalpoststatusEnum.values());
+        normalpoststatusFilterCombobox.setItemLabelGenerator(NormalpoststatusEnum::getTittel);
+
+        normalposttypeFilterCombobox = leggTilFilterfelt(7,new ComboBox<>(),"Velg");
+        normalposttypeFilterCombobox.setItems(NormalposttypeEnum.values());
+        normalposttypeFilterCombobox.setItemLabelGenerator(NormalposttypeEnum::getTittel);
+
     }
 
     private ComponentRenderer<Span,Post> opprettUtFraKontoRenderer(){
@@ -172,7 +213,7 @@ public class PostView extends MasterDetailViewmal<Post> {
 
     private ComponentRenderer<Span,Post> opprettEgenbeskrivelseRenderer(){
         return new ComponentRenderer<>(post -> {
-            Span span = new Span(post.getEgenbeskrivelseString());
+            Span span = new Span(post.getBeskrivelseString());
             settStil(span, post);
             return span;
         });
@@ -205,7 +246,7 @@ public class PostView extends MasterDetailViewmal<Post> {
 
     private ComponentRenderer<Span,Post> opprettPoststatusRenderer(){
         return new ComponentRenderer<>(post -> {
-            Span span = post.getPoststatusEnum()!=null ? new Span(post.getPosttypeEnum().getTittel()) : new Span("");
+            Span span = post.getNormalPoststatusEnum()!=null ? new Span(post.getNormalPoststatusEnum().getTittel()) : new Span("");
             settStil(span, post);
             return span;
         });
@@ -213,35 +254,10 @@ public class PostView extends MasterDetailViewmal<Post> {
 
     private ComponentRenderer<Span,Post> opprettPosttypeRenderer(){
         return new ComponentRenderer<>(post -> {
-            Span span = post.getPosttypeEnum() != null ? new Span(post.getPosttypeEnum().getTittel()) : new Span("");
+            Span span = post.getNormalPosttypeEnum() != null ? new Span(post.getNormalPosttypeEnum().getTittel()) : new Span("");
             settStil(span, post);
             return span;
         });
     }
-
-
-
-    @Override
-    public void instansOpprettFilterFelter() {
-        datoFilterDatePicker = leggTilFilterfelt(0, new DatePicker(),"< dato");
-        tekstfrabankenFilterTextField = leggTilFilterfelt(1, new TextField(),"tekst");
-        egenbeskrivelseFilterTextField = leggTilFilterfelt(2,new TextField(), "tekst");
-        kategoriFilterComboBox = leggTilFilterfelt(3, new ComboBox<>(),"Velg");
-        kategoriFilterComboBox.setItems(kategoriService.finnAlle());
-        kategoriFilterComboBox.setItemLabelGenerator(Kategori::hentBeskrivendeNavn);
-
-        innpaakontoFilterIntegerField = leggTilFilterfelt(4, new IntegerField(),"> tall");
-        utfrakontoFilterIntegerField = leggTilFilterfelt(5, new IntegerField(), "> tall");
-
-        poststatusFilterCombobox = leggTilFilterfelt(6, new ComboBox<>(),"Velg");
-        poststatusFilterCombobox.setItems(PoststatusEnum.values());
-        poststatusFilterCombobox.setItemLabelGenerator(PoststatusEnum::getTittel);
-
-        posttypeFilterCombobox = leggTilFilterfelt(7,new ComboBox<>(),"Velg");
-        posttypeFilterCombobox.setItems(PosttypeEnum.values());
-        posttypeFilterCombobox.setItemLabelGenerator(PosttypeEnum::getTittel);
-
-    }
-
 
 }

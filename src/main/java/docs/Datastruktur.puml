@@ -4,21 +4,30 @@
 class Post {
     PostklasseEnum:
     \t[Normal, Budsjettpost]
-    NormalposttypeEnum:
-    \t[Normal, Delpost, Utelates, Kredittkortpost] //Brukes kun til vanlige poster//
-    NormalpoststatusEnum:
-    \t[Ubehandlet, Under_Arbeid, Ferdig] //Brukes kun til vanlige poster//
-    BudsjettpoststatusEnum:
-    \t[Foreslått, Tildelt]
     LocalDate dato
-    String tekstFraBanken  //Kun poster//
-    String beskrivelse //Tidligere egenBeskrivelse//
-    Integer mentForAar  //Kun budsjettposter//
-    Integer mentForMaaned  //Kun budsjettposter//
-    finnForelder()  //Egentlig kategori//
-    hentBeskrivendeTittel()
+    String beskrivelse
     Integer innPaaKonto
     Integer utFraKonto
+
+    //Unikt for Normalposter://
+    String tekstFraBanken
+    NormalposttypeEnum:
+    \t[Normal, Delpost, Utelates, Kredittkortpost]
+    NormalpoststatusEnum:
+    \t[Ubehandlet, Under_Arbeid, Ferdig]
+    forelderPostUuid
+
+
+    //Unikt for Budsjettposter://
+    BudsjettpoststatusEnum:
+    \t[Foreslått, Tildelt]
+    EstimatpresisjonEnum:
+    \t[Lav, Middels, Høy]
+    PrioritetEnum:
+    \t[1 - Må, 2 - Bør, 3 - Kan]
+    rekkefølge
+    erRegelmessig
+
 }
 
 class Kategori {
@@ -57,7 +66,7 @@ class Periodepost {
     PeriodepostTypeEnum:
         \t[Aarsoversiktpost, Aarsoversiktbudsjettpost,
         \t Maanedsoversiktpost, Maanedsoversiktbudsjettpost
-        \t Kostnadspakke, Budsjettgruppe]
+        \t Kostnadspakke, Budsjettpostgruppe]
     LocalDate datoFra
     LocalDate datoTil
     String beskrivelse

@@ -29,10 +29,6 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         return leggTilUUID(new Kategori());
     }
 
-    @Override
-    public boolean behandleSpesialfeltVedImport(Object entitet, Field field, String nyVerdi) {
-        return false;
-    }
 
     @Override
     public RedigeringsomraadeAktig<Kategori> hentRedigeringsomraadeAktig() {

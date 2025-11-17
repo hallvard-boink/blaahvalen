@@ -1,20 +1,16 @@
-package com.hallvardlaerum.regnskap.data;
+package com.hallvardlaerum.budsjett;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 
-public enum PoststatusEnum implements EnumAktig {
-
-    UBEHANDLET("Ubehandlet","Posten er akkurat blitt importert, og er ikke bearbeidet ennå."),
-    UNDER_ARBEID("Under arbeid","Posten er ikke ferdig bearbeidet, må fortsette senere."),
-    FERDIG("Ferdig","Posten er ferdig bearbeidet, og kan tas med i utregninger"),
-    SKAL_REFUNDERES("Skal refunderes","Posten er et utlegg som skal refunderes fra andre (registreres i egen post)"),
-    FERDIG_REFUNDERT("Ferdig refundert","Posten er ferdig refundert");
-
+public enum PrioritetEnum implements EnumAktig {
+    MAA("1 - Må","Denne må gjennomføres uansett"),
+    BØR("2 - Bør","Vi kan klare oss uten, men bør helst ta denne"),
+    KAN("3 - Kan","Denne kan vi fint vente med");
 
     private String tittel;
     private String beskrivelse;
 
-    PoststatusEnum(String tittel, String beskrivelse) {
+    PrioritetEnum(String tittel, String beskrivelse) {
         this.tittel = tittel;
         this.beskrivelse = beskrivelse;
     }
@@ -40,7 +36,7 @@ public enum PoststatusEnum implements EnumAktig {
 
     @Override
     public String getTittelMedBeskrivelse() {
-        return tittel + ": " + beskrivelse;
+        return tittel + " (" + beskrivelse + ")";
     }
 
     public void setBeskrivelse(String beskrivelse) {

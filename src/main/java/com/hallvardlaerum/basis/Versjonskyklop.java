@@ -8,6 +8,7 @@ public class Versjonskyklop extends Versjonskyklopmal {
 
     @Override
     public void byggOppVersjoner() {
+        super.leggTilVersjon("0.3.2","2025-11-19","Før TekstField i stedet for IntegerField","");
         super.leggTilVersjon("0.3.1","2025-11-17","Delposter","Utvidelse av PostView og korreksjon av import.");
         super.leggTilVersjon("0.3","2025-11-09","Budsjettposter","Datastruktur og import");
         super.leggTilVersjon("0.2.1","2025-11-08","Stil på lista med poster","Triksing med Lumo og css.");

@@ -1,0 +1,49 @@
+package com.hallvardlaerum.post.normalpost;
+
+import com.hallvardlaerum.libs.database.EnumAktig;
+
+public enum NormalpoststatusEnum implements EnumAktig {
+
+    UBEHANDLET("Ubehandlet","Posten er akkurat blitt importert, og er ikke bearbeidet ennå."),
+    UNDER_ARBEID("Under arbeid","Posten er ikke ferdig bearbeidet, må fortsette senere."),
+    FERDIG("Ferdig","Posten er ferdig bearbeidet, og kan tas med i utregninger"),
+    SKAL_REFUNDERES("Skal refunderes","Posten er et utlegg som skal refunderes fra andre (registreres i egen post)"),
+    FERDIG_REFUNDERT("Ferdig refundert","Posten er ferdig refundert");
+
+
+    private String tittel;
+    private String beskrivelse;
+
+    NormalpoststatusEnum(String tittel, String beskrivelse) {
+        this.tittel = tittel;
+        this.beskrivelse = beskrivelse;
+    }
+
+    @Override
+    public String getTittel() {
+        return tittel;
+    }
+
+    public void setTittel(String tittel) {
+        this.tittel = tittel;
+    }
+
+    @Override
+    public String getBeskrivelse() {
+        return beskrivelse;
+    }
+
+    @Override
+    public String getTittelIImportfil() {
+        return tittel;
+    }
+
+    @Override
+    public String getTittelMedBeskrivelse() {
+        return tittel + ": " + beskrivelse;
+    }
+
+    public void setBeskrivelse(String beskrivelse) {
+        this.beskrivelse = beskrivelse;
+    }
+}

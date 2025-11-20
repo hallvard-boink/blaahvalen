@@ -7,6 +7,9 @@ import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.filerogopplasting.Filkyklop;
 import com.hallvardlaerum.libs.ui.MainViewmal;
 import com.hallvardlaerum.libs.verktoy.Backupkyklop;
+import com.hallvardlaerum.periode.PeriodeRedigeringsomraade;
+import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktRedigeringsomraade;
+import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktRedigeringsomraade;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktService;
 import com.hallvardlaerum.post.PostService;
@@ -23,7 +26,8 @@ public class OmView extends MainViewmal {
 
     public OmView(PostService postService, NormalpostRedigeringsomraade normalPostRedigeringsomraade,
                   KategoriService kategoriService, KategoriRedigeringsomraade kategoriRedigeringsomraade,
-                  MaanedsoversiktService maanedsoversiktService, MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade
+                  MaanedsoversiktService maanedsoversiktService, MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade,
+                  AarsoversiktService aarsoversiktService, AarsoversiktRedigeringsomraade aarsoversiktRedigeringsomraade
       ) {
         super();
 
@@ -32,15 +36,17 @@ public class OmView extends MainViewmal {
             Filkyklop.hent().initierRotmappeFile("blaahvalen");
             Versjonskyklop.hent().initier(); // for å initiere versjonskyklop
 
-//TODO: Er det behov for å hente redigeringsomraade fra serviceklassen? Sjekk havaara mot childTable
+//TODO: Når er det behov for å hente redigeringsomraade fra serviceklassen? Sjekk havaara mot childTable
 
 
             kategoriService.initier(kategoriRedigeringsomraade);
             maanedsoversiktService.initier(maanedsoversiktRedigeringsomraade);
+            aarsoversiktService.initier(aarsoversiktRedigeringsomraade);
             postService.initier(normalPostRedigeringsomraade, kategoriService);
 
             Backupkyklop.hent().leggTilEntitetservice(kategoriService);
             Backupkyklop.hent().leggTilEntitetservice(maanedsoversiktService);
+            Backupkyklop.hent().leggTilEntitetservice(aarsoversiktService);
             Backupkyklop.hent().leggTilEntitetservice(postService);
 
             opprettLayout(Versjonskyklop.hent());

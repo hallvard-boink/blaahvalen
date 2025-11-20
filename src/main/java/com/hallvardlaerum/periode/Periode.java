@@ -43,6 +43,17 @@ public class Periode extends AbstraktEntitet {
     @SkalEksporteres
     private Integer sumDifferanseResultatBudsjettRegnskap;
 
+    @SkalEksporteres
+    private Integer sumRegnskapInntektMedOverfoeringerInteger;
+
+    @SkalEksporteres
+    private Integer sumRegnskapUtgifterMedOverfoeringerInteger;
+
+    @SkalEksporteres
+    private Integer sumRegnskapResultatMedOverfoeringerInteger;
+
+
+
     public Periode() {
     }
 
@@ -138,5 +149,29 @@ public class Periode extends AbstraktEntitet {
 
     public void setSumDifferanseResultatBudsjettRegnskap(Integer sumDifferanseResultatBudsjettRegnskap) {
         this.sumDifferanseResultatBudsjettRegnskap = sumDifferanseResultatBudsjettRegnskap;
+    }
+
+    public Integer getSumRegnskapInntektMedOverfoeringerInteger() {
+        return sumRegnskapInntektMedOverfoeringerInteger;
+    }
+
+    public void setSumRegnskapInntektMedOverfoeringerInteger(Integer sumRegnskapInntektMedOverfoeringerInteger) {
+        this.sumRegnskapInntektMedOverfoeringerInteger = sumRegnskapInntektMedOverfoeringerInteger;
+    }
+
+    public Integer getSumRegnskapUtgifterMedOverfoeringerInteger() {
+        return sumRegnskapUtgifterMedOverfoeringerInteger;
+    }
+
+    public void setSumRegnskapUtgifterMedOverfoeringerInteger(Integer sumRegnskapUtgifterMedOverfoeringerInteger) {
+        this.sumRegnskapUtgifterMedOverfoeringerInteger = sumRegnskapUtgifterMedOverfoeringerInteger;
+    }
+
+    public Integer getSumRegnskapResultatMedOverfoeringerInteger() {
+        return sumRegnskapResultatMedOverfoeringerInteger;
+    }
+
+    public void setSumRegnskapResultatMedOverfoeringerInteger(Integer sumRegnskapResultatMedOverfoeringerInteger) {
+        this.sumRegnskapResultatMedOverfoeringerInteger = sumRegnskapResultatMedOverfoeringerInteger;
     }
 }

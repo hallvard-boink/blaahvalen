@@ -4,8 +4,8 @@ import com.hallvardlaerum.libs.database.EnumAktig;
 
 public enum PeriodetypeEnum implements EnumAktig {
 
-    AARSOVERSIKT("Full dato","Hele datoen er kjent"),
-    MAANEDSOVERSIKT("Månedsoversikt","Måned og år er kjent"),
+    AARSOVERSIKT("Årsoversikt","Oversikt over regnskap og budsjett for et helt år"),
+    MAANEDSOVERSIKT("Månedsoversikt","Oversikt over regnskap og budsjett i en gitt måned"),
     MAANEDSBUDSJETTMAL("Budsjettmal","Utkast til budsjett for en gitt måned og år");
 
 

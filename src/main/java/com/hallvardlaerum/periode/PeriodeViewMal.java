@@ -4,12 +4,12 @@ import com.hallvardlaerum.libs.database.EntitetserviceAktig;
 import com.hallvardlaerum.libs.database.SearchCriteria;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.DatopresisjonEnum;
-import com.hallvardlaerum.libs.felter.DesimalMester;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
-import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktRedigeringsomraade;
+import com.hallvardlaerum.libs.ui.ViewmalAktig;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -17,6 +17,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 
@@ -25,6 +26,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode> {
     private Grid<Periode> grid;
     private EntitetserviceAktig<Periode> periodeservice;
     private RedigeringsomraadeAktig<Periode> redigeringsomraade;
+    private PeriodetypeEnum periodetypeEnum;
 
     private DatePicker fraDatoFilterDatePicker;
     private TextField beskrivelseFilterTextField;
@@ -34,13 +36,39 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode> {
     public PeriodeViewMal(EntitetserviceAktig<Periode> periodeservice) {
         super();
         this.periodeservice = periodeservice;
-        redigeringsomraade = periodeservice.hentRedigeringsomraadeAktig();
-        redigeringsomraade.settView(this);
-        opprettLayout(periodeservice, redigeringsomraade, SplitLayout.Orientation.HORIZONTAL);
+    }
 
+    public void initier(PeriodetypeEnum periodetypeEnum, ViewmalAktig<Periode> viewmalAktig) {
+        this.periodetypeEnum = periodetypeEnum;
+        redigeringsomraade = periodeservice.hentRedigeringsomraadeAktig();
+        redigeringsomraade.settView(viewmalAktig);
+        opprettLayout(periodeservice, redigeringsomraade, SplitLayout.Orientation.HORIZONTAL);
+        hentVindutittel().setText(periodetypeEnum.getTittel());
+        initierGridMedPagedSearch();
+    }
+
+    @Override
+    public void instansTilpassNyopprettetEntitet(){
+        Periode periode = hentEntitet();
+        periode.setPeriodetypeEnum(periodetypeEnum);
     }
 
 
+    public void initierGridMedPagedSearch() {
+        super.initierCallbackDataProviderIGrid(
+                query -> periodeservice.finnEntiteterMedSpecification(
+                        query.getOffset(),
+                        query.getLimit(),
+                        periodeservice.getEntityFilterSpecification(),
+                        Sort.by("datoFraLocalDate").descending()
+                ),
+
+                query -> periodeservice.tellAntallMedSpecification(
+                        query.getOffset(),
+                        query.getLimit(),
+                        periodeservice.getEntityFilterSpecification())
+        );
+    }
 
     @Override
     public void settFilter() {
@@ -58,22 +86,25 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode> {
             searchCriteriaArrayList.add(new SearchCriteria("sumRegnskapResultatInteger","<",resultatFilterIntegerField.getValue()));
         }
 
+        searchCriteriaArrayList.add(new SearchCriteria("periodetypeEnum",":",periodetypeEnum));
         super.brukFiltreIDataprovider(searchCriteriaArrayList);
     }
+
 
     @Override
     public void instansOpprettGrid() {
         grid = super.hentGrid();
         grid.addColumn(Periode::getDatoFraLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer());
         grid.addColumn(Periode::getBeskrivelseString).setHeader("Beskrivelse");
-        grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat");
+        grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END);
     }
+
 
     private ComponentRenderer<Span, Periode> opprettResultatRenderer() {
         return new ComponentRenderer<>(periode -> {
             Span span = new Span();
             if (periode.getSumRegnskapResultatInteger()!=null) {
-                span.setText(DesimalMester.konverterDoubleTilFormatertStreng(periode.getSumRegnskapResultatInteger()));
+                span.setText(HelTallMester.integerFormatertSomStortTall(periode.getSumRegnskapResultatInteger()));
                 if (periode.getSumRegnskapResultatInteger()<0) {
                     span.addClassName(LumoUtility.TextColor.ERROR);
                 }

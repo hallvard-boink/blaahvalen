@@ -4,15 +4,20 @@ import com.hallvardlaerum.libs.felter.TekstKyklop;
 import com.hallvardlaerum.libs.ui.BooleanCombobox;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
-
+import com.vaadin.flow.theme.lumo.LumoUtility;
 
 
 @Route("kategori")
@@ -24,6 +29,7 @@ public class KategoriView extends MasterDetailViewmal<Kategori> {
     private TextField tittelFilterTextField;
     private BooleanCombobox brukesTilBudsjettFilterBooleanCombobox;
     private BooleanCombobox brukestilRegnskapFilterBooleanCombobox;
+    private BooleanCombobox brukesTilFastePosterFilterBooleanCombobox;
     private BooleanCombobox erAktivFilterBooleanCombobox;
     private ComboBox<KategoriType> kategoriTypeFilterComboBox;
 
@@ -42,11 +48,9 @@ public class KategoriView extends MasterDetailViewmal<Kategori> {
         GridListDataView<Kategori> listDataView = hentGrid().getListDataView();
         listDataView.removeFilters();
 
-
         if (!tittelFilterTextField.getValue().isEmpty()) {
             listDataView.addFilter(k -> TekstKyklop.hent().inneholderTekst(k.getTittel(), tittelFilterTextField.getValue()));
         }
-
 
         if (brukesTilBudsjettFilterBooleanCombobox.getValue()!=null) {
             listDataView.addFilter(k -> k.getBrukesTilBudsjett().equals(brukesTilBudsjettFilterBooleanCombobox.getValue()));
@@ -76,46 +80,71 @@ public class KategoriView extends MasterDetailViewmal<Kategori> {
     public void instansOpprettGrid() {
         Grid<Kategori> grid = hentGrid();
 
-        grid.addColumn(Kategori::getTittel).setHeader("Tittel");
+        grid.addColumn(Kategori::getTittel).setHeader("Tittel").setRenderer(opprettKategoriTittelRenderer());
         //grid.addColumn(Kategori::getBrukesTilBudsjett).setHeader("Budsjett");
 
-        grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getBrukesTilBudsjett()))
+        grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getBrukesTilBudsjett(), kategori))
                 .setTooltipGenerator(kategori -> kategori.getBrukesTilBudsjett().toString())
-                .setHeader("Budsjett");
+                .setHeader("Brukes til budsjett").setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getBrukesTilFastePoster()))
+        grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getBrukesTilFastePoster(), kategori))
                 .setTooltipGenerator(kategori -> kategori.getBrukesTilFastePoster().toString())
-                .setHeader("Faste poster");
+                .setHeader("Brukes til faste poster").setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getBrukesTilRegnskap()))
+        grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getBrukesTilRegnskap(), kategori))
                 .setTooltipGenerator(kategori -> kategori.getBrukesTilRegnskap().toString())
-                .setHeader("Regnskap");
+                .setHeader("Brukes til regnskap").setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getErAktiv()))
+        grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getErAktiv(), kategori))
                 .setTooltipGenerator(kategori -> kategori.getErAktiv().toString())
-                .setHeader("Aktiv");
+                .setHeader("Er aktiv").setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addColumn(k-> {
-            if (k.getKategoriType()==null) {
-                return "";
-            } else {
-                return k.getKategoriType().getTittel();
-            }
-        }).setHeader("Type");
+        grid.addColumn(Kategori::getKategoriType).setHeader("Type").setRenderer(opprettKategoriTypeRenderer());
 
     }
 
-    private Component opprettJaNeiIkon(Boolean brukesTilBudsjett) {
+    private ComponentRenderer<Span, Kategori> opprettKategoriTypeRenderer(){
+        return new ComponentRenderer<>(k -> {
+            Span span = new Span();
+            if (k.getKategoriType()!=null) {
+                span.setText(k.getKategoriType().getTittel());
+            }
+            if (!k.getErAktiv()) {
+                span.addClassName(LumoUtility.TextColor.TERTIARY);
+            }
+            return span;
+        });
+    }
+
+    private ComponentRenderer<Span, Kategori> opprettKategoriTittelRenderer(){
+        return new ComponentRenderer<>(k -> {
+           Span span = new Span(k.getTittel());
+           if (!k.getErAktiv()) {
+               span.addClassName(LumoUtility.TextColor.TERTIARY);
+           }
+           return span;
+        });
+    }
+
+    private Component opprettJaNeiIkon(Boolean avkrysset, Kategori kategori) {
 
         Icon icon;
-        if (brukesTilBudsjett) {
-            icon = VaadinIcon.CHECK.create();
-            icon.getElement().getThemeList().add("badge success");
+
+        if (!kategori.getErAktiv()) {
+            icon = VaadinIcon.BAN.create();
+            icon.getElement().getThemeList().add("badge contrast");
         } else {
-            icon = VaadinIcon.CLOSE_SMALL.create();
-            icon.getElement().getThemeList().add("badge error");
+            if (avkrysset) {
+                icon = VaadinIcon.CHECK.create();
+                icon.getElement().getThemeList().add("badge success");
+            } else {
+                icon = VaadinIcon.CLOSE_SMALL.create();
+                icon.getElement().getThemeList().add("badge error");
+            }
         }
         icon.getStyle().set("padding", "var(--lumo-space-xs");
+        icon.addClassName(LumoUtility.Background.CONTRAST_30);
+
         return icon;
     }
 
@@ -124,9 +153,10 @@ public class KategoriView extends MasterDetailViewmal<Kategori> {
     public void instansOpprettFilterFelter() {
         tittelFilterTextField = leggTilFilterfelt(0,new TextField(),"tekst");
         brukesTilBudsjettFilterBooleanCombobox = leggTilFilterfelt(1, new BooleanCombobox(),"Velg");
-        brukestilRegnskapFilterBooleanCombobox = leggTilFilterfelt(2, new BooleanCombobox(),"Velg");
-        erAktivFilterBooleanCombobox = leggTilFilterfelt(3, new BooleanCombobox(),"Velg");
-        kategoriTypeFilterComboBox = leggTilFilterfelt(4,new ComboBox<>(),"Velg");
+        brukesTilFastePosterFilterBooleanCombobox = leggTilFilterfelt(2, new BooleanCombobox(),"Velg");
+        brukestilRegnskapFilterBooleanCombobox = leggTilFilterfelt(3, new BooleanCombobox(),"Velg");
+        erAktivFilterBooleanCombobox = leggTilFilterfelt(4, new BooleanCombobox(),"Velg");
+        kategoriTypeFilterComboBox = leggTilFilterfelt(5,new ComboBox<>(),"Velg");
         kategoriTypeFilterComboBox.setItems(KategoriType.values());
         kategoriTypeFilterComboBox.setItemLabelGenerator(KategoriType::getTittel);
     }

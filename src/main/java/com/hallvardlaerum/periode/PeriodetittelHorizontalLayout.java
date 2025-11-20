@@ -13,8 +13,13 @@ public class PeriodetittelHorizontalLayout extends HorizontalLayout {
     private DatopresisjonEnum datopresisjonEnum;
     private H3 datoH3;
 
-    public PeriodetittelHorizontalLayout(DatopresisjonEnum datopresisjonEnum) {
-        this.datopresisjonEnum = datopresisjonEnum;
+    public PeriodetittelHorizontalLayout(PeriodetypeEnum periodetypeEnum) {
+        switch (periodetypeEnum) {
+            case MAANEDSOVERSIKT, MAANEDSBUDSJETTMAL -> datopresisjonEnum = DatopresisjonEnum.MAANED;
+            case AARSOVERSIKT -> datopresisjonEnum = DatopresisjonEnum.AAR;
+            default -> datopresisjonEnum = DatopresisjonEnum.FULL_DATO;
+        }
+
         byggLayout();
     }
 
@@ -29,7 +34,7 @@ public class PeriodetittelHorizontalLayout extends HorizontalLayout {
 
     public void oppdaterTittel(LocalDate dato) {
         String periodetittelString="";
-        if (datopresisjonEnum==DatopresisjonEnum.AAR) {
+        if (datopresisjonEnum == DatopresisjonEnum.AAR) {
             periodetittelString = Datokyklop.hent().formaterLocalDate_YYYY(dato);
         } else if (datopresisjonEnum == DatopresisjonEnum.MAANED) {
             periodetittelString = Datokyklop.hent().formaterLocalDate_MaanedsnavnAar(dato);

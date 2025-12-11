@@ -2,16 +2,19 @@ package com.hallvardlaerum.grunndata.kategori;
 
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
+import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Component;
 
 @Component
-public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> implements RedigeringsomraadeAktig<Kategori> {
+@UIScope
+public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> implements RedigeringsomraadeAktig<Kategori>, InitieringsEgnet {
     private TextField tittelTextField;
     private TextArea beskrivelseTextArea;
     private Checkbox brukesTilBudsjettCheckbox;
@@ -21,13 +24,25 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
     private ComboBox<KategoriType> kategoriTypeComboBox;
     private IntegerField rekkefoelgeIntegerField;
     private Checkbox erAktivCheckbox;
+    private boolean erInitiert = false;
 
+    public KategoriRedigeringsomraade() {
 
-    public void initier(){
-        if (tittelTextField==null) {
+    }
+
+    @Override
+    public void init(){
+        if (!erInitiert) {
+            super.initRedigeringsomraadeMal();
             instansOpprettFelter();
             instansByggOppBinder();
+            erInitiert=true;
         }
+    }
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
     }
 
     @Override

@@ -49,6 +49,11 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
     }
 
     @Override
+    public String toString(){
+        return hentBeskrivendeNavn();
+    }
+
+    @Override
     public String hentBeskrivendeNavn() {
         return tittel + "(" + kategoriType.getTittel() + ", " + kategoriRetning.getTittel() + ")";
     }

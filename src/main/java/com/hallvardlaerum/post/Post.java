@@ -10,6 +10,7 @@ import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.post.normalpost.NormalpoststatusEnum;
 import com.hallvardlaerum.post.normalpost.NormalposttypeEnum;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 
@@ -26,6 +27,7 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     private LocalDate datoLocalDate;
 
     @SkalEksporteres
+    @Column(length = 1000)
     private String beskrivelseString;
 
     @SkalEksporteres
@@ -43,10 +45,8 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     // Felter som er unike for normalposter
 
     @SkalEksporteres
-    private String tekstFraBankenString;
-
-    @SkalEksporteres
-    private String meldingKIDFaktnrString;  //TODO: Slå sammen denne med tekstFraBankenString
+    @Column(length = 1000)
+    private String tekstFraBankenString;  // Skal inkludere meldingKIDFaktnrString i regnearket
 
     @SkalEksporteres
     private NormalposttypeEnum normalposttypeEnum; //enum
@@ -58,6 +58,7 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     private String forelderPostUUID; //Brukes for å håndtere forholdet mellom delposter og hovedpost
 
     @SkalEksporteres
+    @Column(length = 1000)
     private String ekstraInfoString;
 
 
@@ -101,8 +102,22 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
             sb.append(innPaaKontoInteger>0? innPaaKontoInteger : utFraKontoInteger);
             return sb.toString();
         } else {
-            return Datokyklop.hent().formaterDato(datoLocalDate) + " " + tekstFraBankenString +
-                    (innPaaKontoInteger>0? innPaaKontoInteger : utFraKontoInteger);
+            StringBuilder sb = new StringBuilder();
+            if (datoLocalDate!=null) {
+                sb.append(Datokyklop.hent().formaterDato(datoLocalDate)).append(" ");
+            }
+            if (tekstFraBankenString!=null) {
+                sb.append(tekstFraBankenString);
+            }
+            if (innPaaKontoInteger!=null && innPaaKontoInteger>0) {
+                sb.append(innPaaKontoInteger);
+            }
+
+            if (utFraKontoInteger!=null && utFraKontoInteger>0) {
+                sb.append(utFraKontoInteger);
+            }
+
+            return sb.toString();
         }
     }
 
@@ -157,13 +172,6 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
         this.tekstFraBankenString = tekstFraBankenString;
     }
 
-    public String getMeldingKIDFaktnrString() {
-        return meldingKIDFaktnrString;
-    }
-
-    public void setMeldingKIDFaktnrString(String meldingKIDFaktnrString) {
-        this.meldingKIDFaktnrString = meldingKIDFaktnrString;
-    }
 
     public String getBeskrivelseString() {
         return beskrivelseString;
@@ -268,4 +276,5 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     public void setErRegelmessigBoolean(Boolean erRegelmessigBoolean) {
         this.erRegelmessigBoolean = erRegelmessigBoolean;
     }
+
 }

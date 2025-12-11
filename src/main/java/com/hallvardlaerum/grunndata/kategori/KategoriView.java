@@ -3,6 +3,8 @@ package com.hallvardlaerum.grunndata.kategori;
 import com.hallvardlaerum.libs.felter.TekstKyklop;
 import com.hallvardlaerum.libs.ui.BooleanCombobox;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
+import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -17,12 +19,14 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 
 @Route("kategori")
-@Menu(title = "Kategori", order = 50)
-public class KategoriView extends MasterDetailViewmal<Kategori> {
+@UIScope
+//@Menu(title = "Kategori", order = 50)
+public class KategoriView extends MasterDetailViewmal<Kategori, KategoriRepository> implements InitieringsEgnet {
     private KategoriService kategoriService;
     private KategoriRedigeringsomraade kategoriRedigeringsomraade;
 
@@ -32,15 +36,30 @@ public class KategoriView extends MasterDetailViewmal<Kategori> {
     private BooleanCombobox brukesTilFastePosterFilterBooleanCombobox;
     private BooleanCombobox erAktivFilterBooleanCombobox;
     private ComboBox<KategoriType> kategoriTypeFilterComboBox;
+    private boolean erInitiert;
 
-    public KategoriView(KategoriService kategoriService) {
+    public KategoriView() {
         super();
-        this.kategoriService = kategoriService;
-        this.kategoriRedigeringsomraade = (KategoriRedigeringsomraade) kategoriService.hentRedigeringsomraadeAktig();
-        kategoriRedigeringsomraade.settView(this);
-        opprettLayout(kategoriService, kategoriRedigeringsomraade);
+        Allvitekyklop.hent().setKategoriView(this);
+        init();
     }
 
+    @Override
+    public boolean erInitiert() {
+        return false;
+    }
+
+    public void init(){
+        if (!erInitiert) {
+            this.kategoriService = Allvitekyklop.hent().getKategoriService();
+            this.kategoriRedigeringsomraade = Allvitekyklop.hent().getKategoriRedigeringsomraade();
+            this.kategoriRedigeringsomraade.settView(this);
+
+            opprettLayout(kategoriService, kategoriRedigeringsomraade);
+
+            erInitiert = true;
+        }
+    }
 
 
     @Override

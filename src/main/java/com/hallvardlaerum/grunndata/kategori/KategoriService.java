@@ -2,23 +2,33 @@ package com.hallvardlaerum.grunndata.kategori;
 
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
+import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.verktoy.Allvitekyklop;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class KategoriService extends EntitetserviceMal<Kategori, KategoriRepository> {
+public class KategoriService extends EntitetserviceMal<Kategori, KategoriRepository> implements InitieringsEgnet {
     private KategoriRepository kategoriRepository;
     private KategoriRedigeringsomraade kategoriRedigeringsomraade;
+    private boolean erInitiert = false;
 
-    public KategoriService(KategoriRepository kategoriRepository) {
-        super(Kategori.class, kategoriRepository);
-        this.kategoriRepository = kategoriRepository;
+    public KategoriService() {
     }
 
-    public void initier(KategoriRedigeringsomraade kategoriRedigeringsomraade){
-        this.kategoriRedigeringsomraade = kategoriRedigeringsomraade;
-        this.kategoriRedigeringsomraade.initier();
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+    public void init(){
+        if(!erInitiert) {
+            super.initEntitetserviceMal(Kategori.class, Allvitekyklop.hent().getKategoriRepository());
+            this.kategoriRedigeringsomraade = Allvitekyklop.hent().getKategoriRedigeringsomraade();
+            kategoriRepository = Allvitekyklop.hent().getKategoriRepository();
+            erInitiert = true;
+        }
     }
 
     @Override
@@ -28,6 +38,7 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
 
 
     @Override
+    @Deprecated
     public RedigeringsomraadeAktig<Kategori> hentRedigeringsomraadeAktig() {
         return kategoriRedigeringsomraade;
     }

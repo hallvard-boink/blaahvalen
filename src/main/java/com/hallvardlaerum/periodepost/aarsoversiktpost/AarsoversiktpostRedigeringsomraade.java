@@ -1,0 +1,40 @@
+package com.hallvardlaerum.periodepost.aarsoversiktpost;
+
+import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periode.PeriodetypeEnum;
+import com.hallvardlaerum.periodepost.PeriodepostRedigeringsomraadeMal;
+import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
+import com.hallvardlaerum.verktoy.Allvitekyklop;
+import com.vaadin.flow.spring.annotation.UIScope;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@UIScope
+public class AarsoversiktpostRedigeringsomraade extends PeriodepostRedigeringsomraadeMal implements InitieringsEgnet {
+    private boolean erInitiert = false;
+
+    public AarsoversiktpostRedigeringsomraade() {
+        super();
+    }
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+    public void init(){
+        if (!erInitiert) {
+            super.initierPeriodepostRedigeringsomraadeMal(
+                    PeriodepostTypeEnum.AARSOVERSIKTPOST,
+                    Allvitekyklop.hent().getAarsoversiktService(),
+                    PeriodetypeEnum.AARSOVERSIKT
+            );
+            erInitiert = true;
+        }
+    }
+
+
+}

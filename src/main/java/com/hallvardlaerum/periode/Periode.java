@@ -3,9 +3,14 @@ package com.hallvardlaerum.periode;
 import com.hallvardlaerum.libs.database.AbstraktEntitet;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;
 import com.hallvardlaerum.libs.felter.Datokyklop;
+import com.hallvardlaerum.periodepost.Periodepost;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 public class Periode extends AbstraktEntitet {
@@ -52,15 +57,28 @@ public class Periode extends AbstraktEntitet {
     @SkalEksporteres
     private Integer sumRegnskapResultatMedOverfoeringerInteger;
 
+    @OneToMany(fetch =  FetchType.EAGER, mappedBy = "periode", cascade = CascadeType.REMOVE)
+    private List<Periodepost> periodeposterList;
 
+    public List<Periodepost> getPeriodeposterList() {
+        return periodeposterList;
+    }
 
     public Periode() {
     }
 
+    @Override
+    public String toString(){
+        return hentBeskrivendeNavn();
+    }
 
     @Override
     public String hentBeskrivendeNavn() {
-        return periodetypeEnum.getTittel() + " " + Datokyklop.hent().formaterDato(datoFraLocalDate);
+        if (periodetypeEnum!=null) {
+            return periodetypeEnum.getTittel() + " " + Datokyklop.hent().formaterLocalDateMedPresisjon(datoFraLocalDate, periodetypeEnum.getDatopresisjonEnum());
+        } else {
+            return toString();
+        }
     }
 
     public PeriodetypeEnum getPeriodetypeEnum() {

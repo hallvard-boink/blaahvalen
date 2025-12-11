@@ -1,7 +1,9 @@
 package com.hallvardlaerum.basis;
 
+import com.hallvardlaerum.libs.ui.Navigasjonsmenykyklop;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Nav;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -11,10 +13,12 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 import static com.vaadin.flow.theme.lumo.LumoUtility.*;
 
 @Layout
+@UIScope
 public final class MainLayout extends AppLayout {
 
     MainLayout() {
@@ -27,7 +31,7 @@ public final class MainLayout extends AppLayout {
         var appLogo = VaadinIcon.CUBES.create();
         appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
 
-        var appName = new Span("Blaahvalen");
+        var appName = new Span("Blåhvalen");
         appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
 
         var header = new Div(appLogo, appName);
@@ -36,10 +40,25 @@ public final class MainLayout extends AppLayout {
     }
 
     private SideNav createSideNav() {
-        var nav = new SideNav();
-        nav.addClassNames(Margin.Horizontal.MEDIUM);
-        MenuConfiguration.getMenuEntries().forEach(entry -> nav.addItem(createSideNavItem(entry)));
-        return nav;
+        SideNav sideNav = new SideNav();
+        sideNav.addClassNames(Margin.Horizontal.MEDIUM);
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Post","normalpost" );
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Månedsoversikt","maanedsoversikt");
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Årsoversikt","aarsoversikt");
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Verktøy","verktoy");
+
+
+        SideNavItem detaljerSideNavItem = Navigasjonsmenykyklop.hent().leggMenyvalgforelderTilRot(sideNav, "Detaljer");
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(detaljerSideNavItem, "Månedsoversiktposter","maanedsoversiktpost");
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(detaljerSideNavItem, "Årsoversiktposter","aarsoversiktpost");
+
+        SideNavItem innstillingerSideNavItem = Navigasjonsmenykyklop.hent().leggMenyvalgforelderTilRot(sideNav, "Innstillinger");
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(innstillingerSideNavItem, "Kategori","kategori");
+
+
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Om denne appen","");
+
+        return sideNav;
     }
 
     private SideNavItem createSideNavItem(MenuEntry menuEntry) {

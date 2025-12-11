@@ -6,20 +6,25 @@ import com.hallvardlaerum.grunndata.kategori.KategoriService;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
 
+import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.post.Post;
+import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> implements RedigeringsomraadeAktig<Post>{
+@UIScope
+public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> implements RedigeringsomraadeAktig<Post>, InitieringsEgnet {
+    private boolean erInitiert = false;
     private DatePicker datoDatePicker;
     private TextField tekstFraBankenTextField;
-    private TextField meldingKIDFaktnrTextField;
+    private TextField tekstFraAvsenderStringTextField;
     private TextField egenbeskrivelseTextField;
     private IntegerField innPaaKontoIntegerField;
     private IntegerField utFraKontoIntegerField;
@@ -31,22 +36,42 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
     private TextField uuidTextField;
     private TextField forelderPostUUID;
 
-    public void initier(KategoriService kategoriservice) {
-        this.kategoriService = kategoriservice;
-        if (datoDatePicker == null) {
-            instansOpprettFelter();
-            instansByggOppBinder();
-        }
-    }
 
     public NormalpostRedigeringsomraade() {
         super();
     }
 
     @Override
+    public void init() {
+        if (!erInitiert) {
+            super.initRedigeringsomraadeMal();
+            this.kategoriService = Allvitekyklop.hent().getKategoriService();
+            instansOpprettFelter();
+            instansByggOppBinder();
+
+            erInitiert = true;
+        }
+    }
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+    public void oppdaterInnPaaKontoIntegerField(Integer innInteger) {
+        innPaaKontoIntegerField.setValue(innInteger);
+    }
+
+    public void oppdaterUtFraKontoIntegerField(Integer utInteger) {
+        utFraKontoIntegerField.setValue(utInteger);
+    }
+
+
+    @Override
     public void aktiver(Boolean blnAktiver) {
         super.aktiver(blnAktiver);
-        ((NormalpostView)hentView()).aktiverDelpostknapperHvisAktuelt(blnAktiver);
+        Allvitekyklop.hent().getNormalpostView().aktiverDelpostknapperHvisAktuelt(blnAktiver);
+        //((NormalpostView)hentView()).aktiverDelpostknapperHvisAktuelt(blnAktiver);
     }
 
     @Override
@@ -59,7 +84,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         String hovedtabString= "Hoved";
         String ekstratabString = "Ekstra";
 
-        tekstFraBankenTextField = super.leggTilRedigeringsfelt(new TextField("Tekst fra banken"),hovedtabString);
+        tekstFraBankenTextField = super.leggTilRedigeringsfelt(hovedtabString, new TextField("Tekst fra banken"));
         settColspan(tekstFraBankenTextField,3);
 
         datoDatePicker = new DatePicker("Dato");
@@ -71,7 +96,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         utFraKontoIntegerField = new IntegerField("Ut fra konto");
         super.leggTilRedigeringsfelter(hovedtabString, datoDatePicker, innPaaKontoIntegerField, utFraKontoIntegerField);
 
-        egenbeskrivelseTextField = super.leggTilRedigeringsfelt(new TextField("Egen beskrivelse"),hovedtabString);
+        egenbeskrivelseTextField = super.leggTilRedigeringsfelt(hovedtabString, new TextField("Egen beskrivelse"));
         settColspan(egenbeskrivelseTextField,3);
 
         kategoriComboBox = new ComboBox<>("Kategori");
@@ -94,11 +119,9 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         normalpoststatusComboBox.setItems(NormalpoststatusEnum.values());
         super.leggTilRedigeringsfelter(hovedtabString, kategoriComboBox, normalposttypeComboBox, normalpoststatusComboBox);
 
-
-        meldingKIDFaktnrTextField = super.leggTilRedigeringsfelt(new TextField("Melding/KID/Fakturanr"),ekstratabString);
-        ekstraInfoTextArea = super.leggTilRedigeringsfelt(new TextArea("Ekstra info"),ekstratabString);
-        uuidTextField = super.leggTilRedigeringsfelt(new TextField("UUID"),ekstratabString);
-        forelderPostUUID = super.leggTilRedigeringsfelt(new TextField("ForelderpostUUID"),ekstratabString);
+        ekstraInfoTextArea = super.leggTilRedigeringsfelt(ekstratabString, new TextArea("Ekstra info"));
+        uuidTextField = super.leggTilRedigeringsfelt(ekstratabString, new TextField("UUID"));
+        forelderPostUUID = super.leggTilRedigeringsfelt(ekstratabString, new TextField("ForelderpostUUID"));
 
         super.leggTilDatofeltTidOpprettetOgRedigert(ekstratabString);
 
@@ -110,7 +133,6 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         Binder<Post> binder = hentBinder();
         binder.bind(datoDatePicker, Post::getDatoLocalDate, Post::setDatoLocalDate);
         binder.bind(tekstFraBankenTextField, Post::getTekstFraBankenString, Post::setTekstFraBankenString);
-        binder.bind(meldingKIDFaktnrTextField, Post::getMeldingKIDFaktnrString, Post::setMeldingKIDFaktnrString);
         binder.bind(egenbeskrivelseTextField, Post::getBeskrivelseString, Post::setBeskrivelseString);
         binder.bind(innPaaKontoIntegerField, Post::getInnPaaKontoInteger, Post::setInnPaaKontoInteger);
         binder.bind(utFraKontoIntegerField, Post::getUtFraKontoInteger, Post::setUtFraKontoInteger);

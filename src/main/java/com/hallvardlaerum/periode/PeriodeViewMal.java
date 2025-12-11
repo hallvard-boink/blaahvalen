@@ -22,9 +22,9 @@ import org.springframework.data.domain.Sort;
 import java.util.ArrayList;
 
 
-public class PeriodeViewMal extends MasterDetailViewmal<Periode> {
+public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeRepository> {
     private Grid<Periode> grid;
-    private EntitetserviceAktig<Periode> periodeservice;
+    private EntitetserviceAktig<Periode, PeriodeRepository> periodeservice;
     private RedigeringsomraadeAktig<Periode> redigeringsomraade;
     private PeriodetypeEnum periodetypeEnum;
 
@@ -33,19 +33,26 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode> {
     private IntegerField resultatFilterIntegerField;
 
 
-    public PeriodeViewMal(EntitetserviceAktig<Periode> periodeservice) {
+    public PeriodeViewMal() {
         super();
-        this.periodeservice = periodeservice;
+
     }
 
-    public void initier(PeriodetypeEnum periodetypeEnum, ViewmalAktig<Periode> viewmalAktig) {
+    public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
+                                   ViewmalAktig<Periode, ?> viewmalAktig,
+                                   EntitetserviceAktig<Periode,PeriodeRepository> periodeservice,
+                                   RedigeringsomraadeAktig<Periode> redigeringsomraade) {
         this.periodetypeEnum = periodetypeEnum;
-        redigeringsomraade = periodeservice.hentRedigeringsomraadeAktig();
-        redigeringsomraade.settView(viewmalAktig);
-        opprettLayout(periodeservice, redigeringsomraade, SplitLayout.Orientation.HORIZONTAL);
+        this.redigeringsomraade = redigeringsomraade;
+        this.redigeringsomraade.settView(viewmalAktig);
+        this.periodeservice = periodeservice;
+
+        super.opprettLayout(this.periodeservice, redigeringsomraade, SplitLayout.Orientation.HORIZONTAL, 25D);
         hentVindutittel().setText(periodetypeEnum.getTittel());
         initierGridMedPagedSearch();
     }
+
+
 
     @Override
     public void instansTilpassNyopprettetEntitet(){
@@ -78,7 +85,8 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode> {
             searchCriteriaArrayList.add(new SearchCriteria("datoFraLocalDate","<", fraDatoFilterDatePicker.getValue()));
         }
 
-        if (beskrivelseFilterTextField.getValue()!=null) {
+
+        if (beskrivelseFilterTextField.getValue()!=null && !beskrivelseFilterTextField.getValue().isEmpty()) {
             searchCriteriaArrayList.add(new SearchCriteria("beskrivelseString",":", beskrivelseFilterTextField.getValue()));
         }
 
@@ -97,7 +105,9 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode> {
         grid.addColumn(Periode::getDatoFraLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer());
         grid.addColumn(Periode::getBeskrivelseString).setHeader("Beskrivelse");
         grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END);
+
     }
+
 
 
     private ComponentRenderer<Span, Periode> opprettResultatRenderer() {

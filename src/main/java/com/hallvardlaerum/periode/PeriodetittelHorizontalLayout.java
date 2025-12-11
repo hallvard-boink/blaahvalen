@@ -32,6 +32,10 @@ public class PeriodetittelHorizontalLayout extends HorizontalLayout {
         add(datoH3);
     }
 
+    public void oppdaterTittel(String tittel) {
+        datoH3.setText(tittel);
+    }
+
     public void oppdaterTittel(LocalDate dato) {
         String periodetittelString="";
         if (datopresisjonEnum == DatopresisjonEnum.AAR) {

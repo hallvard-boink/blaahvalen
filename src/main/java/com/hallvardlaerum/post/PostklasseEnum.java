@@ -15,6 +15,15 @@ public enum PostklasseEnum implements EnumAktig {
         this.beskrivelse = beskrivelse;
     }
 
+    public static PostklasseEnum konverterFraByte(Byte kodeByte) {
+        for (PostklasseEnum postklasseEnum:PostklasseEnum.values()) {
+            if (postklasseEnum.ordinal()==kodeByte.intValue()){
+                return postklasseEnum;
+            }
+        }
+        return null;
+    }
+
     public String getTittel() {
         return tittel;
     }
@@ -40,4 +49,6 @@ public enum PostklasseEnum implements EnumAktig {
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
+
+
 }

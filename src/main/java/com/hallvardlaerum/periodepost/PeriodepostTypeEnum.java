@@ -5,12 +5,9 @@ import com.hallvardlaerum.libs.database.EnumAktig;
 public enum PeriodepostTypeEnum implements EnumAktig {
 
     AARSOVERSIKTPOST("Årsoversiktpost",""),
-    AARSOVERSIKTBUDSJETTPOST("Årsoversiktbudsjettpost",""),
     MAANEDSOVERSIKTPOST("Månedsoversiktpost",""),
-    MAANEDSOVERSIKTBUDSJETTPOST("Månedsoversiktbudsjettpost",""),
     OVERSIKTNORMALPOST("Kostnadspakke",""),
     OVERSIKTBUDSJETTPOST("Budsjettpostgruppe","")
-
     ;
 
     private String tittel;

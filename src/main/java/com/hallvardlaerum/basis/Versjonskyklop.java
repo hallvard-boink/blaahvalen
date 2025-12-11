@@ -1,13 +1,17 @@
 package com.hallvardlaerum.basis;
 
 import com.hallvardlaerum.libs.feiloglogging.Versjonskyklopmal;
+import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 
-public class Versjonskyklop extends Versjonskyklopmal {
+public class Versjonskyklop extends Versjonskyklopmal implements InitieringsEgnet {
     private static Versjonskyklop versjonskyklop;
+    private boolean erInitiert = false;
 
 
     @Override
     public void byggOppVersjoner() {
+        super.leggTilVersjon("0.4.0","2025-12-10","Laget dialogbokser for periodeposter","Fikset vanskelig bug med scope og binder");
+        super.leggTilVersjon("0.3.5","2025-11-20","Lagt til Periodepost og Maanedsoversiktpost","");
         super.leggTilVersjon("0.3.4","2025-11-20","Lagt til Årsoversikt","");
         super.leggTilVersjon("0.3.3","2025-11-19","Generalisere PeriodeView","");
         super.leggTilVersjon("0.3.2","2025-11-19","Før TekstField i stedet for IntegerField","");
@@ -36,5 +40,16 @@ public class Versjonskyklop extends Versjonskyklopmal {
         versjonskyklop.setApplikasjonsKortnavnString("blaahvalen");
         versjonskyklop.setApplikasjonsBeskrivelseString("Regnskap og budsjett for Tina og Hallvard.");
         byggOppVersjoner();
+        erInitiert =true;
+    }
+
+    @Override
+    public void init() {
+        this.initier();
+    }
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
     }
 }

@@ -1,12 +1,18 @@
 package com.hallvardlaerum.post.normalpost;
 
+import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
+import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.grunndata.kategori.Kategori;
 import com.hallvardlaerum.grunndata.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.SearchCriteria;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
-import com.hallvardlaerum.post.PostService;
+import com.hallvardlaerum.post.PostRepository;
+import com.hallvardlaerum.post.PostServiceMal;
+import com.hallvardlaerum.verktoy.Allvitekyklop;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -18,17 +24,19 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.data.domain.Sort;
-
 import java.util.ArrayList;
 
-@Route("post")
-@Menu(order = 10, title = "Poster")
-public class NormalpostView extends MasterDetailViewmal<Post> {
+@Route("normalpost")
+@UIScope
+//@Menu(order = 10, title = "Poster")
+public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> implements InitieringsEgnet {
     private Grid<Post> grid;
-    private PostService postService;
+    private PostServiceMal postService;
     private NormalpostRedigeringsomraade normalPostRedigeringsomraade;
+    private boolean erInitiert = false;
 
     private DatePicker datoFilterDatePicker;
     private TextField tekstfrabankenFilterTextField;
@@ -43,16 +51,56 @@ public class NormalpostView extends MasterDetailViewmal<Post> {
     private KategoriService kategoriService;
     private NormaldelpostViewMester normaldelpostViewMester;
 
-    public NormalpostView(PostService postService, KategoriService kategoriService) {
+    public NormalpostView() {
         super();
-        this.postService = postService;
-        this.kategoriService = kategoriService;
-        this.normalPostRedigeringsomraade = (NormalpostRedigeringsomraade) postService.hentRedigeringsomraadeAktig();
-        normalPostRedigeringsomraade.settView(this);
-        opprettLayout(postService, normalPostRedigeringsomraade, SplitLayout.Orientation.VERTICAL);
-        initierGridMedNormalSoek();
-        normaldelpostViewMester = new NormaldelpostViewMester(this, postService);
+        Allvitekyklop.hent().setNormalpostView(this);
+        init();
+    }
 
+    @Override
+    public void init(){
+        if (!erInitiert) {
+            this.postService = Allvitekyklop.hent().getNormalpostService();
+            this.kategoriService = Allvitekyklop.hent().getKategoriService();
+            this.normalPostRedigeringsomraade = Allvitekyklop.hent().getNormalpostRedigeringsomraade();
+            this.normalPostRedigeringsomraade.settView(this);
+
+            super.opprettLayout(postService, normalPostRedigeringsomraade, SplitLayout.Orientation.VERTICAL);
+            initierGridMedNormalSoek();
+            normaldelpostViewMester = new NormaldelpostViewMester(this,  normalPostRedigeringsomraade, postService);
+            leggTilImporterCSVFraHandelsbankenButton();
+
+            erInitiert = true;
+        }
+    }
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+    private void leggTilImporterCSVFraHandelsbankenButton(){
+        Button importerCSVFraHandelsbankenButton = new Button("Importer CSV fra Handelsbanken");
+        importerCSVFraHandelsbankenButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        importerCSVFraHandelsbankenButton.addClickListener(e -> importerCSVFraHandelsbanken());
+        hentKnapperadSoekefelt().add(importerCSVFraHandelsbankenButton);
+    }
+
+    private void importerCSVFraHandelsbanken() {
+        NormalpostFraCSVImportassistent normalpostFraCSVImportassistent = new NormalpostFraCSVImportassistent(postService, this);
+        CSVImportmester csvImportmester = new CSVImportmester(normalpostFraCSVImportassistent);
+        csvImportmester.setLesCharsetString("ISO-8859-15");
+        csvImportmester.velgImportfilOgKjoerImport(postService);
+
+    }
+
+
+    public void oppdaterMarkerteRadiGrid(){
+        grid.getDataProvider().refreshItem(normalPostRedigeringsomraade.getEntitet());
+    }
+
+    public void markerEntitetiGrid(){
+        grid.select(normalPostRedigeringsomraade.getEntitet());
     }
 
     public void aktiverDelpostknapperHvisAktuelt(Boolean blnAktiver){
@@ -67,7 +115,7 @@ public class NormalpostView extends MasterDetailViewmal<Post> {
                         q.getOffset(),
                         q.getLimit(),
                         postService.getEntityFilterSpecification(),
-                        Sort.by("datoLocalDate").descending().and(Sort.by("tekstFraBankenString"))
+                        Sort.by("datoLocalDate").descending().and(Sort.by("tekstFraBankenString").and(Sort.by("normalposttypeEnum").descending()))
                 ),
 
                 query -> postService.tellAntallMedSpecification(

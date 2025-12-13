@@ -99,7 +99,13 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
             } else {
                 sb.append("(ukjent kategori): ");
             }
-            sb.append(innPaaKontoInteger>0? innPaaKontoInteger : utFraKontoInteger);
+            if (innPaaKontoInteger!=null && innPaaKontoInteger>0) {
+                sb.append(innPaaKontoInteger);
+            }
+            if (utFraKontoInteger!=null && utFraKontoInteger>0) {
+                sb.append(utFraKontoInteger);
+            }
+
             return sb.toString();
         } else {
             StringBuilder sb = new StringBuilder();

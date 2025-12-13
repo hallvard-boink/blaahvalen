@@ -11,6 +11,8 @@ import com.hallvardlaerum.libs.verktoy.Backupkyklop;
 import com.hallvardlaerum.periode.PeriodeRepository;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktRedigeringsomraade;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
+import com.hallvardlaerum.periode.maanedsbudsjettmal.MaanedsbudsjettmalRedigeringsomraade;
+import com.hallvardlaerum.periode.maanedsbudsjettmal.MaanedsbudsjettmalService;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktRedigeringsomraade;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktService;
 import com.hallvardlaerum.periodepost.PeriodepostRepository;
@@ -20,6 +22,8 @@ import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostRed
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostService;
 import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.post.normalpost.NormalpostRedigeringsomraade;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -28,6 +32,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.PermitAll;
+import org.apache.xmlbeans.impl.xb.xsdschema.All;
 
 @Route("")
 @PermitAll
@@ -42,11 +47,12 @@ public class OmView extends MainViewmal {
                   MaanedsoversiktService maanedsoversiktService, MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade,
                   MaanedsoversiktpostService maanedsoversiktpostService, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraade, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraadeTilDialog,
                   AarsoversiktpostService aarsoversiktpostService, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog,
-                  NormalpostService normalpostService, NormalpostRedigeringsomraade normalPostRedigeringsomraade
+                  NormalpostService normalpostService, NormalpostRedigeringsomraade normalPostRedigeringsomraade,
+                  BudsjettpostService budsjettpostService, BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade,
+                  MaanedsbudsjettmalService maanedsbudsjettmalService, MaanedsbudsjettmalRedigeringsomraade maanedsbudsjettmalRedigeringsomraade
       )
     {
         super();
-        Loggekyklop.hent().settNivaaDEBUG();
 
         //TODO MaanedsoversiktpostRedigeringsomraade og MaanedsoversiktpostRedigeringsomraadeTilDialog er samme instans. Bruk Spring Boot annotering (@Qualifier?) til å skille dem
 
@@ -61,7 +67,6 @@ public class OmView extends MainViewmal {
                 Allvitekyklop.hent().setKategoriRepository(kategoriRepository);
                 Allvitekyklop.hent().setKategoriService(kategoriService);
                 Allvitekyklop.hent().setKategoriRedigeringsomraade(kategoriRedigeringsomraade);
-                //Allvitekyklop.hent().setKategoriView(kategoriView);
 
                 Allvitekyklop.hent().setPeriodeRepository(periodeRepository);
                 Allvitekyklop.hent().setPeriodepostRepository(periodepostRepository);
@@ -69,25 +74,26 @@ public class OmView extends MainViewmal {
 
                 Allvitekyklop.hent().setAarsoversiktService(aarsoversiktService);
                 Allvitekyklop.hent().setAarsoversiktRedigeringsomraade(aarsoversiktRedigeringsomraade);
-                //Allvitekyklop.hent().setAarsoversiktView(aarsoversiktView);
 
                 Allvitekyklop.hent().setMaanedsoversiktService(maanedsoversiktService);
                 Allvitekyklop.hent().setMaanedsoversiktRedigeringsomraade(maanedsoversiktRedigeringsomraade);
-                //Allvitekyklop.hent().setMaanedsoversiktView(maanedsoversiktView);
 
                 Allvitekyklop.hent().setAarsoversiktpostService(aarsoversiktpostService);
                 Allvitekyklop.hent().setAarsoversiktpostRedigeringsomraade(aarsoversiktpostRedigeringsomraade);
                 Allvitekyklop.hent().setAarsoversiktpostRedigeringsomraadeTilDialog(aarsoversiktpostRedigeringsomraadeTilDialog);
-                //Allvitekyklop.hent().setAarsoversiktpostView(aarsoversiktpostView);
 
                 Allvitekyklop.hent().setMaanedsoversiktpostService(maanedsoversiktpostService);
                 Allvitekyklop.hent().setMaanedsoversiktpostRedigeringsomraade(maanedsoversiktpostRedigeringsomraade);
                 Allvitekyklop.hent().setMaanedsoversiktpostRedigeringsomraadeTilDialog(maanedsoversiktpostRedigeringsomraadeTilDialog);
-                //Allvitekyklop.hent().setMaanedsoversiktpostView(maanedsoversiktpostView);
 
                 Allvitekyklop.hent().setNormalpostService(normalpostService);
                 Allvitekyklop.hent().setNormalpostRedigeringsomraade(normalPostRedigeringsomraade);
-                //Allvitekyklop.hent().setNormalpostView(normalpostView);
+
+                Allvitekyklop.hent().setBudsjettpostService(budsjettpostService);
+                Allvitekyklop.hent().setBudsjettpostRedigeringsomraade(budsjettpostRedigeringsomraade);
+
+                Allvitekyklop.hent().setMaanedsbudsjettmalService(maanedsbudsjettmalService);
+                Allvitekyklop.hent().setMaanedsbudsjettmalRedigeringsomraade(maanedsbudsjettmalRedigeringsomraade);
 
 
                 Backupkyklop.hent().leggTilEntitetservice(kategoriService);
@@ -102,14 +108,8 @@ public class OmView extends MainViewmal {
                 opprettLayout(Versjonskyklop.hent());
             }
 
-//TODO: Når er det behov for å hente redigeringsomraade fra serviceklassen? Sjekk havaara mot childTable
+            //TODO: Når er det behov for å hente redigeringsomraade fra serviceklassen? Sjekk havaara mot childTable
 
-            //kategoriService.initier(kategoriRedigeringsomraade);
-//            postService.initier(normalPostRedigeringsomraade, kategoriService);
-//            maanedsoversiktService.initier(maanedsoversiktRedigeringsomraade, maanedsoversiktpostService, postService, aarsoversiktService);
-//            maanedsoversiktpostService.initierSuper(maanedsoversiktpostRedigeringsomraade, postService);
-//            aarsoversiktService.initier(aarsoversiktRedigeringsomraade, aarsoversiktpostService, postService);
-//            aarsoversiktpostService.initierSuper(aarsoversiktpostRedigeringsomraade, PeriodepostTypeEnum.AARSOVERSIKTPOST);
         });
 
 

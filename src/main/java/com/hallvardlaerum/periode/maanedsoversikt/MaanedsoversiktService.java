@@ -19,7 +19,7 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
     private boolean erInitiert = false;
 
     public MaanedsoversiktService() {
-
+        super();
     }
 
     @Override

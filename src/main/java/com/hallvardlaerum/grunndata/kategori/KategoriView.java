@@ -100,6 +100,8 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
         Grid<Kategori> grid = hentGrid();
 
         grid.addColumn(Kategori::getTittel).setHeader("Tittel").setRenderer(opprettKategoriTittelRenderer());
+
+        grid.addColumn(Kategori::getUndertittel).setHeader("Undertittel").setRenderer(opprettKategoriUnderTittelRenderer());
         //grid.addColumn(Kategori::getBrukesTilBudsjett).setHeader("Budsjett");
 
         grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getBrukesTilBudsjett(), kategori))
@@ -142,6 +144,16 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
                span.addClassName(LumoUtility.TextColor.TERTIARY);
            }
            return span;
+        });
+    }
+
+    private ComponentRenderer<Span, Kategori> opprettKategoriUnderTittelRenderer(){
+        return new ComponentRenderer<>(k -> {
+            Span span = new Span(k.getUndertittel());
+            if (!k.getErAktiv()) {
+                span.addClassName(LumoUtility.TextColor.TERTIARY);
+            }
+            return span;
         });
     }
 

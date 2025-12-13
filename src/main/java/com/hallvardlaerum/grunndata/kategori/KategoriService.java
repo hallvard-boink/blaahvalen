@@ -6,6 +6,7 @@ import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -43,6 +44,10 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         return kategoriRedigeringsomraade;
     }
 
+    @Override
+    public ArrayList<Kategori> finnAlle() {
+        return new ArrayList<>(kategoriRepository.findAllByOrderByTittelAscUndertittelAsc());
+    }
 
     public Kategori finnEtterTittel(String tittel) {
         Optional<Kategori> kategoriOptional = kategoriRepository.findByTittel(tittel);

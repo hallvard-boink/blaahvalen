@@ -241,7 +241,6 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
 
     public Stream<Post> finnAlleSomStream(PageRequest springPageRequest) {
         return super.hentRepository().findAll(springPageRequest).stream();
-
     }
 
 

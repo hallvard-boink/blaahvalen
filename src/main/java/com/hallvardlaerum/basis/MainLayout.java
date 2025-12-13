@@ -42,18 +42,19 @@ public final class MainLayout extends AppLayout {
     private SideNav createSideNav() {
         SideNav sideNav = new SideNav();
         sideNav.addClassNames(Margin.Horizontal.MEDIUM);
-        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Post","normalpost" );
-        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Månedsoversikt","maanedsoversikt");
-        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Årsoversikt","aarsoversikt");
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Poster","normalpost" );
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Månedsoversikter","maanedsoversikt");
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Årsoversikter","aarsoversikt");
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Budsjettposter","budsjettpost");
         Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Verktøy","verktoy");
-
 
         SideNavItem detaljerSideNavItem = Navigasjonsmenykyklop.hent().leggMenyvalgforelderTilRot(sideNav, "Detaljer");
         Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(detaljerSideNavItem, "Månedsoversiktposter","maanedsoversiktpost");
         Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(detaljerSideNavItem, "Årsoversiktposter","aarsoversiktpost");
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(detaljerSideNavItem, "Månedsbudsjettmaler","maanedsbudsjettmal");
 
         SideNavItem innstillingerSideNavItem = Navigasjonsmenykyklop.hent().leggMenyvalgforelderTilRot(sideNav, "Innstillinger");
-        Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(innstillingerSideNavItem, "Kategori","kategori");
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(innstillingerSideNavItem, "Kategorier","kategori");
 
 
         Navigasjonsmenykyklop.hent().leggMenyvalgTilRot(sideNav, "Om denne appen","");

@@ -10,6 +10,8 @@ public class Versjonskyklop extends Versjonskyklopmal implements InitieringsEgne
 
     @Override
     public void byggOppVersjoner() {
+        super.leggTilVersjon("0.4.2","2025-12-13","Månedsbudsjettmal","La til månedsbudsjettmal, og jobbet med overordnet håndtering av budsjettposter, faste utgifter og maler.");
+        super.leggTilVersjon("0.4.1","2025-12-10","Budsjettposter","La til støtte for budsjettposter");
         super.leggTilVersjon("0.4.0","2025-12-10","Laget dialogbokser for periodeposter","Fikset vanskelig bug med scope og binder");
         super.leggTilVersjon("0.3.5","2025-11-20","Lagt til Periodepost og Maanedsoversiktpost","");
         super.leggTilVersjon("0.3.4","2025-11-20","Lagt til Årsoversikt","");
@@ -39,6 +41,7 @@ public class Versjonskyklop extends Versjonskyklopmal implements InitieringsEgne
         versjonskyklop.setApplikasjonsNavnString("Blåhvalen 2025");
         versjonskyklop.setApplikasjonsKortnavnString("blaahvalen");
         versjonskyklop.setApplikasjonsBeskrivelseString("Regnskap og budsjett for Tina og Hallvard.");
+
         byggOppVersjoner();
         erInitiert =true;
     }

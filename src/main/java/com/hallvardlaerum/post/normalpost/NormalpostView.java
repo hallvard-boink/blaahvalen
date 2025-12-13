@@ -10,6 +10,7 @@ import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
+import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -67,6 +68,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
 
             super.opprettLayout(postService, normalPostRedigeringsomraade, SplitLayout.Orientation.VERTICAL);
             initierGridMedNormalSoek();
+            hentVindutittel().setText("Poster");
             normaldelpostViewMester = new NormaldelpostViewMester(this,  normalPostRedigeringsomraade, postService);
             leggTilImporterCSVFraHandelsbankenButton();
 
@@ -134,6 +136,8 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
         ArrayList<SearchCriteria> filtre = new ArrayList<>();
 
         //Oppdater PostSpecification her
+
+        filtre.add(new SearchCriteria("postklasseEnum",":", PostklasseEnum.NORMALPOST));
 
         if (datoFilterDatePicker.getValue()!=null) {
             filtre.add(new SearchCriteria("datoLocalDate","<",datoFilterDatePicker.getValue()));

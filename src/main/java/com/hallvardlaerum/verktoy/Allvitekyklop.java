@@ -8,6 +8,9 @@ import com.hallvardlaerum.periode.PeriodeRepository;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktRedigeringsomraade;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktView;
+import com.hallvardlaerum.periode.maanedsbudsjettmal.MaanedsbudsjettmalRedigeringsomraade;
+import com.hallvardlaerum.periode.maanedsbudsjettmal.MaanedsbudsjettmalService;
+import com.hallvardlaerum.periode.maanedsbudsjettmal.MaanedsbudsjettmalView;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktRedigeringsomraade;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktService;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktView;
@@ -20,6 +23,9 @@ import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostSer
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostView;
 import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpostView;
 import com.hallvardlaerum.post.normalpost.NormalpostRedigeringsomraade;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.post.normalpost.NormalpostView;
@@ -40,6 +46,14 @@ public class Allvitekyklop {
     private NormalpostRedigeringsomraade normalpostRedigeringsomraade;
     private NormalpostView normalpostView;
 
+    private BudsjettpostService budsjettpostService;
+    private BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade;
+    private BudsjettpostView budsjettpostView;
+
+    private MaanedsbudsjettmalService maanedsbudsjettmalService;
+    private MaanedsbudsjettmalRedigeringsomraade maanedsbudsjettmalRedigeringsomraade;
+    private MaanedsbudsjettmalView maanedsbudsjettmalView;
+
     private MaanedsoversiktService maanedsoversiktService;
     private MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade;
     private MaanedsoversiktView maanedsoversiktView;
@@ -57,6 +71,8 @@ public class Allvitekyklop {
     private AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade;
     private AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog;
     private AarsoversiktpostView aarsoversiktpostView;
+
+
 
     private VerktoyView verktoyView;
 
@@ -77,7 +93,6 @@ public class Allvitekyklop {
         maanedsoversiktRedigeringsomraade.init();
 
         aarsoversiktpostService.initier();
-        //TODO: Binder er ikke null, men den får ikke bindings. Flytte på new Binder?
         aarsoversiktpostRedigeringsomraade.init();
         aarsoversiktpostRedigeringsomraadeTilDialog.init();
 
@@ -88,6 +103,37 @@ public class Allvitekyklop {
         normalpostService.init();
         normalpostRedigeringsomraade.init();
 
+        budsjettpostService.init();
+        budsjettpostRedigeringsomraade.init();
+
+        maanedsbudsjettmalService.init();
+        maanedsbudsjettmalRedigeringsomraade.init();
+
+
+    }
+
+    public MaanedsbudsjettmalService getMaanedsbudsjettmalService() {
+        return maanedsbudsjettmalService;
+    }
+
+    public void setMaanedsbudsjettmalService(MaanedsbudsjettmalService maanedsbudsjettmalService) {
+        this.maanedsbudsjettmalService = maanedsbudsjettmalService;
+    }
+
+    public MaanedsbudsjettmalRedigeringsomraade getMaanedsbudsjettmalRedigeringsomraade() {
+        return maanedsbudsjettmalRedigeringsomraade;
+    }
+
+    public void setMaanedsbudsjettmalRedigeringsomraade(MaanedsbudsjettmalRedigeringsomraade maanedsbudsjettmalRedigeringsomraade) {
+        this.maanedsbudsjettmalRedigeringsomraade = maanedsbudsjettmalRedigeringsomraade;
+    }
+
+    public MaanedsbudsjettmalView getMaanedsbudsjettmalView() {
+        return maanedsbudsjettmalView;
+    }
+
+    public void setMaanedsbudsjettmalView(MaanedsbudsjettmalView maanedsbudsjettmalView) {
+        this.maanedsbudsjettmalView = maanedsbudsjettmalView;
     }
 
     public KategoriRepository getKategoriRepository() {
@@ -256,6 +302,26 @@ public class Allvitekyklop {
 
     public void setAarsoversiktpostService(AarsoversiktpostService aarsoversiktpostService) {
         this.aarsoversiktpostService = aarsoversiktpostService;
+    }
+
+    public BudsjettpostService getBudsjettpostService() {
+        return budsjettpostService;
+    }
+
+    public void setBudsjettpostService(BudsjettpostService budsjettpostService) {
+        this.budsjettpostService = budsjettpostService;
+    }
+
+    public BudsjettpostRedigeringsomraade getBudsjettpostRedigeringsomraade() {
+        return budsjettpostRedigeringsomraade;
+    }
+
+    public void setBudsjettpostRedigeringsomraade(BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade) {
+        this.budsjettpostRedigeringsomraade = budsjettpostRedigeringsomraade;
+    }
+
+    public BudsjettpostView getBudsjettpostView() {
+        return budsjettpostView;
     }
 
     public AarsoversiktpostRedigeringsomraade getAarsoversiktpostRedigeringsomraade() {
@@ -574,4 +640,7 @@ public class Allvitekyklop {
     }
 
 
+    public void setBudsjettpostView(BudsjettpostView budsjettpostView) {
+
+    }
 }

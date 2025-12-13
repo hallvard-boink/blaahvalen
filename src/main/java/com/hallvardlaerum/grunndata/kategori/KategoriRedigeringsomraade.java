@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 @UIScope
 public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> implements RedigeringsomraadeAktig<Kategori>, InitieringsEgnet {
     private TextField tittelTextField;
+    private TextField undertittelTextField;
     private TextArea beskrivelseTextArea;
     private Checkbox brukesTilBudsjettCheckbox;
     private Checkbox brukesTilFastePosterCheckbox;
@@ -52,14 +53,24 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
 
     @Override
     public void instansOpprettFelter() {
-        tittelTextField = leggTilRedigeringsfelt(new TextField("Tittel"));
-        beskrivelseTextArea = leggTilRedigeringsfelt(new TextArea("Beskrivelse"));
+        String hovedtabString = "Hoved";
+        String ekstratabString = "Ekstra";
 
+        tittelTextField = new TextField("Tittel");
+        undertittelTextField = new TextField("Undertittel");
+        leggTilRedigeringsfelter(hovedtabString, tittelTextField, undertittelTextField);
+        settColspan(tittelTextField,2);
+        settColspan(undertittelTextField,2);
+
+        beskrivelseTextArea = leggTilRedigeringsfelt(new TextArea("Beskrivelse"));
+        leggTilRedigeringsfelter(hovedtabString, beskrivelseTextArea);
+        settColspan(beskrivelseTextArea,4);
+
+        erAktivCheckbox = new Checkbox("Er aktiv");
         brukesTilBudsjettCheckbox = new Checkbox("Brukes til budsjett");
         brukesTilFastePosterCheckbox = new Checkbox("Brukes til faste poster");
         brukesTilRegnskapCheckbox = new Checkbox("Brukes til regnskap");
-        super.leggTilRedigeringsfelter(brukesTilBudsjettCheckbox,  brukesTilFastePosterCheckbox, brukesTilRegnskapCheckbox);
-
+        leggTilRedigeringsfelter(hovedtabString,erAktivCheckbox, brukesTilBudsjettCheckbox,  brukesTilFastePosterCheckbox, brukesTilRegnskapCheckbox);
 
         kategoriRetningComboBox = new ComboBox<>("Retning");
         kategoriRetningComboBox.setItems(KategoriRetning.values());
@@ -68,9 +79,9 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
         kategoriTypeComboBox.setItems(KategoriType.values());
         kategoriTypeComboBox.setItemLabelGenerator(KategoriType::getTittel);
         rekkefoelgeIntegerField = new IntegerField("Rekkefølge");
-        super.leggTilRedigeringsfelter(kategoriRetningComboBox, kategoriTypeComboBox, rekkefoelgeIntegerField);
+        leggTilRedigeringsfelter(hovedtabString, kategoriRetningComboBox, kategoriTypeComboBox, rekkefoelgeIntegerField);
 
-        erAktivCheckbox = leggTilRedigeringsfelt(new Checkbox("Er aktiv"));
+        leggTilDatofeltTidOpprettetOgRedigert(ekstratabString);
 
         setFokusComponent(tittelTextField);
 
@@ -80,6 +91,7 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
     public void instansByggOppBinder() {
         Binder<Kategori> binder = hentBinder();
         binder.bind(tittelTextField, Kategori::getTittel, Kategori::setTittel);
+        binder.bind(undertittelTextField, Kategori::getUndertittel, Kategori::setUndertittel);
         binder.bind(beskrivelseTextArea, Kategori::getBeskrivelse, Kategori::setBeskrivelse);
         binder.bind(brukesTilBudsjettCheckbox, Kategori::getBrukesTilBudsjett, Kategori::setBrukesTilBudsjett);
         binder.bind(brukesTilFastePosterCheckbox, Kategori::getBrukesTilFastePoster, Kategori::setBrukesTilFastePoster);

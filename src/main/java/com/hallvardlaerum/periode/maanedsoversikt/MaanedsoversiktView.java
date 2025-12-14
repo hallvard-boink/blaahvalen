@@ -1,11 +1,11 @@
 package com.hallvardlaerum.periode.maanedsoversikt;
 
+import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.*;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import com.hallvardlaerum.verktoy.RapportMester;
+import com.hallvardlaerum.verktoy.PeriodeRapportMester;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -44,9 +44,15 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
                     maanedsoversiktRedigeringsomraade
                     );
             leggTilOgTilpassKnapper();
+            hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
 
             erInitiert = true;
         }
+    }
+
+    private void importerCSVFraGamleBlaahvalen() {
+        new CSVImportmester(new MaanedsoversiktFraGamleBlaahvalenCSVImportassistent()).velgImportfilOgKjoerImport(maanedsoversiktService);
+
     }
 
 
@@ -60,7 +66,7 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
         skrivUtMaanedsoversiktButton.addClickListener(e -> {
             Periode periode = (Periode)hentRedigeringsomraadeAktig().getEntitet();
             PeriodeRedigeringsomraadeMal redigeringsomraade = (PeriodeRedigeringsomraadeMal)hentRedigeringsomraadeAktig();
-            new RapportMester().lagrePeriodeSomPDF(periode, redigeringsomraade.hentPeriodepostListSortert(periode));
+            new PeriodeRapportMester().lagrePeriodeSomPDF(periode, redigeringsomraade.hentPeriodepostListSortert(periode));
         });
         skrivUtMaanedsoversiktButton.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(skrivUtMaanedsoversiktButton);

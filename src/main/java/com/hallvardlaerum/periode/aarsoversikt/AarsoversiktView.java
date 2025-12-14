@@ -1,14 +1,14 @@
 package com.hallvardlaerum.periode.aarsoversikt;
 
+import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodeViewMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import com.hallvardlaerum.verktoy.RapportMester;
+import com.hallvardlaerum.verktoy.PeriodeRapportMester;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -48,9 +48,17 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
                     aarsoversiktRedigeringsomraade);
 
             leggTilOgTilpassKnapper();
+            hentVerktoeySubMeny().addItem("Importer årsoversikter fra gamle Blåhvalen", e -> importerAarsoversikterFraGamleBlaahvalenCSV());
 
             erInitiert = true;
         }
+    }
+
+    private void importerAarsoversikterFraGamleBlaahvalenCSV() {
+        AarsoversiktFraGamleBlaahvalenCSVImportassistent aarsoversiktFraGamleBlaahvalenCSVImportassistent = new AarsoversiktFraGamleBlaahvalenCSVImportassistent();
+        CSVImportmester csvImportmester = new CSVImportmester(aarsoversiktFraGamleBlaahvalenCSVImportassistent);
+        csvImportmester.velgImportfilOgKjoerImport(aarsoversiktService);
+
     }
 
     private void leggTilOgTilpassKnapper() {
@@ -63,7 +71,7 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
         lagrePDFButton.addClickListener(e -> {
             Periode periode = (Periode)hentRedigeringsomraadeAktig().getEntitet();
             PeriodeRedigeringsomraadeMal redigeringsomraade = (PeriodeRedigeringsomraadeMal)hentRedigeringsomraadeAktig();
-            new RapportMester().lagrePeriodeSomPDF(periode, redigeringsomraade.hentPeriodepostListSortert(periode));
+            new PeriodeRapportMester().lagrePeriodeSomPDF(periode, redigeringsomraade.hentPeriodepostListSortert(periode));
         });
         lagrePDFButton.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(lagrePDFButton);

@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -83,14 +84,13 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
         }
 
         if (field.getName().equalsIgnoreCase("Kategori")) {
-            Kategori kategori = kategoriService.finnEtterTittel(nyVerdi);
-            if (kategori!=null) {
+            Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittel(nyVerdi);
+            if (kategoriOptional.isPresent()) {
                 try {
-                    field.set(entitet,kategori);
+                    field.set(entitet,kategoriOptional.get());
                     return true;
                 } catch (IllegalAccessException e) {
-
-                    Loggekyklop.hent().loggTilFilINFO("Klarte ikke å sette Kategori med entiteten " + kategori.hentBeskrivendeNavn() + ". Importrad: " + importradString);
+                    Loggekyklop.hent().loggTilFilINFO("Klarte ikke å sette Kategori med entiteten " + kategoriOptional.get().hentBeskrivendeNavn() + ". Importrad: " + importradString);
                     return false;
                 }
             } else {
@@ -197,8 +197,6 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
                 Loggekyklop.hent().loggADVARSEL("Fant ingen poster med opplysningene " + strOpplysninger + ", kobler ikke til forelderpost");
             }
         }
-
-
 
     }
 

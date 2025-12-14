@@ -15,6 +15,16 @@ public enum PrioritetEnum implements EnumAktig {
         this.beskrivelse = beskrivelse;
     }
 
+    public static PrioritetEnum hentFraTittel(String tittel) {
+        for (PrioritetEnum p:PrioritetEnum.values()) {
+            if (p.getTittel().equals(tittel)) {
+                return p;
+            }
+        }
+        return null;
+
+    }
+
     @Override
     public String getTittel() {
         return tittel;

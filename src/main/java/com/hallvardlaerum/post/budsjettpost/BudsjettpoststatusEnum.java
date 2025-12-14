@@ -14,6 +14,15 @@ public enum BudsjettpoststatusEnum implements EnumAktig {
         this.beskrivelse = beskrivelse;
     }
 
+    public static BudsjettpoststatusEnum hentFraTittel(String tittel) {
+        for (BudsjettpoststatusEnum b:BudsjettpoststatusEnum.values()) {
+            if (b.getTittel().equals(tittel)) {
+                return b;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String getTittel() {
         return tittel;
@@ -41,4 +50,5 @@ public enum BudsjettpoststatusEnum implements EnumAktig {
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
+
 }

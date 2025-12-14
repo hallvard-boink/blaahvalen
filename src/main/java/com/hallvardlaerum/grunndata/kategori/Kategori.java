@@ -21,7 +21,7 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
 
 
     /**
-     * Brukes til nivå 2-kategorier, som er ment til budsjettpostgrupper og kostnadspakker
+     * Undertittel brukes til nivå 2-kategorier, som er ment til budsjettpostgrupper og kostnadspakker
      */
     @SkalEksporteres
     private String undertittel;
@@ -64,14 +64,22 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
     public String hentBeskrivendeNavn() {
         StringBuilder sb = new StringBuilder();
         sb.append(tittel);
-        if (undertittel!=null) {
-            sb.append(":");
+        if (undertittel!=null && !undertittel.isEmpty()) {
+            sb.append(": ");
             sb.append(undertittel);
         }
-        sb.append(" (");
+        sb.append(" [");
         sb.append(kategoriType.getTittel()).append(", ");
-        sb.append(kategoriRetning.getBeskrivelse()).append(")");
+        sb.append(kategoriRetning.getTittel()).append("]");
         return sb.toString();
+    }
+
+    public String hentKortnavn(){
+        if (undertittel!=null && !undertittel.isEmpty()) {
+            return tittel + ": " + undertittel;
+        } else {
+            return tittel;
+        }
     }
 
     public Kategori() {

@@ -23,7 +23,6 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -72,14 +71,26 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
             normaldelpostViewMester = new NormaldelpostViewMester(this,  normalPostRedigeringsomraade, postService);
             leggTilImporterCSVFraHandelsbankenButton();
 
+            hentVerktoeySubMeny().addItem("Importer CSV fra Gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
+
             erInitiert = true;
         }
     }
+
+
+    private void importerCSVFraGamleBlaahvalen() {
+        NormalpostFraGamleBlaahvalenCSVImportassistent normalpostFraGamleBlaahvalenCSVImportassistent = new NormalpostFraGamleBlaahvalenCSVImportassistent();
+        CSVImportmester csvImportmester = new CSVImportmester(normalpostFraGamleBlaahvalenCSVImportassistent);
+        csvImportmester.velgImportfilOgKjoerImport(postService);
+    }
+
 
     @Override
     public boolean erInitiert() {
         return erInitiert;
     }
+
+
 
     private void leggTilImporterCSVFraHandelsbankenButton(){
         Button importerCSVFraHandelsbankenButton = new Button("Importer CSV fra Handelsbanken");
@@ -89,8 +100,8 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
     }
 
     private void importerCSVFraHandelsbanken() {
-        NormalpostFraCSVImportassistent normalpostFraCSVImportassistent = new NormalpostFraCSVImportassistent(postService, this);
-        CSVImportmester csvImportmester = new CSVImportmester(normalpostFraCSVImportassistent);
+        NormalpostFraHandelsbankensCSVImportassistent normalpostFraHandelsbankensCSVImportassistent = new NormalpostFraHandelsbankensCSVImportassistent(postService, this);
+        CSVImportmester csvImportmester = new CSVImportmester(normalpostFraHandelsbankensCSVImportassistent);
         csvImportmester.setLesCharsetString("ISO-8859-15");
         csvImportmester.velgImportfilOgKjoerImport(postService);
 
@@ -288,7 +299,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
 
     private ComponentRenderer<Span, Post> opprettKategoriRenderer(){
         return new ComponentRenderer<>(post -> {
-            Span span = post.getKategori() != null ? new Span(post.getKategori().getTittel()) : new Span("");
+            Span span = post.getKategori() != null ? new Span(post.getKategori().hentKortnavn()) : new Span("");
             settStil(span, post);
             return span;
         });

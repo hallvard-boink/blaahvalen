@@ -101,7 +101,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
 
         kategoriComboBox = new ComboBox<>("Kategori");
         kategoriComboBox.setItems(kategoriService.finnAlle());
-        kategoriComboBox.setItemLabelGenerator(Kategori::getTittel);
+        kategoriComboBox.setItemLabelGenerator(Kategori::hentKortnavn);
         kategoriComboBox.addValueChangeListener(kategori -> {
             if (kategori != null && getEntitet()!=null) {
                 if (normalpoststatusComboBox.getValue()==NormalpoststatusEnum.UBEHANDLET) {

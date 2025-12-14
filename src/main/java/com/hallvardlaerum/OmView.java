@@ -11,8 +11,6 @@ import com.hallvardlaerum.libs.verktoy.Backupkyklop;
 import com.hallvardlaerum.periode.PeriodeRepository;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktRedigeringsomraade;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
-import com.hallvardlaerum.periode.maanedsbudsjettmal.MaanedsbudsjettmalRedigeringsomraade;
-import com.hallvardlaerum.periode.maanedsbudsjettmal.MaanedsbudsjettmalService;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktRedigeringsomraade;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktService;
 import com.hallvardlaerum.periodepost.PeriodepostRepository;
@@ -21,7 +19,6 @@ import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostService;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostRedigeringsomraade;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostService;
 import com.hallvardlaerum.post.PostRepository;
-import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.post.normalpost.NormalpostRedigeringsomraade;
@@ -32,11 +29,11 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.PermitAll;
-import org.apache.xmlbeans.impl.xb.xsdschema.All;
+
 
 @Route("")
 @PermitAll
-@Menu(title = "Om...", order = 99)
+//@Menu(title = "Om...", order = 99)
 @UIScope
 public class OmView extends MainViewmal {
     private Boolean erInitiert = false;
@@ -48,8 +45,7 @@ public class OmView extends MainViewmal {
                   MaanedsoversiktpostService maanedsoversiktpostService, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraade, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraadeTilDialog,
                   AarsoversiktpostService aarsoversiktpostService, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog,
                   NormalpostService normalpostService, NormalpostRedigeringsomraade normalPostRedigeringsomraade,
-                  BudsjettpostService budsjettpostService, BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade,
-                  MaanedsbudsjettmalService maanedsbudsjettmalService, MaanedsbudsjettmalRedigeringsomraade maanedsbudsjettmalRedigeringsomraade
+                  BudsjettpostService budsjettpostService, BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade
       )
     {
         super();
@@ -91,10 +87,6 @@ public class OmView extends MainViewmal {
 
                 Allvitekyklop.hent().setBudsjettpostService(budsjettpostService);
                 Allvitekyklop.hent().setBudsjettpostRedigeringsomraade(budsjettpostRedigeringsomraade);
-
-                Allvitekyklop.hent().setMaanedsbudsjettmalService(maanedsbudsjettmalService);
-                Allvitekyklop.hent().setMaanedsbudsjettmalRedigeringsomraade(maanedsbudsjettmalRedigeringsomraade);
-
 
                 Backupkyklop.hent().leggTilEntitetservice(kategoriService);
                 Backupkyklop.hent().leggTilEntitetservice(maanedsoversiktService); //sjekk at alle poster (også årsoversikter) blir eksportert

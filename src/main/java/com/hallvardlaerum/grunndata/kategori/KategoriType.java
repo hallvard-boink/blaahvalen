@@ -10,6 +10,7 @@ public enum KategoriType implements EnumAktig {
     SKAL_IKKE_KATEGORISERES("Skal ikke kategoriseres","Poster som det ikke gir mening å kategorisere"),
     KATEGORI_IKKE_FUNNET("Kategori ikke funnet","Poster vi ikke har klart å finne kategori til"),
     TIL_SPARING("Til sparing","Kategorier som handler om å sette av penger."),
+    DETALJERT("Detaljert","Brukes til budsjettpostgrupper og kostnadspakker.")
     ;
 
 

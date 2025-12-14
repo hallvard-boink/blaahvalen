@@ -12,6 +12,15 @@ public enum EstimatpresisjonEnum implements EnumAktig {
     private String tittel;
     private String beskrivelse;
 
+    public static EstimatpresisjonEnum hentFraTittel(String tittel) {
+        for (EstimatpresisjonEnum e:EstimatpresisjonEnum.values()) {
+            if (e.getTittel().equals(tittel)) {
+                return e;
+            }
+        }
+        return null;
+    }
+
     EstimatpresisjonEnum(String tittel, String beskrivelse) {
         this.tittel = tittel;
         this.beskrivelse = beskrivelse;

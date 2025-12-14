@@ -3,22 +3,23 @@ package com.hallvardlaerum.post.budsjettpost;
 import com.hallvardlaerum.grunndata.kategori.Kategori;
 import com.hallvardlaerum.grunndata.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.SearchCriteria;
+import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostRepository;
-import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 @UIScope
 public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> implements InitieringsEgnet {
     private Grid<Post> grid;
-    private PostServiceMal postService;
+    private BudsjettpostService budsjettpostService;
     private BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade;
     private boolean erInitiert = false;
     private KategoriService kategoriService;
@@ -37,6 +38,7 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
     private TextField beskrivelseFilterTextField;
     private IntegerField innpaakontoFilterIntegerField;
     private IntegerField utfrakontoFilterIntegerField;
+    private ComboBox<BudsjettpoststatusEnum> budsjettpoststatusFilterComboBox;
 
 
 
@@ -65,6 +67,10 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
             filtre.add(new SearchCriteria("utFraKontoInteger",">",utfrakontoFilterIntegerField.getValue()));
         }
 
+        if (budsjettpoststatusFilterComboBox.getValue()!=null) {
+            filtre.add(new SearchCriteria("budsjettpoststatusEnum",":",budsjettpoststatusFilterComboBox.getValue()));
+        }
+
         super.brukFiltreIDataprovider(filtre);
     }
 
@@ -76,7 +82,16 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
         grid.addColumn(Post::getBeskrivelseString).setHeader("Beskrivelse");
         grid.addColumn(Post::getInnPaaKontoInteger).setHeader("Inn på konto");
         grid.addColumn(Post::getUtFraKontoInteger).setHeader("Ut fra konto");
+        grid.addColumn(Post::getBudsjettpoststatusEnum).setHeader("Status").setRenderer(opprettBudsjettpoststatusRenderer());
 
+    }
+
+    private ComponentRenderer<Span,Post> opprettBudsjettpoststatusRenderer(){
+        return new ComponentRenderer<>(post -> {
+            Span span = post.getBudsjettpoststatusEnum() != null ? new Span(post.getBudsjettpoststatusEnum().getTittel()) : new Span("");
+            //settStil(span, post);
+            return span;
+        });
     }
 
     @Override
@@ -88,38 +103,49 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
         beskrivelseFilterTextField = leggTilFilterfelt(2, new TextField(),"tekst");
         innpaakontoFilterIntegerField = leggTilFilterfelt(3, new IntegerField(),"> tall");
         utfrakontoFilterIntegerField = leggTilFilterfelt(4, new IntegerField(), "> tall");
+        budsjettpoststatusFilterComboBox = leggTilFilterfelt(5, new ComboBox<>(),"Velg");
+        budsjettpoststatusFilterComboBox.setItems(BudsjettpoststatusEnum.values());
+        budsjettpoststatusFilterComboBox.setItemLabelGenerator(BudsjettpoststatusEnum::getTittel);
 
     }
 
     @Override
     public void init() {
         if (!erInitiert) {
-            this.postService = Allvitekyklop.hent().getBudsjettpostService();
+            this.budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
             this.kategoriService = Allvitekyklop.hent().getKategoriService();
             this.budsjettpostRedigeringsomraade = Allvitekyklop.hent().getBudsjettpostRedigeringsomraade();
             this.budsjettpostRedigeringsomraade.settView(this);
 
-            super.opprettLayout(postService, budsjettpostRedigeringsomraade, SplitLayout.Orientation.VERTICAL);
+            super.opprettLayout(budsjettpostService, budsjettpostRedigeringsomraade, SplitLayout.Orientation.VERTICAL);
             initierGridMedNormalSoek();
             hentVindutittel().setText("Budsjettposter");
+
+            hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
 
             erInitiert = true;
         }
     }
 
+    private void importerCSVFraGamleBlaahvalen() {
+        CSVImportmester csvImportmester = new CSVImportmester(new BudsjettpostFraGamleBlaahvalenCSVImportassistent());
+        csvImportmester.velgImportfilOgKjoerImport(budsjettpostService);
+    }
+
+
     public void initierGridMedNormalSoek(){
         super.initierCallbackDataProviderIGrid(
-                q -> postService.finnEntiteterMedSpecification(
+                q -> budsjettpostService.finnEntiteterMedSpecification(
                         q.getOffset(),
                         q.getLimit(),
-                        postService.getEntityFilterSpecification(),
+                        budsjettpostService.getEntityFilterSpecification(),
                         Sort.by("datoLocalDate").descending().and(Sort.by("kategori").and(Sort.by("beskrivelseString").descending()))
                 ),
 
-                query -> postService.tellAntallMedSpecification(
+                query -> budsjettpostService.tellAntallMedSpecification(
                         query.getOffset(),
                         query.getLimit(),
-                        postService.getEntityFilterSpecification())
+                        budsjettpostService.getEntityFilterSpecification())
         );
 
     }

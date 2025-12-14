@@ -1,18 +1,20 @@
 package com.hallvardlaerum.verktoy;
 
+import com.hallvardlaerum.grunndata.kategori.Kategori;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
+
+import java.util.Optional;
 
 @Route("verktoy")
 @UIScope
@@ -50,7 +52,7 @@ public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
         add(importerEkstraFelterButton);
 
         Button skrivUtPDFTestButton = new Button("Skriv ut Test-PDF");
-        skrivUtPDFTestButton.addClickListener(e -> RapportMester.printTestPDF());
+        skrivUtPDFTestButton.addClickListener(e -> PeriodeRapportMester.printTestPDF());
         add(skrivUtPDFTestButton);
 
         Button opprettTabsButton = new Button("Opprett Tabs i FormLayout");
@@ -60,6 +62,24 @@ public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
         Button loggDebugButton = new Button("Logg debug");
         loggDebugButton.addClickListener(e -> Loggekyklop.hent().loggDEBUG("DEBUUUUG"));
         add(loggDebugButton);
+
+        Button finnKategoriFraTittelUnderTittelButton = new Button("Finn kategori fra tittel og undertittel");
+        finnKategoriFraTittelUnderTittelButton.addClickListener(e -> finnKategoriFraTittelUnderTittel());
+        add(finnKategoriFraTittelUnderTittelButton);
+    }
+
+    private void finnKategoriFraTittelUnderTittel() {
+        String tittel = "Ferie og reiser";
+        String undertittel = "";
+
+        Optional<Kategori> kategoriOptional = Allvitekyklop.hent().getKategoriService().finnEtterTittelOgUnderTittel(tittel,undertittel);
+        if (kategoriOptional.isEmpty()) {
+            Notification.show("Fant ikke kategori med tittel " + tittel + "  og undertittel " + undertittel);
+        } else {
+            Notification.show("Fant kategori med tittel " + kategoriOptional.get().getTittel()
+                    + " og undertittel " + kategoriOptional.get().getUndertittel());
+        }
+
 
 
     }

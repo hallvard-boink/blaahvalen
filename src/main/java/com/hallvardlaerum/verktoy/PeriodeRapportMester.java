@@ -47,7 +47,7 @@ import java.util.ArrayList;
  */
 
 import static net.sf.dynamicreports.report.builder.DynamicReports.*;
-public class RapportMester {
+public class PeriodeRapportMester {
     private Periode periode;
     private ArrayList<Periodepost> periodepostSortertArrayList;
 

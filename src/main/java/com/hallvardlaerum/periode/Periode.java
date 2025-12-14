@@ -4,10 +4,8 @@ import com.hallvardlaerum.libs.database.AbstraktEntitet;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.periodepost.Periodepost;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +23,7 @@ public class Periode extends AbstraktEntitet {
     private LocalDate datoTilLocalDate;
 
     @SkalEksporteres
+    @Column(length = 2000)
     private String beskrivelseString;
 
     @SkalEksporteres

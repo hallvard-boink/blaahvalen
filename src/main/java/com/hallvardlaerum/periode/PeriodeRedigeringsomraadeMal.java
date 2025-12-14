@@ -106,7 +106,7 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         periodepostGrid = new Grid<>();
         periodepostGrid.addColumn(p -> {
             if(p.getKategori()!=null) {
-                return p.getKategori().getTittel();
+                return p.getKategori().hentKortnavn();
             } else {
                 return "";
             }

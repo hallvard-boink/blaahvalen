@@ -23,7 +23,11 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             LocalDate datoFraOgMedLocalDate, LocalDate datoTilOgMedLocalDate, PostklasseEnum postklasseEnum, Kategori kategori
     );
 
-    //Window<Post> findFirst100ByTekstFraBankenStringOrderByDatoLocalDate(String tekst, OffsetScrollPosition position);
+    List<Post> findByDatoLocalDateAndTekstFraBankenStringAndKategori(
+            LocalDate datoLocalDate, String tekstFraBankenString, Kategori kategori
+    );
+
+
 
     @NativeQuery("SELECT k.uuid, COUNT(p.uuid) FROM post p LEFT JOIN kategori k ON p.kategori_uuid  = k.uuid " +
             "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND p.postklasse_enum = ?3 AND p.normalposttype_enum!=2 " +

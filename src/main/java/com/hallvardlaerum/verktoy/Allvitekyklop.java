@@ -8,9 +8,6 @@ import com.hallvardlaerum.periode.PeriodeRepository;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktRedigeringsomraade;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktView;
-import com.hallvardlaerum.periode.maanedsbudsjettmal.MaanedsbudsjettmalRedigeringsomraade;
-import com.hallvardlaerum.periode.maanedsbudsjettmal.MaanedsbudsjettmalService;
-import com.hallvardlaerum.periode.maanedsbudsjettmal.MaanedsbudsjettmalView;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktRedigeringsomraade;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktService;
 import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktView;
@@ -49,10 +46,6 @@ public class Allvitekyklop {
     private BudsjettpostService budsjettpostService;
     private BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade;
     private BudsjettpostView budsjettpostView;
-
-    private MaanedsbudsjettmalService maanedsbudsjettmalService;
-    private MaanedsbudsjettmalRedigeringsomraade maanedsbudsjettmalRedigeringsomraade;
-    private MaanedsbudsjettmalView maanedsbudsjettmalView;
 
     private MaanedsoversiktService maanedsoversiktService;
     private MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade;
@@ -106,35 +99,9 @@ public class Allvitekyklop {
         budsjettpostService.init();
         budsjettpostRedigeringsomraade.init();
 
-        maanedsbudsjettmalService.init();
-        maanedsbudsjettmalRedigeringsomraade.init();
-
 
     }
 
-    public MaanedsbudsjettmalService getMaanedsbudsjettmalService() {
-        return maanedsbudsjettmalService;
-    }
-
-    public void setMaanedsbudsjettmalService(MaanedsbudsjettmalService maanedsbudsjettmalService) {
-        this.maanedsbudsjettmalService = maanedsbudsjettmalService;
-    }
-
-    public MaanedsbudsjettmalRedigeringsomraade getMaanedsbudsjettmalRedigeringsomraade() {
-        return maanedsbudsjettmalRedigeringsomraade;
-    }
-
-    public void setMaanedsbudsjettmalRedigeringsomraade(MaanedsbudsjettmalRedigeringsomraade maanedsbudsjettmalRedigeringsomraade) {
-        this.maanedsbudsjettmalRedigeringsomraade = maanedsbudsjettmalRedigeringsomraade;
-    }
-
-    public MaanedsbudsjettmalView getMaanedsbudsjettmalView() {
-        return maanedsbudsjettmalView;
-    }
-
-    public void setMaanedsbudsjettmalView(MaanedsbudsjettmalView maanedsbudsjettmalView) {
-        this.maanedsbudsjettmalView = maanedsbudsjettmalView;
-    }
 
     public KategoriRepository getKategoriRepository() {
         return kategoriRepository;

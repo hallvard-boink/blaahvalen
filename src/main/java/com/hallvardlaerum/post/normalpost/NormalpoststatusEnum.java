@@ -19,6 +19,15 @@ public enum NormalpoststatusEnum implements EnumAktig {
         this.beskrivelse = beskrivelse;
     }
 
+    public static NormalpoststatusEnum hentFraTittel(String tittel) {
+        for (NormalpoststatusEnum status:NormalpoststatusEnum.values()) {
+            if (status.getTittel().equals(tittel)) {
+                return status;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String getTittel() {
         return tittel;

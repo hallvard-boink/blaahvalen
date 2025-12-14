@@ -17,6 +17,14 @@ public enum NormalposttypeEnum implements EnumAktig {
         this.beskrivelse = beskrivelse;
     }
 
+    public static NormalposttypeEnum hentFraTittel(String tittel) {
+        for (NormalposttypeEnum type:NormalposttypeEnum.values()) {
+            if (type.getTittel().equals(tittel)) {
+                return type;
+            }
+        }
+        return null;
+    }
 
     @Override
     public String getTittelIImportfil() {

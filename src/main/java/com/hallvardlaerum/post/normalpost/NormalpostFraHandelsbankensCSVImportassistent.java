@@ -1,27 +1,20 @@
 package com.hallvardlaerum.post.normalpost;
 
-import com.hallvardlaerum.libs.eksportimport.CSVImportassistentAktig;
-import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
+import com.hallvardlaerum.libs.eksportimport.CSVImportassistentMal;
 import com.hallvardlaerum.libs.felter.Datokyklop;
-import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.PostklasseEnum;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 
-public class NormalpostFraCSVImportassistent implements CSVImportassistentAktig {
+public class NormalpostFraHandelsbankensCSVImportassistent extends CSVImportassistentMal<Post> {
     private PostServiceMal postService;
-    private ArrayList<String> cellerArrayList;
     private Post post;
-    private String cellerString = null;
-    private String feltnavneneString = null;
-    private ArrayList<String>feltnavnCSVArrayList ;
     private NormalpostView normalpostView;
 
-    public NormalpostFraCSVImportassistent(PostServiceMal postService, NormalpostView normalpostView) {
+    public NormalpostFraHandelsbankensCSVImportassistent(PostServiceMal postService, NormalpostView normalpostView) {
         this.postService = postService;
         this.normalpostView = normalpostView;
     }
@@ -38,9 +31,9 @@ public class NormalpostFraCSVImportassistent implements CSVImportassistentAktig 
 
     @Override
     public Post konverterFraTekstRadOgLagre(ArrayList<String> feltnavnCSVArrayList, String[] celler) {
+        super.lesInnFeltnavnogCeller(feltnavnCSVArrayList, celler);
+
         post = postService.opprettEntitet();
-        cellerArrayList = new ArrayList<>(List.of(celler));
-        this.feltnavnCSVArrayList = feltnavnCSVArrayList;
 
         String statusString = hentVerdi("Status");
         if (statusString.equalsIgnoreCase("Reservert")) {  //Denne skal ikke importeres
@@ -66,91 +59,6 @@ public class NormalpostFraCSVImportassistent implements CSVImportassistentAktig 
     }
 
 
-
-    private Integer parseInt(String integerString) {
-        if (integerString==null || integerString=="") {
-            return null;
-        } else {
-            Integer tallInteger = HelTallMester.konverterStrengMedDesimalTilInteger(integerString);
-            if (tallInteger<0) {
-                tallInteger = -tallInteger;
-            }
-            return tallInteger;
-        }
-    }
-
-    private String hentVerdier(boolean setterInnLinjeskift, boolean setterInnFeltnavn, String... feltnavnene){
-        if (feltnavnene==null) {
-            return null;
-        }
-
-        int i = 0;
-        StringBuilder sb = new StringBuilder();
-        for (String feltnavnString:feltnavnene) {
-            String verdi = hentVerdi(feltnavnString);
-            if (verdi!=null) {
-                if (setterInnFeltnavn) {
-                    sb.append(feltnavnString).append(": ");
-                }
-                sb.append(verdi);
-                if (i<feltnavnene.length-1) {
-                    if (setterInnLinjeskift) {
-                        sb.append("\n");
-                    } else {
-                        sb.append(", ");
-                    }
-                }
-            }
-            i++;
-        }
-
-        return sb.toString();
-    }
-
-    private String hentVerdi(String feltnavn) {
-        Integer posInteger = finnPosisjon(feltnavn);
-        if (posInteger==null) {
-            Loggekyklop.hent().loggTilFilINFO("Fant ikke '"+ feltnavn +"' i "  + hentFeltnavnCSVString());
-            return "";
-        } else {
-            if (posInteger>cellerArrayList.size()-1) {
-                return "";
-            } else {
-                return cellerArrayList.get(posInteger);
-            }
-        }
-    }
-
-    private String hentFeltnavnCSVString(){
-        if (feltnavneneString==null) {
-            StringBuilder sb = new StringBuilder();
-            for (String feltnavn:feltnavnCSVArrayList) {
-                sb.append(feltnavn).append(" ");
-            }
-            feltnavneneString = sb.toString();
-        }
-        return feltnavneneString;
-    }
-
-
-
-    private Integer finnPosisjon(String feltnavn) {
-        for (int i = 0; i<feltnavnCSVArrayList.size(); i++) {
-            if (feltnavn.equalsIgnoreCase(feltnavnCSVArrayList.get(i))) {
-                return i;
-            }
-        }
-        return null;
-    }
-
-    private String hentcellerString(){
-        StringBuilder sb = new StringBuilder();
-        for (String celleString:cellerArrayList) {
-            sb.append(celleString).append(" ");
-        }
-        cellerString = sb.toString();
-        return cellerString;
-    }
 
 
 }

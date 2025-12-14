@@ -1,5 +1,6 @@
 package com.hallvardlaerum.post;
 
+import com.hallvardlaerum.libs.felter.DatopresisjonEnum;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
 import com.hallvardlaerum.post.budsjettpost.EstimatpresisjonEnum;
 import com.hallvardlaerum.post.budsjettpost.PrioritetEnum;
@@ -70,6 +71,9 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     private EstimatpresisjonEnum estimatpresisjonEnum;
 
     @SkalEksporteres
+    private DatopresisjonEnum datopresisjonEnum;
+
+    @SkalEksporteres
     private PrioritetEnum prioritetEnum;
 
     @SkalEksporteres
@@ -78,6 +82,14 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     @SkalEksporteres
     Boolean erRegelmessigBoolean;
 
+
+    public DatopresisjonEnum getDatopresisjonEnum() {
+        return datopresisjonEnum;
+    }
+
+    public void setDatopresisjonEnum(DatopresisjonEnum datopresisjonEnum) {
+        this.datopresisjonEnum = datopresisjonEnum;
+    }
 
     public String getUuidString(){
         return getUuid().toString();

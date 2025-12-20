@@ -2,7 +2,6 @@ package com.hallvardlaerum.periodepost;
 
 import com.hallvardlaerum.grunndata.kategori.Kategori;
 import com.hallvardlaerum.grunndata.kategori.KategoriService;
-import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
@@ -18,9 +17,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import org.apache.catalina.valves.AbstractAccessLogValve;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Periodepost> implements RedigeringsomraadeAktig<Periodepost> {
@@ -74,14 +71,14 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
         Periodepost periodepost = getEntitet();
-        List<Post> normalposterList = postService.hentPosterFradatoTilDato(
+        List<Post> normalposterList = postService.hentPosterFradatoTilDatoPostklasseenumKategori(
             periodepost.getPeriode().getDatoFraLocalDate(),
             periodepost.getPeriode().getDatoTilLocalDate(),
             PostklasseEnum.NORMALPOST,
             periodepost.getKategori()
         );
         normalposterGrid.setItems(normalposterList);
-        Loggekyklop.hent().loggFEIL("instansOppdaterEkstraRedigeringsfelter: binder er "+ super.hentBinder().toString());
+
     }
 
 

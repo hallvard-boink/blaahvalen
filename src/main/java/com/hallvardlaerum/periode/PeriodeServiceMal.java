@@ -6,8 +6,10 @@ import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
+import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.PostklasseEnum;
+import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import org.jetbrains.annotations.NotNull;
@@ -60,13 +62,50 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
 
     public void oppdaterPeriodensPeriodeposterOgSummer(){
         Periode periode = periodeRedigeringsomraade.getEntitet();
-        oppdaterPeriodeposter(periode);
+
+        oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(periode);
+        oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode);
+
         oppdaterSummer(periode);
         periodeRedigeringsomraade.lesBean();
         periodeRedigeringsomraade.instansOppdaterEkstraRedigeringsfelter();
     }
 
-    public void oppdaterPeriodeposter(Periode periode){
+    public void oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(Periode periode){
+        if (periode==null) {
+            return;
+        }
+
+        List<Periodepost> periodepostList = periode.getPeriodeposterList();
+        NormalpostService normalpostService = Allvitekyklop.hent().getNormalpostService();
+        for (Periodepost periodepost:periodepostList) {
+            List<Post> postList = normalpostService.finnPosterFradatoTilDatoKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), periodepost.getKategori());
+            if (postList.isEmpty()) {
+                periodepostService.slett(periodepost);
+            } else {
+                periodepostService.oppdaterSummer(periodepost);
+            }
+        }
+    }
+
+    public void oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(Periode periode) {
+        List<Kategori> kategoriListHarPoster = postService.hentRepository().hentKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+        for (Kategori kategori:kategoriListHarPoster) {
+            List<Periodepost> periodepostList = periodepostService.finnFraPeriodeOgKategori(periode,kategori);
+            if (periodepostList.isEmpty()) {
+                Periodepost periodepost = periodepostService.opprettEntitet();
+                periodepost.setPeriode(periode);
+                periodepost.setKategori(kategori);
+                periodepost.setPeriodepostTypeEnum(periodetypeEnum.getPeriodepostTypeEnum());
+                periodepostService.oppdaterSummer(periodepost);
+                periodepostService.lagre(periodepost);
+            }
+        }
+
+    }
+
+
+    public void oppdaterPeriodeposter_gammel(Periode periode){
 
         ArrayList<Kategori> kategoriArrayList = postService.hentKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), PostklasseEnum.NORMALPOST);
         if (kategoriArrayList.isEmpty()) {

@@ -18,6 +18,8 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 @Component
 @UIScope
 public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> implements RedigeringsomraadeAktig<Post>, InitieringsEgnet {
@@ -31,6 +33,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
     private ComboBox<NormalposttypeEnum> normalposttypeComboBox;
     private ComboBox<NormalpoststatusEnum> normalpoststatusComboBox;
     private ComboBox<Kategori> kategoriComboBox;
+    private ComboBox<Kategori> kategoriDetaljComboBox;
     private KategoriService kategoriService;
     private TextArea ekstraInfoTextArea;
     private TextField uuidTextField;
@@ -76,7 +79,13 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
 
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
-
+        Kategori kategori = getEntitet().getKategori();
+        if (kategori!=null) {
+            kategoriDetaljComboBox.setItems(kategoriService.finnDelkategorier(kategori.getTittel()));
+            kategoriDetaljComboBox.setValue(kategori);
+        } else {
+            kategoriDetaljComboBox.setItems(new ArrayList<>());
+        }
     }
 
     @Override
@@ -100,15 +109,22 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         settColspan(egenbeskrivelseTextField,3);
 
         kategoriComboBox = new ComboBox<>("Kategori");
-        kategoriComboBox.setItems(kategoriService.finnAlle());
-        kategoriComboBox.setItemLabelGenerator(Kategori::hentKortnavn);
+        kategoriComboBox.setItems(kategoriService.finnAlleHovedkategorier());
+        kategoriComboBox.setItemLabelGenerator(Kategori::getTittel);
         kategoriComboBox.addValueChangeListener(kategori -> {
             if (kategori != null && getEntitet()!=null) {
                 if (normalpoststatusComboBox.getValue()==NormalpoststatusEnum.UBEHANDLET) {
                     normalpoststatusComboBox.setValue(NormalpoststatusEnum.FERDIG);
                 }
+
+                kategoriDetaljComboBox.setItems(kategoriService.finnDelkategorier(kategori.getValue().getTittel()));
             }
         });
+
+        kategoriDetaljComboBox = new ComboBox<>("Underkategori");
+        kategoriDetaljComboBox.setItemLabelGenerator(Kategori::getUndertittel);
+
+        super.leggTilRedigeringsfelter(hovedtabString, kategoriComboBox, kategoriDetaljComboBox);
 
         normalposttypeComboBox = new ComboBox<>("Posttype");
         normalposttypeComboBox.setItemLabelGenerator(NormalposttypeEnum::getTittel);
@@ -117,7 +133,8 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         normalpoststatusComboBox = new ComboBox<>("Poststatus");
         normalpoststatusComboBox.setItemLabelGenerator(NormalpoststatusEnum::getTittel);
         normalpoststatusComboBox.setItems(NormalpoststatusEnum.values());
-        super.leggTilRedigeringsfelter(hovedtabString, kategoriComboBox, normalposttypeComboBox, normalpoststatusComboBox);
+
+        super.leggTilRedigeringsfelter(hovedtabString, normalposttypeComboBox, normalpoststatusComboBox);
 
         ekstraInfoTextArea = super.leggTilRedigeringsfelt(ekstratabString, new TextArea("Ekstra info"));
         uuidTextField = super.leggTilRedigeringsfelt(ekstratabString, new TextField("UUID"));
@@ -139,6 +156,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         binder.bind(normalposttypeComboBox, Post::getNormalPosttypeEnum, Post::setNormalPosttypeEnum);
         binder.bind(normalpoststatusComboBox, Post::getNormalPoststatusEnum, Post::setNormalPoststatusEnum);
         binder.bind(kategoriComboBox, Post::getKategori, Post::setKategori);
+        binder.bind(kategoriDetaljComboBox, Post::getKategori, Post::setKategori);
         binder.bind(ekstraInfoTextArea, Post::getEkstraInfoString, Post::setEkstraInfoString);
         binder.bind(uuidTextField, Post::getUuidString, Post::setUuidStringFake);
         binder.bind(forelderPostUUID, Post::getForelderPostUUID, Post::setForelderPostUUID);

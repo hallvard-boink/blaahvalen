@@ -66,6 +66,14 @@ public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
         Button finnKategoriFraTittelUnderTittelButton = new Button("Finn kategori fra tittel og undertittel");
         finnKategoriFraTittelUnderTittelButton.addClickListener(e -> finnKategoriFraTittelUnderTittel());
         add(finnKategoriFraTittelUnderTittelButton);
+
+        Button oppdaterNivaaAlleKategorierButton = new Button("Oppdater nivå for alle kategorier");
+        oppdaterNivaaAlleKategorierButton.addClickListener(e -> oppdaterNivaaAlleKategorier());
+        add(oppdaterNivaaAlleKategorierButton);
+    }
+
+    private void oppdaterNivaaAlleKategorier() {
+        Allvitekyklop.hent().getKategoriService().oppdaterNivaaAlleKategorier();
     }
 
     private void finnKategoriFraTittelUnderTittel() {

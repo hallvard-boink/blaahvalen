@@ -26,8 +26,21 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
     )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
     List<Tuple> sumPosterFradatoTilDatoKategori(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, UUID kategoriUUID);
 
+
+    @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer)+sum(p.ut_fra_konto_integer) " +
+            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
+            "WHERE p.dato_local_date >= ?1 AND " +
+            "p.dato_local_date <= ?2 AND " +
+            "p.normalposttype_enum != 2 AND " +
+            "k.tittel = ?3"
+    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
+    List<Tuple> sumPosterFradatoTilDatoKategoritittel(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, String kategoritittel);
+
+
+
+
     List<Periodepost> findByPeriodeAndKategori(Periode periode, Kategori kategori);
 
 
-
+    List<Periodepost> findByPeriodeAndNivaa(Periode periode, int nivaa);
 }

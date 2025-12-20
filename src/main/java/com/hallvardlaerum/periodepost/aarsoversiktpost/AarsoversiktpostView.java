@@ -1,5 +1,6 @@
 package com.hallvardlaerum.periodepost.aarsoversiktpost;
 
+import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
@@ -24,6 +25,7 @@ public class AarsoversiktpostView extends PeriodepostViewMal implements Initieri
 
     public AarsoversiktpostView() {
         super();
+        Allvitekyklop.hent().setAarsoversiktpostView(this);
         init();
     }
 
@@ -49,17 +51,29 @@ public class AarsoversiktpostView extends PeriodepostViewMal implements Initieri
                     aarsoversiktpostService,
                     Allvitekyklop.hent().getAarsoversiktService());
 
-            if (oppdaterSummerButton == null) {
-                leggTilOgTilpassKnapper();
-            }
+
+            leggTilOgTilpassKnapper();
+            hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importCSVFraGamleBlaahvalen());
+
             erInitiert = true;
         }
 
     }
 
+    private void importCSVFraGamleBlaahvalen() {
+        new CSVImportmester(new AarsoversiktpostFraGamleBlaahvalenCSVImportAssistent()).velgImportfilOgKjoerImport(aarsoversiktpostService);
+
+    }
+
     private void leggTilOgTilpassKnapper() {
         oppdaterSummerButton = new Button("Oppdater summer");
+        oppdaterSummerButton.setEnabled(false);
         oppdaterSummerButton.addClickListener(e ->  aarsoversiktpostService.oppdaterSummer());
         hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerButton);
+    }
+
+    public void instansAktiverKnapperadRedigeringsfelt(Boolean aktiverBoolean) {
+        super.instansAktiverKnapperadRedigeringsfelt(aktiverBoolean);
+        oppdaterSummerButton.setEnabled(aktiverBoolean);
     }
 }

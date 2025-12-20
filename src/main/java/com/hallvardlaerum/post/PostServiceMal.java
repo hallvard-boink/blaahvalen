@@ -5,18 +5,16 @@ package com.hallvardlaerum.post;
 import com.hallvardlaerum.grunndata.kategori.Kategori;
 import com.hallvardlaerum.grunndata.kategori.KategoriRepository;
 import com.hallvardlaerum.grunndata.kategori.KategoriService;
-import com.hallvardlaerum.libs.database.EntitetAktig;
 import com.hallvardlaerum.libs.database.EntitetserviceMedForelderMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 
-import com.hallvardlaerum.post.normalpost.NormalposttypeEnum;
+import com.hallvardlaerum.periode.Periode;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import jakarta.persistence.Tuple;
 import org.springframework.data.domain.PageRequest;
 
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +31,6 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post,K
 
     }
 
-
-
     public void initPostServiceMal(PostklasseEnum postklasseEnum) {
         if (!erInitiert) {
             this.postklasseEnum = postklasseEnum;
@@ -45,15 +41,20 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post,K
         }
     }
 
-    public List<Post> hentPosterFradatoTilDato(LocalDate fraDatoLocalDate, LocalDate tiDatoLocalDate, PostklasseEnum postklasseEnum, Kategori kategori) {
+    public List<Post> hentPosterFradatoTilDatoPostklasseenumKategori(LocalDate fraDatoLocalDate, LocalDate tiDatoLocalDate, PostklasseEnum postklasseEnum, Kategori kategori) {
         return hentRepository().findByDatoLocalDateBetweenAndPostklasseEnumAndKategoriOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(
                 fraDatoLocalDate, tiDatoLocalDate, postklasseEnum, kategori
         );
     }
 
+    public List<Post> hentBudsjettPosterFradatoTilDatoKategoriBudsjettpoststatus(LocalDate fraDatoLocalDate, LocalDate tiDatoLocalDate, Kategori kategori, BudsjettpoststatusEnum budsjettpoststatusEnum) {
+        return hentRepository().findByDatoLocalDateBetweenAndKategoriAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(
+                fraDatoLocalDate, tiDatoLocalDate, kategori, budsjettpoststatusEnum, PostklasseEnum.BUDSJETTPOST
+                );
+    }
 
     public ArrayList<Kategori> hentKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate, PostklasseEnum postklasseEnum) {
-        List<Tuple> tupleList = super.hentRepository().hentKategorierDetFinnesPosterMedFraDatoTilDato(fraLocalDate, tilLocalDate, postklasseEnum);
+        List<Tuple> tupleList = super.hentRepository().hentKategorierDetFinnesPosterForFraDatoTilDatoPostklasse(fraLocalDate, tilLocalDate, postklasseEnum);
         ArrayList<Kategori> kategoriList = new ArrayList<>();
         if (tupleList.isEmpty()) {
             return kategoriList;
@@ -76,7 +77,17 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post,K
 
     public Stream<Post> finnAlleSomStream(PageRequest springPageRequest) {
         return super.hentRepository().findAll(springPageRequest).stream();
+    }
 
+    /**
+     * Både budsjettposter og normalposter
+     * @param datoFraLocalDate
+     * @param datoTilLocalDate
+     * @param kategori
+     * @return
+     */
+    public List<Post> finnPosterFradatoTilDatoKategori(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, Kategori kategori) {
+        return hentRepository().findByDatoLocalDateBetweenAndKategori(datoFraLocalDate, datoTilLocalDate, kategori);
     }
 
 }

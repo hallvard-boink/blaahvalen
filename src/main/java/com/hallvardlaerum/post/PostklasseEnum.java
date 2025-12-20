@@ -16,6 +16,9 @@ public enum PostklasseEnum implements EnumAktig {
     }
 
     public static PostklasseEnum konverterFraByte(Byte kodeByte) {
+        if (kodeByte==null) {
+            return null;
+        }
         for (PostklasseEnum postklasseEnum:PostklasseEnum.values()) {
             if (postklasseEnum.ordinal()==kodeByte.intValue()){
                 return postklasseEnum;

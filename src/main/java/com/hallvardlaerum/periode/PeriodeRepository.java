@@ -52,4 +52,7 @@ public interface PeriodeRepository extends JpaRepository<Periode, UUID>,
             "k.kategori_type != 2"
     )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, , Kategoritype 2 = Overføring
     Integer sumUtFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+
+
+
 }

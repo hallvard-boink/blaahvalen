@@ -2,10 +2,8 @@ package com.hallvardlaerum.post.normalpost;
 
 
 import com.hallvardlaerum.grunndata.kategori.Kategori;
-import com.hallvardlaerum.grunndata.kategori.KategoriRepository;
 import com.hallvardlaerum.grunndata.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.EntitetAktig;
-import com.hallvardlaerum.libs.database.EntitetserviceMedForelderMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
@@ -14,7 +12,6 @@ import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import jakarta.persistence.Tuple;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +20,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -32,30 +28,11 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
     private KategoriService kategoriService;
     private ArrayList<Ekstrafeltrad> ekstrafeltradArrayList;
     private Boolean erInitiert = false;
+    private PostRepository postRepository;
 
-    public NormalpostService() {
-
+    public List<Post> hentNormalposterFradatoTilDatoKategori(LocalDate fraDatoLocalDate, LocalDate tiDatoLocalDate, Kategori kategori) {
+        return super.hentPosterFradatoTilDatoPostklasseenumKategori(fraDatoLocalDate,tiDatoLocalDate,PostklasseEnum.NORMALPOST,kategori);
     }
-
-    @Override
-    public boolean erInitiert() {
-        return erInitiert;
-    }
-
-    @Override
-    public void init() {
-        if (!erInitiert) {
-            super.initPostServiceMal(PostklasseEnum.NORMALPOST);
-            this.normalPostRedigeringsomraade = Allvitekyklop.hent().getNormalpostRedigeringsomraade();
-            this.kategoriService = Allvitekyklop.hent().getKategoriService();
-            erInitiert=true;
-        }
-    }
-
-    public List<Post> hentPosterFradatoTilDato(LocalDate fraDatoLocalDate, LocalDate tiDatoLocalDate, Kategori kategori) {
-        return super.hentPosterFradatoTilDato(fraDatoLocalDate,tiDatoLocalDate,PostklasseEnum.NORMALPOST,kategori);
-    }
-
 
     public ArrayList<Kategori> hentKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
         return super.hentKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate,PostklasseEnum.NORMALPOST);
@@ -63,12 +40,12 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
 
 
     //TODO: Hva brukes denne til?
+
     @Override
     public Post opprettEntitetMedForelder() {
         return opprettEntitet();
         //Skulle det ha vært satt inn en forelder her? Fra hvor???
     }
-
     @Override
     public Post opprettEntitet() {
         Post normalpost = leggTilUUID(new Post());
@@ -103,6 +80,25 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
 
     }
 
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+    public NormalpostService() {
+    }
+
+    @Override
+    public void init() {
+        if (!erInitiert) {
+            super.initPostServiceMal(PostklasseEnum.NORMALPOST);
+            this.normalPostRedigeringsomraade = Allvitekyklop.hent().getNormalpostRedigeringsomraade();
+            this.kategoriService = Allvitekyklop.hent().getKategoriService();
+            this.postRepository = Allvitekyklop.hent().getPostRepository();
+            erInitiert=true;
+        }
+    }
 
     @Override
     public boolean lagreEkstrafeltTilSenere(EntitetAktig entitet, String feltnavnString, String verdiStreng, String importradString) {

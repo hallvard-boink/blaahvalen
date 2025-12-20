@@ -19,12 +19,14 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
     @SkalEksporteres
     private String beskrivelse;
 
-
     /**
      * Undertittel brukes til nivå 2-kategorier, som er ment til budsjettpostgrupper og kostnadspakker
      */
     @SkalEksporteres
     private String undertittel;
+
+    @SkalEksporteres
+    private Integer nivaa;
 
     @SkalEksporteres
     private Boolean brukesTilBudsjett;
@@ -58,6 +60,14 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
     @Override
     public String toString(){
         return hentBeskrivendeNavn();
+    }
+
+    public Integer getNivaa() {
+        return nivaa;
+    }
+
+    public void setNivaa(Integer nivaa) {
+        this.nivaa = nivaa;
     }
 
     @Override

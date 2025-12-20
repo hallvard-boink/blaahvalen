@@ -12,6 +12,7 @@ import com.hallvardlaerum.verktoy.Allvitekyklop;
 import jakarta.persistence.Tuple;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, PeriodepostRepository> {
@@ -63,10 +64,12 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
     }
 
     public void oppdaterSummer(Periodepost periodepost) {
-        List<Tuple> tuples = periodepostRepository.sumPosterFradatoTilDatoKategori(
+        List<Tuple> tuples = periodepostRepository.sumPosterFradatoTilDatoKategoritittel(
                 periodepost.getPeriode().getDatoFraLocalDate(),
                 periodepost.getPeriode().getDatoTilLocalDate(),
-                periodepost.getKategori().getUuid());
+                periodepost.getKategori().getTittel());
+
+
         if (tuples==null) {
             periodepost.setSumBudsjettInteger(0);
             periodepost.setSumRegnskapInteger(0);
@@ -77,7 +80,7 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
             } else if (postklasseEnum == PostklasseEnum.BUDSJETTPOST) {
                 periodepost.setSumRegnskapInteger(0);
             }
-        } else {
+        } else { //TODO: Hvorfor dette?
             for (Tuple tuple:tuples) {
                 oppdaterSummer_tuple(periodepost,tuple);
             }
@@ -85,15 +88,21 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
     }
 
     private PostklasseEnum oppdaterSummer_tuple(Periodepost periodepost, Tuple tuple) {
-        Byte byteKode = tuple.get(0, Byte.class);
-        PostklasseEnum postklasseEnum = PostklasseEnum.konverterFraByte(byteKode);
-        if (postklasseEnum==null) {
-            Loggekyklop.hent().loggFEIL("Resultatet av periodepostRepository.sumUtFradatoTilDatoKategoriNormalposter ble ikke som forventet." +
-                    "Bytekode er " + byteKode + ", mens postklasseEnum er null ");
+
+        Byte postklasseenumByte = tuple.get(0, Byte.class);
+        BigDecimal sumBigDecimal = tuple.get(1, BigDecimal.class);
+        if (postklasseenumByte==null && sumBigDecimal == null) {
             return null;
         }
 
-        Integer sumInteger = DesimalMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class));
+        PostklasseEnum postklasseEnum = PostklasseEnum.konverterFraByte(postklasseenumByte);
+        if (postklasseEnum==null) {
+            Loggekyklop.hent().loggFEIL("Resultatet av periodepostRepository.sumUtFradatoTilDatoKategoriNormalposter ble ikke som forventet." +
+                    "Bytekode er " + postklasseenumByte + ", mens postklasseEnum er null ");
+            return null;
+        }
+
+        Integer sumInteger = DesimalMester.konverterBigdecimalTilInteger(sumBigDecimal);
         if (postklasseEnum==PostklasseEnum.NORMALPOST) {
             periodepost.setSumRegnskapInteger(sumInteger);
         } else if (postklasseEnum == PostklasseEnum.BUDSJETTPOST) {
@@ -130,4 +139,22 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
             return sb.toString();
         }
     }
+
+    public List<Periodepost> finnHovedperiodeposter(Periode periode) {
+        if (periode == null) {
+            return new ArrayList<>();
+        } else {
+            return periodepostRepository.findByPeriodeAndNivaa(periode,1);
+        }
+    }
+
+    public List<Periodepost> finnDetaljerteperiodeposter(Periode periode) {
+        if (periode == null) {
+            return new ArrayList<>();
+        } else {
+            return periodepostRepository.findByPeriodeAndNivaa(periode,2);
+        }
+    }
+
+
 }

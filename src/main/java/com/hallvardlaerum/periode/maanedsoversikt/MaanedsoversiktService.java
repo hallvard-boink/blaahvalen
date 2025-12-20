@@ -12,11 +12,33 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MaanedsoversiktService extends PeriodeServiceMal implements InitieringsEgnet {
     private AarsoversiktService aarsoversiktService;
     private boolean erInitiert = false;
+
+
+    public Periode finnMaanedsoversiktFraAarMnd(String aarMnd){
+        if (aarMnd == null || aarMnd.isEmpty()) {
+            return null;
+        }
+
+        String datoString = aarMnd + "-01";
+        LocalDate datoFra = LocalDate.parse(datoString);
+
+        List<Periode> periodeList = hentRepository().findByPeriodetypeEnumAndDatoFraLocalDate(PeriodetypeEnum.MAANEDSOVERSIKT, datoFra);
+        if (periodeList.isEmpty()) {
+            return null;
+        } else {
+            if (periodeList.size()>1) {
+                Loggekyklop.bruk().loggINFO("Fant mer enn en måned med Aar-mnd " + aarMnd + ", men fortsetter");
+            }
+            return periodeList.getFirst();
+        }
+
+    }
 
     public MaanedsoversiktService() {
         super();

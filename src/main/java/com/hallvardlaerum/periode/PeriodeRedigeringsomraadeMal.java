@@ -2,6 +2,7 @@ package com.hallvardlaerum.periode;
 
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
+import com.hallvardlaerum.libs.ui.Gridkyklop;
 import com.hallvardlaerum.libs.ui.RedigerEntitetDialog;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
@@ -26,7 +27,11 @@ import java.util.List;
 
 public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode> implements RedigeringsomraadeAktig<Periode> {
     private PeriodetypeEnum periodetypeEnum;
-    private Grid<Periodepost> periodepostGrid;
+    private PeriodepostTypeEnum periodepostTypeEnum;
+
+    private Grid<Periodepost> hovedKategorierGrid;
+
+
     private RedigerEntitetDialog<Periodepost, Periode> periodepostRedigerEntitetDialog;
     private PeriodepostRedigeringsomraadeMal periodepostRedigeringsomraadeTilDialog;
     private PeriodepostServiceMal periodepostService;
@@ -53,8 +58,8 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
     private TextField sumRegnskapUtgifterMedOverfoeringerTextField;
     private TextField sumRegnskapResultatMedOverfoeringerTextField;
 
-
     private PeriodetittelHorizontalLayout periodetittelHorizontalLayout;
+
 
     public PeriodeRedigeringsomraadeMal() {
 
@@ -72,54 +77,35 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         super.initRedigeringsomraadeMal();
 
         if (beskrivelseTextArea==null) {
-            opprettPeriodepostGrid();
+
             instansOpprettFelter();
+
             periodetittelHorizontalLayout = leggTilAndrefelterOver(new PeriodetittelHorizontalLayout(periodetypeEnum));
             instansByggOppBinder();
 
-            PeriodepostTypeEnum periodepostTypeEnum;
+
             if (periodetypeEnum == PeriodetypeEnum.AARSOVERSIKT) {
-                periodepostTypeEnum = PeriodepostTypeEnum.AARSOVERSIKTPOST;
+                this.periodepostTypeEnum = PeriodepostTypeEnum.AARSOVERSIKTPOST;
                 settView(Allvitekyklop.hent().getAarsoversiktView());
             } else if (periodetypeEnum == PeriodetypeEnum.MAANEDSOVERSIKT) {
-                periodepostTypeEnum = PeriodepostTypeEnum.MAANEDSOVERSIKTPOST;
+                this.periodepostTypeEnum = PeriodepostTypeEnum.MAANEDSOVERSIKTPOST;
                 settView(Allvitekyklop.hent().getAarsoversiktView());
             } else {
-                periodepostTypeEnum = null;
+                this.periodepostTypeEnum = null;
             }
-            this.periodepostRedigeringsomraadeTilDialog.initierPeriodepostRedigeringsomraadeMal(periodepostTypeEnum,
-                    periodeService,
-                    periodetypeEnum);
 
-            this.periodepostRedigerEntitetDialog = new RedigerEntitetDialog<>(periodepostService,
-                    periodeService,
+            this.periodepostRedigeringsomraadeTilDialog.initierPeriodepostRedigeringsomraadeMal(this.periodepostTypeEnum,
+                    this.periodeService,
+                    this.periodetypeEnum);
+
+            this.periodepostRedigerEntitetDialog = new RedigerEntitetDialog<>(this.periodepostService,
+                    this.periodeService,
                     "Rediger periodepost",
                     "",
                     this.periodepostRedigeringsomraadeTilDialog
             );
 
         }
-    }
-
-
-    public void opprettPeriodepostGrid(){
-        periodepostGrid = new Grid<>();
-        periodepostGrid.addColumn(p -> {
-            if(p.getKategori()!=null) {
-                return p.getKategori().hentKortnavn();
-            } else {
-                return "";
-            }
-        }).setHeader("Kategori").setWidth("100px");
-        periodepostGrid.addColumn(Periodepost::getSumBudsjettInteger).setHeader("Budsjett").setWidth("40px");
-        periodepostGrid.addColumn(Periodepost::getSumRegnskapInteger).setHeader("Regnskap").setWidth("40px");
-        periodepostGrid.addColumn(Periodepost::getBeskrivelseString).setHeader("Beskrivelse").setWidth("200px");
-        periodepostGrid.setSizeFull();
-
-
-        periodepostGrid.addItemDoubleClickListener(e -> {
-            periodepostRedigerEntitetDialog.vis(e.getItem());
-        });
     }
 
 
@@ -135,10 +121,10 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
 
     private void oppdaterPeriodepostGrid() {
         if(getEntitet()==null) {
-            periodepostGrid.setItems(new ArrayList<>());
-            return;
+            hovedKategorierGrid.setItems(new ArrayList<>());
         } else {
-            periodepostGrid.setItems(hentPeriodepostListSortert(getEntitet()));
+            hovedKategorierGrid.setItems(periodepostService.finnHovedperiodeposter(getEntitet()));
+            //hovedKategorierGrid.setItems(hentPeriodepostListSortert(getEntitet()));
         }
     }
 
@@ -157,10 +143,46 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
 
     @Override
     public void instansOpprettFelter() {
-        String hovedtabString ="Hoved";
-        String postertabString = "Poster";
-        String ekstratabString = "Ekstra";
 
+        instansOpprettFelter_leggTilHovedTab();
+        instansOpprettFelter_leggTilHovedkategorierTab();
+        instansOpprettFelter_leggTilEkstraTab();
+
+        setFokusComponent(beskrivelseTextArea);
+
+    }
+
+
+
+    private void instansOpprettFelter_leggTilHovedkategorierTab() {
+        String regnskaptabString = "Kategorier";
+
+        hovedKategorierGrid = new Grid<>();
+        hovedKategorierGrid.addColumn(p -> {
+            if(p.getKategori()!=null) {
+                return p.getKategori().hentKortnavn();
+            } else {
+                return "";
+            }
+        }).setHeader("Kategori").setWidth("100px");
+        hovedKategorierGrid.addColumn(Periodepost::getSumBudsjettInteger).setHeader("Budsjett").setWidth("40px");
+        hovedKategorierGrid.addColumn(Periodepost::getSumRegnskapInteger).setHeader("Regnskap").setWidth("40px");
+        hovedKategorierGrid.addColumn(Periodepost::getBeskrivelseString).setHeader("Beskrivelse").setWidth("200px");
+        hovedKategorierGrid.setSizeFull();
+
+
+        hovedKategorierGrid.addItemDoubleClickListener(e -> {
+            periodepostRedigerEntitetDialog.vis(e.getItem());
+        });
+
+        Gridkyklop.hent().alleRaderTilpassKolonnerOgOpprettFilteradIGrid(hovedKategorierGrid);
+
+        leggTilRedigeringsfelter(regnskaptabString, hovedKategorierGrid);
+        hentFormLayoutFraTab(regnskaptabString).setSizeFull();
+    }
+
+    private void instansOpprettFelter_leggTilHovedTab() {
+        String hovedtabString ="Hoved";
         Span innSpan = new Span("Inn");
         innSpan.addClassName(LumoUtility.TextAlignment.RIGHT);
         Span utSpan = new Span("Ut");
@@ -226,10 +248,10 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         beskrivelseTextArea = leggTilRedigeringsfelt(hovedtabString, new TextArea("Beskrivelse"));
         beskrivelseTextArea.setMinRows(4);
         settColspan(beskrivelseTextArea,5);
+    }
 
-        leggTilRedigeringsfelter(postertabString,periodepostGrid);
-        hentFormLayoutFraTab(postertabString).setSizeFull();
-
+    private void instansOpprettFelter_leggTilEkstraTab() {
+        String ekstratabString = "Ekstra";
         periodetypeComboBox = new ComboBox<>("Periodetype");
         periodetypeComboBox.setItems(PeriodetypeEnum.values());
         periodetypeComboBox.setItemLabelGenerator(PeriodetypeEnum::getTittel);
@@ -243,16 +265,17 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
             //Flytt dato til første i måneden og datoTil til siste i måneden
             LocalDate dato = e.getValue();
             datoFraDatePicker.setValue(LocalDate.of(dato.getYear(), dato.getMonth(),1));
-            datoTilDatePicker.setValue(Datokyklop.hent().finnSisteIMaaneden(datoFraDatePicker.getValue()));
+            if (periodetypeEnum==PeriodetypeEnum.MAANEDSOVERSIKT) {
+                datoTilDatePicker.setValue(Datokyklop.hent().finnSisteIMaaneden(datoFraDatePicker.getValue()));
+            } else if (periodetypeEnum==PeriodetypeEnum.AARSOVERSIKT) {
+                datoTilDatePicker.setValue(LocalDate.of(e.getValue().getYear(), 12,31));
+            }
         });
 
         datoTilDatePicker = new DatePicker("Til");
         leggTilRedigeringsfelter(ekstratabString, periodetypeComboBox, datoFraDatePicker, datoTilDatePicker);
 
         leggTilDatofeltTidOpprettetOgRedigert(ekstratabString);
-
-        setFokusComponent(beskrivelseTextArea);
-
     }
 
     @Override

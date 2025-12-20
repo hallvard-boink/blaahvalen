@@ -16,6 +16,9 @@ import org.springframework.stereotype.Component;
 public class MaanedsoversiktpostRedigeringsomraade extends PeriodepostRedigeringsomraadeMal implements InitieringsEgnet {
     private boolean erInitiert = false;
 
+
+
+
     public MaanedsoversiktpostRedigeringsomraade() {
         super();
     }

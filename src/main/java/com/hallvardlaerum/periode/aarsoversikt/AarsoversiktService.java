@@ -1,6 +1,7 @@
 package com.hallvardlaerum.periode.aarsoversikt;
 
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
+import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.*;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -8,10 +9,32 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AarsoversiktService extends PeriodeServiceMal implements InitieringsEgnet {
     private boolean erInitiert=false;
+
+
+    public Periode PeriodefinnAarsoversiktFraAarString(String aarString) {
+        if (aarString==null || aarString.isEmpty()) {
+            return null;
+        }
+
+        Integer aarInteger = Integer.parseInt(aarString);
+        LocalDate datoFra = LocalDate.of(aarInteger,1,1);
+        List<Periode> aarsoversikter = super.hentRepository().findByPeriodetypeEnumAndDatoFraLocalDate(PeriodetypeEnum.AARSOVERSIKT,datoFra);
+        if (aarsoversikter.isEmpty()) {
+            return null;
+        } else {
+            if (aarsoversikter.size()>1) {
+                Loggekyklop.bruk().loggINFO("Fant mer enn en årsoversikt for aarString " + aarString + ", fortsetter");
+            }
+            return aarsoversikter.getFirst();
+        }
+
+    }
+
 
     public AarsoversiktService() {
 

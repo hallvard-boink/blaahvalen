@@ -94,7 +94,7 @@ public class PeriodepostViewMal extends MasterDetailViewmal<Periodepost, Periode
                         query.getOffset(),
                         query.getLimit(),
                         periodepostService.getEntityFilterSpecification(),
-                        Sort.by("periode").descending()
+                        Sort.by("periode.datoFraLocalDate").descending()
                 ),
 
                 query -> periodepostService.tellAntallMedSpecification(

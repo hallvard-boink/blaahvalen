@@ -12,6 +12,9 @@ public class MaanedsoversiktpostService extends PeriodepostServiceMal implements
     private MaanedsoversiktService maanedsoversiktService;
     private boolean erInitiert = false;
 
+
+
+
     public MaanedsoversiktpostService(){
     }
 

@@ -1,6 +1,5 @@
 package com.hallvardlaerum.post.budsjettpost;
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
 import com.hallvardlaerum.grunndata.kategori.KategoriService;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
@@ -20,13 +19,8 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
 
 
 
-    public List<Post> finnBudsjettposterFraPeriodeOgKategoriOgBudsjettstatus(Periode periode, Kategori kategori, BudsjettpoststatusEnum budsjettpoststatusEnum){
-        return super.hentBudsjettPosterFradatoTilDatoKategoriBudsjettpoststatus(
-            periode.getDatoFraLocalDate(),
-            periode.getDatoTilLocalDate(),
-            kategori,
-            budsjettpoststatusEnum
-        );
+    public List<Post> finnFraPeriodeOgBudsjettstatus(Periode periode, BudsjettpoststatusEnum budsjettpoststatusEnum) {
+        return hentRepository().findByDatoLocalDateBetweenAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(),budsjettpoststatusEnum, PostklasseEnum.BUDSJETTPOST);
     }
 
 

@@ -64,51 +64,62 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
     }
 
     public void oppdaterSummer(Periodepost periodepost) {
+        if (periodepost.getKategori()==null) {
+            return;
+        }
         List<Tuple> tuples = periodepostRepository.sumPosterFradatoTilDatoKategoritittel(
                 periodepost.getPeriode().getDatoFraLocalDate(),
                 periodepost.getPeriode().getDatoTilLocalDate(),
                 periodepost.getKategori().getTittel());
 
-
         if (tuples==null) {
             periodepost.setSumBudsjettInteger(0);
             periodepost.setSumRegnskapInteger(0);
-        } else if (tuples.size()==1) {
-            PostklasseEnum postklasseEnum = oppdaterSummer_tuple(periodepost,tuples.getFirst());
-            if (postklasseEnum == PostklasseEnum.NORMALPOST) {
-                periodepost.setSumBudsjettInteger(0);
-            } else if (postklasseEnum == PostklasseEnum.BUDSJETTPOST) {
-                periodepost.setSumRegnskapInteger(0);
+
+        } else {
+            if (tuples.size()>2) {
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn 2 tuple ved oppsummering av periodepost. Dette skal ikke skje, men fortsetter likevel.");
             }
-        } else { //TODO: Hvorfor dette?
+
             for (Tuple tuple:tuples) {
                 oppdaterSummer_tuple(periodepost,tuple);
             }
+
         }
+        lagre(periodepost);
     }
 
-    private PostklasseEnum oppdaterSummer_tuple(Periodepost periodepost, Tuple tuple) {
+    private void oppdaterSummer_tuple(Periodepost periodepost, Tuple tuple) {
 
         Byte postklasseenumByte = tuple.get(0, Byte.class);
-        BigDecimal sumBigDecimal = tuple.get(1, BigDecimal.class);
-        if (postklasseenumByte==null && sumBigDecimal == null) {
-            return null;
+        BigDecimal sumBigDecimalInn = tuple.get(1, BigDecimal.class);
+        BigDecimal sumBigDecimalUt = tuple.get(2, BigDecimal.class);
+        if (postklasseenumByte==null && sumBigDecimalInn == null && sumBigDecimalUt == null) {
+            return;
         }
 
         PostklasseEnum postklasseEnum = PostklasseEnum.konverterFraByte(postklasseenumByte);
         if (postklasseEnum==null) {
-            Loggekyklop.hent().loggFEIL("Resultatet av periodepostRepository.sumUtFradatoTilDatoKategoriNormalposter ble ikke som forventet." +
+            Loggekyklop.hent().loggFEIL("Klarte ikke finne postklasseEnum fra tuple i oppdaterSummer_tuple" +
                     "Bytekode er " + postklasseenumByte + ", mens postklasseEnum er null ");
-            return null;
+            return;
         }
 
-        Integer sumInteger = DesimalMester.konverterBigdecimalTilInteger(sumBigDecimal);
-        if (postklasseEnum==PostklasseEnum.NORMALPOST) {
-            periodepost.setSumRegnskapInteger(sumInteger);
-        } else if (postklasseEnum == PostklasseEnum.BUDSJETTPOST) {
-            periodepost.setSumBudsjettInteger(sumInteger);
+        Integer sumInnInteger = DesimalMester.konverterBigdecimalTilInteger(sumBigDecimalInn);
+        if (sumInnInteger==null) {
+            sumInnInteger = 0;
         }
-        return postklasseEnum;
+        Integer sumUtInteger = DesimalMester.konverterBigdecimalTilInteger(sumBigDecimalUt);
+        if (sumUtInteger==null) {
+            sumUtInteger = 0;
+        }
+
+        if (postklasseEnum==PostklasseEnum.NORMALPOST) {
+            periodepost.setSumRegnskapInteger(sumInnInteger + sumUtInteger);
+        } else if (postklasseEnum == PostklasseEnum.BUDSJETTPOST) {
+            periodepost.setSumBudsjettInteger(sumInnInteger + + sumUtInteger);
+        }
+
     }
 
 
@@ -140,21 +151,8 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         }
     }
 
-    public List<Periodepost> finnHovedperiodeposter(Periode periode) {
-        if (periode == null) {
-            return new ArrayList<>();
-        } else {
-            return periodepostRepository.findByPeriodeAndNivaa(periode,1);
-        }
+
+    public List<Periodepost> finnHovedperiodeposter(Periode entitet) {
+        return hentRepository().finnEtterPeriodeOgKategorinivaa(entitet.getUuid(), 0);
     }
-
-    public List<Periodepost> finnDetaljerteperiodeposter(Periode periode) {
-        if (periode == null) {
-            return new ArrayList<>();
-        } else {
-            return periodepostRepository.findByPeriodeAndNivaa(periode,2);
-        }
-    }
-
-
 }

@@ -139,6 +139,14 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
         }
     }
 
+    @Override
+    public String toString(){
+        if (getUuid()!=null) {
+            return getUuidString() + ": " + hentBeskrivendeNavn();
+        } else {
+            return "(ingen uuid ennå): " + hentBeskrivendeNavn();
+        }
+    }
 
     public Kategori getKategori() {
         return kategori;

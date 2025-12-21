@@ -102,9 +102,9 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
     @Override
     public void instansOpprettGrid() {
         grid = super.hentGrid();
-        grid.addColumn(Periode::getDatoFraLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer());
+        grid.addColumn(Periode::getDatoFraLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer()).setWidth("100px").setFlexGrow(0);
         grid.addColumn(Periode::getBeskrivelseString).setHeader("Beskrivelse");
-        grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END);
+        grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END).setWidth("100px").setFlexGrow(0);
 
     }
 

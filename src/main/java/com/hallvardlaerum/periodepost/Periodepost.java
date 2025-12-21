@@ -101,4 +101,17 @@ public class Periodepost extends AbstraktEntitet implements EntitetMedForelderAk
     public void setPeriode(Periode periode) {
         this.periode = periode;
     }
+
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        if (getUuid()!=null) {
+            sb.append(getUuid()).append(": ");
+        }
+        if (kategori!=null) {
+            sb.append(kategori.hentBeskrivendeNavn());
+        }
+
+        return sb.toString();
+    }
 }

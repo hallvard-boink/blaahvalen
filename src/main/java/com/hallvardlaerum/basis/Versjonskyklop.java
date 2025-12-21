@@ -10,6 +10,7 @@ public class Versjonskyklop extends Versjonskyklopmal implements InitieringsEgne
 
     @Override
     public void byggOppVersjoner() {
+        super.leggTilVersjon("0.5.2","2025-12-21","Normalpostlister og busjettposterlister","La til oversikter i Perioderedigeringsmaler");
         super.leggTilVersjon("0.5.1","2025-12-20","To-nivå budsjettering","Begynte på mekanismer for bygging av budsjett i to nivåer. Virket for tungvint.");
         super.leggTilVersjon("0.5.0","2025-12-14","Importerte Årsoversikter og Månedsoversikter","Utvidet også kategorier med budsjettpostgrupper.");
         super.leggTilVersjon("0.4.3","2025-12-13","Ny arkitektur","Fjernet månedsbudsjettmal, bygget opp kategorier i to nivåer.");

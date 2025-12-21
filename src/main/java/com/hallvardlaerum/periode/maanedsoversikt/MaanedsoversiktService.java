@@ -64,6 +64,8 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
     }
 
 
+
+
     /**
      * Det opprettes maanedsoversiktposter, men de vises ikke i oversikten - bare de som er opprettet manuelt.
      */
@@ -93,6 +95,5 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
         //hentRedigeringsomraadeAktig().hentView().oppdaterSoekeomraade();
 
     }
-
 
 }

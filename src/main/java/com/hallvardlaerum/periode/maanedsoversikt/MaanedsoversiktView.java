@@ -3,11 +3,14 @@ package com.hallvardlaerum.periode.maanedsoversikt;
 import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.*;
+import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.hallvardlaerum.verktoy.PeriodeRapportMester;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
+
+import java.util.ArrayList;
 
 
 @Route("maanedsoversikt")
@@ -58,7 +61,7 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
 
     private void leggTilOgTilpassKnapper() {
         oppdaterSummerButton = new Button("Oppdater månedsoversikt");
-        oppdaterSummerButton.addClickListener(e -> maanedsoversiktService.oppdaterPeriodensPeriodeposterOgSummer());
+        oppdaterSummerButton.addClickListener(e -> maanedsoversiktService.oppdaterOverordnetPeriodensPeriodeposterOgSummer());
         oppdaterSummerButton.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerButton);
 
@@ -66,7 +69,9 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
         skrivUtMaanedsoversiktButton.addClickListener(e -> {
             Periode periode = (Periode)hentRedigeringsomraadeAktig().getEntitet();
             PeriodeRedigeringsomraadeMal redigeringsomraade = (PeriodeRedigeringsomraadeMal)hentRedigeringsomraadeAktig();
-            new PeriodeRapportMester().lagrePeriodeSomPDF(periode, redigeringsomraade.hentPeriodepostListSortert(periode));
+            PeriodepostServiceMal periodeservice = Allvitekyklop.hent().getMaanedsoversiktpostService();
+            new PeriodeRapportMester().lagrePeriodeSomPDF(periode, new ArrayList<>(periodeservice.finnHovedperiodeposter(periode)));
+            //new PeriodeRapportMester().lagrePeriodeSomPDF(periode, redigeringsomraade.hentPeriodepostListSortert(periode));
         });
         skrivUtMaanedsoversiktButton.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(skrivUtMaanedsoversiktButton);

@@ -1,6 +1,7 @@
 package com.hallvardlaerum.periode;
 
 import com.hallvardlaerum.libs.database.RepositoryTillegg;
+import jakarta.persistence.Tuple;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.NativeQuery;
@@ -53,6 +54,10 @@ public interface PeriodeRepository extends JpaRepository<Periode, UUID>,
     )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, , Kategoritype 2 = Overføring
     Integer sumUtFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
 
-
+    @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) FROM post p " +
+            "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
+            "p.postklasse_enum = 1 AND p.budsjettpoststatus_enum = 1"
+    )
+    List<Tuple> sumInnUtFradatoTilDatoTildelteBudsjettposter(LocalDate fraDato, LocalDate tilDato);
 
 }

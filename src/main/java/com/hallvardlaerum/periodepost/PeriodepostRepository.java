@@ -27,20 +27,31 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
     List<Tuple> sumPosterFradatoTilDatoKategori(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, UUID kategoriUUID);
 
 
-    @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer)+sum(p.ut_fra_konto_integer) " +
+    @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) " +
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
             "WHERE p.dato_local_date >= ?1 AND " +
             "p.dato_local_date <= ?2 AND " +
-            "p.normalposttype_enum != 2 AND " +
-            "k.tittel = ?3"
+            "(p.normalposttype_enum IS NULL OR p.normalposttype_enum != 2) AND " +
+            "k.nivaa = 1 AND " +
+            "k.tittel = ?3 " +
+            "GROUP BY p.postklasse_enum "
     )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
     List<Tuple> sumPosterFradatoTilDatoKategoritittel(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, String kategoritittel);
 
-
-
+    @NativeQuery(value = "SELECT pp.* " +
+            "FROM periodepost pp " +
+                "LEFT JOIN kategori k ON pp.kategori_uuid = k.uuid " +
+                "LEFT JOIN periode p ON pp.periode_uuid = p.uuid " +
+            "WHERE " +
+                "p.uuid = ?1 " +
+                "AND k.nivaa = ?2 " +
+            "ORDER BY " +
+                "pp.sum_regnskap_integer DESC," +
+                "pp.sum_budsjett_integer DESC;"
+    )
+    List<Periodepost> finnEtterPeriodeOgKategorinivaa(UUID periodeUUID, Integer kategoriNivaa);
 
     List<Periodepost> findByPeriodeAndKategori(Periode periode, Kategori kategori);
 
 
-    List<Periodepost> findByPeriodeAndNivaa(Periode periode, int nivaa);
 }

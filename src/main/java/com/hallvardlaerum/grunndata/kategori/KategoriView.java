@@ -110,6 +110,7 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
             });
         }
 
+
     }
 
     @Override
@@ -138,7 +139,7 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
                 .setHeader("Er aktiv").setTextAlign(ColumnTextAlign.CENTER);
 
         grid.addColumn(Kategori::getKategoriType).setHeader("Type").setRenderer(opprettKategoriTypeRenderer());
-
+        grid.setItems(kategoriService.finnAlle());
     }
 
     private ComponentRenderer<Span, Kategori> opprettKategoriTypeRenderer(){

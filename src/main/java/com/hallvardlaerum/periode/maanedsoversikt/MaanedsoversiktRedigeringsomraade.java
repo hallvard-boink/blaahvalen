@@ -2,16 +2,21 @@ package com.hallvardlaerum.periode.maanedsoversikt;
 
 import com.hallvardlaerum.grunndata.kategori.KategoriRetning;
 import com.hallvardlaerum.grunndata.kategori.KategoriService;
-import com.hallvardlaerum.libs.ui.Gridkyklop;
+import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
+import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
-import com.hallvardlaerum.periode.KategoriBudsjettAntallposterSumInnUt;
+import com.hallvardlaerum.periodepost.HallvardsSpan;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Component;
 
@@ -19,21 +24,40 @@ import org.springframework.stereotype.Component;
 @UIScope
 public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal implements InitieringsEgnet {
     private boolean erInitiert=false;
-    private Grid<KategoriBudsjettAntallposterSumInnUt> kategorierMedTildelteBudsjettposterGrid;
-    private Grid<KategoriBudsjettAntallposterSumInnUt> kategoriermedForeslaatteBudsjettposterGrid;
     private Grid<Post> tildelteBudsjettposterGrid;
     private Grid<Post> foreslaatteBudsjettposterGrid;
     private KategoriService kategoriService;
     private BudsjettpostService budsjettpostService;
-
+    private HallvardsSpan innSpan;
+    private HallvardsSpan utSpan;
+    private HallvardsSpan resultatSpan;
 
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
         super.instansOppdaterEkstraRedigeringsfelter();
-        oppdaterKategoriMedBudsjettpostGrid();
+        oppdaterRedigerbudsjettTabMedInnhold();
 
     }
 
+    private void oppdaterRedigerbudsjettTabMedInnhold() {
+        Periode periode = hentEntitet();
+        if (periode==null) {
+            Loggekyklop.bruk().loggADVARSEL("Periode er null, oppdaterer ikke innholdet");
+            return;
+        }
+        innSpan.settInteger(periode.getSumBudsjettInntektInteger());
+        utSpan.settInteger(periode.getSumBudsjettUtgifterInteger());
+        resultatSpan.settInteger(periode.getSumBudsjettResultatInteger());
+
+        if (periode.getSumRegnskapResultatInteger()!=null && periode.getSumBudsjettResultatInteger()<0) {
+            resultatSpan.getStyle().set("color","red");
+        } else {
+            resultatSpan.getStyle().set("color","black");
+        }
+
+        tildelteBudsjettposterGrid.setItems(budsjettpostService.finnFraPeriodeOgBudsjettstatus(hentEntitet(), BudsjettpoststatusEnum.TILDELT));
+        foreslaatteBudsjettposterGrid.setItems(budsjettpostService.finnFraPeriodeOgBudsjettstatus(hentEntitet(), BudsjettpoststatusEnum.FORESLAATT));
+    }
 
 
     @Override
@@ -46,20 +70,13 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
      * <h1>Rediger budsjett</h1>
      * I denne tab'en skal det være mulig å legge til og trekke fra budsjettposter for et månedsbudsjett, og redigere summen i hver budsjettpost.<br/><br/>
      *
-     * <h2>kategorierMedTildelteBudsjettposterGrid</h2>
-     * Tabell over detaljerte kategorier som det finnes tildelte budsjettposter for.
-     * Ved klikk på denne fylles tabellen tildelteBudsjettposterGrid<br/><br/>
      *
-     * <h2>kategoriermedForeslaatteBudsjettposterGrid</h2>
-     * Tabell over detaljerte kategorier som det finnes foreslåtte budsjettposter for.
-     * Ved klikk på denne fylles tabellen foreslaatteBudsjettposterGrid<br/><br/>
-     *
-     * <h2>tildelteBudsjettposterGrid</h2>
+     * <h2>TildelteBudsjettposterGrid</h2>
      * Tabell over budsjettposter med valgte kategori som er tildelt til månedens budsjett.
      * Dobbelklikk her åpner budsjettposten for redigering. SHIFT-klikk fjerner budsjettposten fra budsjettet,
      * ved å endre  status for budsjettposten til 'Foreslått'<br/><br/>
      *
-     * <h2>foreslaatteBudsjettposterGrid</h2>
+     * <h2>ForeslaatteBudsjettposterGrid</h2>
      * Tabell over budsjettposter med valgte kategori som er foreslått, men ikke tildelt til månedens budsjett.
      * Dobbelktklikk her åpner budsjettposten for redigeirng. SHIFT-klikk endrer tildeler budsjettposten<br/><br/>
      *
@@ -67,72 +84,65 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
      */
     private void instansOpprettFelter_leggTilBudsjettTab_Maanedsoversikt() {
         String redigerBudsjetttabString = "Rediger budsjett";
+        Span innLabelSpan = new Span("Budsjetterte inntekter:");
+        Span utLabelSpan = new Span("Budsjetterte utgifter:");
+        Span resultatLabelSpan = new Span("Budsjettert resultat:");
 
+        innSpan = new HallvardsSpan();
+        utSpan = new HallvardsSpan();
+        resultatSpan = new HallvardsSpan();
 
-        kategorierMedTildelteBudsjettposterGrid = opprettGeneriskKategoriMedBudsjettpostGrid();  // Kategorier med budsjettposter som er inkluderte
-        kategoriermedForeslaatteBudsjettposterGrid = opprettGeneriskKategoriMedBudsjettpostGrid();  // Kategorier med budsjettposter som er ekskluderte
-        leggTilRedigeringsfelter(redigerBudsjetttabString, kategorierMedTildelteBudsjettposterGrid, kategoriermedForeslaatteBudsjettposterGrid);
+        tildelteBudsjettposterGrid = opprettGeneriskBudsjettpostGrid(BudsjettpoststatusEnum.TILDELT);  // Inkluderte Budsjettposter for markert kategori
+        tildelteBudsjettposterGrid.setHeightFull();
+        tildelteBudsjettposterGrid.addItemClickListener(e -> {
+            if (e.isShiftKey()) {
+                tildelEllerFjernBudsjettpost(e);
+            }
+        });
 
-        tildelteBudsjettposterGrid = opprettGeneriskBudsjettpostGrid();  // Inkluderte Budsjettposter for markert kategori
-        foreslaatteBudsjettposterGrid = opprettGeneriskBudsjettpostGrid(); // Ekskluderte budsjettposter for markert katgori
+        foreslaatteBudsjettposterGrid = opprettGeneriskBudsjettpostGrid(BudsjettpoststatusEnum.FORESLAATT); // Ekskluderte budsjettposter for markert katgori
+        foreslaatteBudsjettposterGrid.addItemClickListener(e -> {
+            if (e.isShiftKey()) {
+                tildelEllerFjernBudsjettpost(e);
+            }
+        });
+
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.add(innLabelSpan, innSpan, new Span(), utLabelSpan, utSpan, new Span(),  resultatLabelSpan, resultatSpan);
+        leggTilRedigeringsfelter(redigerBudsjetttabString,horizontalLayout);
         leggTilRedigeringsfelter(redigerBudsjetttabString, tildelteBudsjettposterGrid, foreslaatteBudsjettposterGrid);
+
 
         hentFormLayoutFraTab(redigerBudsjetttabString).setSizeFull();
 
     }
 
-    private Grid<KategoriBudsjettAntallposterSumInnUt> opprettGeneriskKategoriMedBudsjettpostGrid(){
-        Grid<KategoriBudsjettAntallposterSumInnUt> grid = new Grid<>();
-        grid.addColumn(p -> {
-            if(p.getKategori()!=null) {
-                return p.getKategori().hentKortnavn();
-            } else {
-                return "";
-            }
-        }).setHeader("Kategori").setWidth("100px");
-        grid.addColumn(KategoriBudsjettAntallposterSumInnUt::getAntallBudsjettposter).setHeader("Antall").setWidth("40px");
-        grid.addColumn(KategoriBudsjettAntallposterSumInnUt::getSumBudsjettInnPaaKonto).setHeader("Inn på konto").setWidth("100px");
-        grid.addColumn(KategoriBudsjettAntallposterSumInnUt::getSumBudsjettUtFraKonto).setHeader("Ut fra konto").setWidth("100px");
-        grid.setSizeFull();
-        Gridkyklop.hent().alleRaderTilpassKolonnerOgOpprettFilteradIGrid(grid);
-        grid.addItemClickListener(e -> oppdaterBudsjettposterGrid(e.getItem()));
-        return grid;
-    }
+    private void tildelEllerFjernBudsjettpost(ItemClickEvent<Post> e) {
+        Post budsjettpost = e.getItem();
+        if (budsjettpost.getBudsjettpoststatusEnum()==BudsjettpoststatusEnum.TILDELT) {
+            budsjettpost.setBudsjettpoststatusEnum(BudsjettpoststatusEnum.FORESLAATT);
+        } else {
+            budsjettpost.setBudsjettpoststatusEnum(BudsjettpoststatusEnum.TILDELT);
+        }
+        budsjettpostService.lagre(budsjettpost);
 
-    private void oppdaterKategoriMedBudsjettpostGrid(){
-        kategorierMedTildelteBudsjettposterGrid.setItems(kategoriService.byggKategoriMedBudsjettpostList(getEntitet(), BudsjettpoststatusEnum.TILDELT));
-        kategoriermedForeslaatteBudsjettposterGrid.setItems(kategoriService.byggKategoriMedBudsjettpostList(getEntitet(),BudsjettpoststatusEnum.FORESLAATT));
+        Allvitekyklop.hent().getMaanedsoversiktService().oppdaterOverordnetPeriodensPeriodeposterOgSummer();
+        oppdaterRedigerbudsjettTabMedInnhold();
     }
 
 
+    private Grid<Post> opprettGeneriskBudsjettpostGrid(BudsjettpoststatusEnum budsjettpoststatusEnum) {
+        String kategoriTittelString = budsjettpoststatusEnum == BudsjettpoststatusEnum.TILDELT ? "Tildelte budsjettposter" : "Foreslåtte budsjettposter";
 
-    private Grid<Post> opprettGeneriskBudsjettpostGrid() {
         Grid<Post> grid = new Grid<>();
-        grid.addColumn(Post::getDatoLocalDate).setHeader("Dato");
+        grid.addColumn(p -> p.getKategori()!=null? p.getKategori().hentKortnavn() : "").setHeader(kategoriTittelString);
+
         grid.addColumn(Post::getBeskrivelseString).setHeader("Beskrivelse");
         grid.addColumn(p -> p.getKategori().getKategoriRetning()== KategoriRetning.INN? p.getInnPaaKontoInteger() : p.getUtFraKontoInteger()).setHeader("Sum");
         return grid;
     }
 
-    private void oppdaterBudsjettposterGrid(KategoriBudsjettAntallposterSumInnUt kategoriBudsjettAntallposterSumInnUt) {
 
-        tildelteBudsjettposterGrid.setItems(budsjettpostService.finnBudsjettposterFraPeriodeOgKategoriOgBudsjettstatus(
-                getEntitet(),
-                kategoriBudsjettAntallposterSumInnUt.getKategori(),
-                BudsjettpoststatusEnum.TILDELT
-        ));
-
-        foreslaatteBudsjettposterGrid.setItems(budsjettpostService.finnBudsjettposterFraPeriodeOgKategoriOgBudsjettstatus(
-                getEntitet(),
-                kategoriBudsjettAntallposterSumInnUt.getKategori(),
-                BudsjettpoststatusEnum.FORESLAATT
-        ));
-    }
-
-    private void inaktiverBudsjettpost(KategoriBudsjettAntallposterSumInnUt kategoriBudsjettAntallposterSumInnUt) {
-
-
-    }
 
 
     public MaanedsoversiktRedigeringsomraade() {

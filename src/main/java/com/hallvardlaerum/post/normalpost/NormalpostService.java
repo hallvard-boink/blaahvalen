@@ -31,11 +31,11 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
     private PostRepository postRepository;
 
     public List<Post> hentNormalposterFradatoTilDatoKategori(LocalDate fraDatoLocalDate, LocalDate tiDatoLocalDate, Kategori kategori) {
-        return super.hentPosterFradatoTilDatoPostklasseenumKategori(fraDatoLocalDate,tiDatoLocalDate,PostklasseEnum.NORMALPOST,kategori);
+        return super.finnPosterFradatoTilDatoPostklasseenumKategori(fraDatoLocalDate,tiDatoLocalDate,PostklasseEnum.NORMALPOST,kategori);
     }
 
     public ArrayList<Kategori> hentKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
-        return super.hentKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate,PostklasseEnum.NORMALPOST);
+        return super.finnKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate,PostklasseEnum.NORMALPOST);
     }
 
 

@@ -105,6 +105,7 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
                     this.periodepostRedigeringsomraadeTilDialog
             );
 
+
         }
     }
 
@@ -114,7 +115,7 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         if (getEntitet()==null) {
             periodetittelHorizontalLayout.oppdaterTittel("");
         } else {
-            periodetittelHorizontalLayout.oppdaterTittel(getEntitet().getDatoFraLocalDate());
+            periodetittelHorizontalLayout.oppdaterTittel(hentEntitet().getDatoFraLocalDate());
         }
         oppdaterPeriodepostGrid();
     }
@@ -124,7 +125,6 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
             hovedKategorierGrid.setItems(new ArrayList<>());
         } else {
             hovedKategorierGrid.setItems(periodepostService.finnHovedperiodeposter(getEntitet()));
-            //hovedKategorierGrid.setItems(hentPeriodepostListSortert(getEntitet()));
         }
     }
 
@@ -165,9 +165,9 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
                 return "";
             }
         }).setHeader("Kategori").setWidth("100px");
-        hovedKategorierGrid.addColumn(Periodepost::getSumBudsjettInteger).setHeader("Budsjett").setWidth("40px");
-        hovedKategorierGrid.addColumn(Periodepost::getSumRegnskapInteger).setHeader("Regnskap").setWidth("40px");
-        hovedKategorierGrid.addColumn(Periodepost::getBeskrivelseString).setHeader("Beskrivelse").setWidth("200px");
+        hovedKategorierGrid.addColumn(Periodepost::getSumBudsjettInteger).setHeader("Budsjett").setWidth("100px").setFlexGrow(0);
+        hovedKategorierGrid.addColumn(Periodepost::getSumRegnskapInteger).setHeader("Regnskap").setWidth("100px").setFlexGrow(0);
+        hovedKategorierGrid.addColumn(Periodepost::getBeskrivelseString).setHeader("Beskrivelse");
         hovedKategorierGrid.setSizeFull();
 
 

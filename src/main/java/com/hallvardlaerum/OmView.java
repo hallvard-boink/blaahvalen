@@ -50,7 +50,6 @@ public class OmView extends MainViewmal {
     {
         super();
 
-        //TODO MaanedsoversiktpostRedigeringsomraade og MaanedsoversiktpostRedigeringsomraadeTilDialog er samme instans. Bruk Spring Boot annotering (@Qualifier?) til å skille dem
 
         UI.getCurrent().access(() -> {  // Ensure we're attaching components in a UI thread
             if (!erInitiert) {

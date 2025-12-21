@@ -63,7 +63,7 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
 
     private void leggTilOgTilpassKnapper() {
         oppdaterSummerButton = new Button("Oppdater årsoversikt");
-        oppdaterSummerButton.addClickListener(e -> aarsoversiktService.oppdaterPeriodensPeriodeposterOgSummer());
+        oppdaterSummerButton.addClickListener(e -> aarsoversiktService.oppdaterDetaljertPeriodensPeriodeposterOgSummer());
         oppdaterSummerButton.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerButton);
 

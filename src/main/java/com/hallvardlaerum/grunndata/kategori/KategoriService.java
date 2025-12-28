@@ -60,11 +60,15 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     }
 
     public List<Kategori> finnAlleHovedkategorier(){
-        return kategoriRepository.finnEtterEkskludertKategoriType(KategoriType.DETALJERT);
+        return kategoriRepository.findByNivaa(0);
+    }
+
+    public List<Kategori> finnAlleUnderkategorier(){
+        return kategoriRepository.findByNivaa(1);
     }
 
     public List<Kategori> finnDelkategorier(String hovedtittel){
-        return kategoriRepository.findByTittelAndKategoriTypeOrderByUndertittel(hovedtittel,KategoriType.DETALJERT);
+        return kategoriRepository.findByTittelAndNivaaOrderByUndertittel(hovedtittel,1);
     }
 
     public KategoriService() {
@@ -85,14 +89,13 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     }
 
     public Kategori finnHovedKategoriEtterTittel(String tittel) {
-        List<Kategori> kategoriList = kategoriRepository.finnEtterTittelOgEkskludertKategoriType(tittel, KategoriType.DETALJERT);
+        List<Kategori> kategoriList = kategoriRepository.findByTittelAndNivaaOrderByUndertittel(tittel, 0);
         if (kategoriList.isEmpty()) {
             return null;
         } else if (kategoriList.size()==1) {
             return kategoriList.getFirst();
         } else {
-            Loggekyklop.hent().loggINFO("Fant flere enn en kategori med tittel " + tittel +
-                    " som ikke har type " + KategoriType.DETALJERT.getTittel());
+            Loggekyklop.hent().loggINFO("Fant flere enn en hovedkategori med tittel " + tittel );
             return kategoriList.getFirst();
         }
     }
@@ -112,7 +115,7 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
 
     @Override
     public ArrayList<Kategori> finnAlle() {
-        return new ArrayList<>(kategoriRepository.findAllByOrderByTittelAscUndertittelAsc());
+        return new ArrayList<>(kategoriRepository.findAllByOrderByErAktivDescTittelAscUndertittelAsc());
     }
 
     public Optional<Kategori> finnEtterTittel(String tittel) {
@@ -134,5 +137,18 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
                 kategori.setNivaa(2);
             }
         }
+    }
+
+    public Kategori finnEtterUndertittel(String undertittel) {
+        if (undertittel==null || undertittel.isEmpty()){
+            return null;
+        }
+
+        return kategoriRepository.findByUndertittelAndNivaa(undertittel,1);
+
+    }
+
+    public Optional<Kategori> finnOppsummerendeUnderkategori(String kategoriString) {
+        return kategoriRepository.findByTittelAndErOppsummerendeUnderkategori(kategoriString,true);
     }
 }

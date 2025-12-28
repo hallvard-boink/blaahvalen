@@ -2,6 +2,7 @@ package com.hallvardlaerum.post;
 
 import com.hallvardlaerum.grunndata.kategori.Kategori;
 import com.hallvardlaerum.libs.database.RepositoryTillegg;
+import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
 import com.hallvardlaerum.post.normalpost.NormalposttypeEnum;
 import jakarta.persistence.Tuple;
@@ -104,5 +105,7 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "AND k.tittel = ?4"
     )
     List<Post> finnEtterFraDatoTilDatoOgPostklasseOgKategoritittel(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, PostklasseEnum postklasseEnum,  String kategoriTittel);
+
+    List<Post> findByKostnadsPakke(Periodepost kostnadspakke);
 }
 

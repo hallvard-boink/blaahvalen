@@ -7,6 +7,8 @@ import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
 
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periodepost.Periodepost;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -24,9 +26,10 @@ import java.util.ArrayList;
 @UIScope
 public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> implements RedigeringsomraadeAktig<Post>, InitieringsEgnet {
     private boolean erInitiert = false;
+    private PeriodeoversiktpostService periodeoversiktpostService;
+
     private DatePicker datoDatePicker;
     private TextField tekstFraBankenTextField;
-    private TextField tekstFraAvsenderStringTextField;
     private TextField egenbeskrivelseTextField;
     private IntegerField innPaaKontoIntegerField;
     private IntegerField utFraKontoIntegerField;
@@ -38,6 +41,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
     private TextArea ekstraInfoTextArea;
     private TextField uuidTextField;
     private TextField forelderPostUUID;
+    private ComboBox<Periodepost> kostnadspakkeComboBox;
 
 
     public NormalpostRedigeringsomraade() {
@@ -49,9 +53,10 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         if (!erInitiert) {
             super.initRedigeringsomraadeMal();
             this.kategoriService = Allvitekyklop.hent().getKategoriService();
+            periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
+
             instansOpprettFelter();
             instansByggOppBinder();
-
             erInitiert = true;
         }
     }
@@ -69,12 +74,10 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         utFraKontoIntegerField.setValue(utInteger);
     }
 
-
     @Override
     public void aktiver(Boolean blnAktiver) {
         super.aktiver(blnAktiver);
         Allvitekyklop.hent().getNormalpostView().aktiverDelpostknapperHvisAktuelt(blnAktiver);
-        //((NormalpostView)hentView()).aktiverDelpostknapperHvisAktuelt(blnAktiver);
     }
 
     @Override
@@ -111,20 +114,36 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         kategoriComboBox = new ComboBox<>("Kategori");
         kategoriComboBox.setItems(kategoriService.finnAlleHovedkategorier());
         kategoriComboBox.setItemLabelGenerator(Kategori::getTittel);
-        kategoriComboBox.addValueChangeListener(kategori -> {
-            if (kategori != null && getEntitet()!=null) {
+        kategoriComboBox.addValueChangeListener(event -> {
+            if (event != null && hentEntitet()!=null) {
                 if (normalpoststatusComboBox.getValue()==NormalpoststatusEnum.UBEHANDLET) {
                     normalpoststatusComboBox.setValue(NormalpoststatusEnum.FERDIG);
                 }
 
-                kategoriDetaljComboBox.setItems(kategoriService.finnDelkategorier(kategori.getValue().getTittel()));
+                ArrayList<Kategori> underkategorierList = new ArrayList<>();
+                if (event.getValue()!=null) {
+                    underkategorierList = new ArrayList<>(kategoriService.finnDelkategorier(event.getValue().getTittel()));
+                }
+                kategoriDetaljComboBox.setItems(underkategorierList);
+                kategoriDetaljComboBox.setValue(underkategorierList.getFirst());
             }
         });
 
         kategoriDetaljComboBox = new ComboBox<>("Underkategori");
         kategoriDetaljComboBox.setItemLabelGenerator(Kategori::getUndertittel);
 
-        super.leggTilRedigeringsfelter(hovedtabString, kategoriComboBox, kategoriDetaljComboBox);
+
+        kostnadspakkeComboBox = new ComboBox<>("Kostnadspakke");
+        kostnadspakkeComboBox.setItemLabelGenerator(p -> {
+            if (p.getTittelString()==null) {
+                return "(mangler tittel)" + p.getUuid();
+            } else {
+                return p.getTittelString();
+            }
+        });
+        kostnadspakkeComboBox.setItems(periodeoversiktpostService.finnAlleKostnadspakker());
+
+        super.leggTilRedigeringsfelter(hovedtabString, kategoriComboBox, kategoriDetaljComboBox, kostnadspakkeComboBox);
 
         normalposttypeComboBox = new ComboBox<>("Posttype");
         normalposttypeComboBox.setItemLabelGenerator(NormalposttypeEnum::getTittel);
@@ -134,7 +153,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         normalpoststatusComboBox.setItemLabelGenerator(NormalpoststatusEnum::getTittel);
         normalpoststatusComboBox.setItems(NormalpoststatusEnum.values());
 
-        super.leggTilRedigeringsfelter(hovedtabString, normalposttypeComboBox, normalpoststatusComboBox);
+        super.leggTilRedigeringsfelter(ekstratabString, normalposttypeComboBox, normalpoststatusComboBox);
 
         ekstraInfoTextArea = super.leggTilRedigeringsfelt(ekstratabString, new TextArea("Ekstra info"));
         uuidTextField = super.leggTilRedigeringsfelt(ekstratabString, new TextField("UUID"));
@@ -142,7 +161,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
 
         super.leggTilDatofeltTidOpprettetOgRedigert(ekstratabString);
 
-        setFokusComponent(egenbeskrivelseTextField);
+        settFokusKomponent(egenbeskrivelseTextField);
     }
 
     @Override
@@ -160,5 +179,6 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         binder.bind(ekstraInfoTextArea, Post::getEkstraInfoString, Post::setEkstraInfoString);
         binder.bind(uuidTextField, Post::getUuidString, Post::setUuidStringFake);
         binder.bind(forelderPostUUID, Post::getForelderPostUUID, Post::setForelderPostUUID);
+        binder.bind(kostnadspakkeComboBox, Post::getKostnadsPakke, Post::setKostnadsPakke);
     }
 }

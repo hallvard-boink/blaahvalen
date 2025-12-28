@@ -3,6 +3,7 @@ package com.hallvardlaerum.grunndata.kategori;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -24,7 +25,11 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
     private ComboBox<KategoriRetning> kategoriRetningComboBox;
     private ComboBox<KategoriType> kategoriTypeComboBox;
     private IntegerField rekkefoelgeIntegerField;
+    private Checkbox erOppsummerendeUnderkategoriCheckbox;
     private Checkbox erAktivCheckbox;
+    private ComboBox<Kategori> hovedKategoriComboBox;
+
+
     private boolean erInitiert = false;
 
     public KategoriRedigeringsomraade() {
@@ -70,20 +75,29 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
         brukesTilBudsjettCheckbox = new Checkbox("Brukes til budsjett");
         brukesTilFastePosterCheckbox = new Checkbox("Brukes til faste poster");
         brukesTilRegnskapCheckbox = new Checkbox("Brukes til regnskap");
-        leggTilRedigeringsfelter(hovedtabString,erAktivCheckbox, brukesTilBudsjettCheckbox,  brukesTilFastePosterCheckbox, brukesTilRegnskapCheckbox);
+        erOppsummerendeUnderkategoriCheckbox = new Checkbox("Er oppsummerende underkategori");
+        leggTilRedigeringsfelter(hovedtabString,erAktivCheckbox, brukesTilBudsjettCheckbox,  brukesTilFastePosterCheckbox, brukesTilRegnskapCheckbox, erOppsummerendeUnderkategoriCheckbox);
 
         kategoriRetningComboBox = new ComboBox<>("Retning");
         kategoriRetningComboBox.setItems(KategoriRetning.values());
         kategoriRetningComboBox.setItemLabelGenerator(KategoriRetning::getTittel);
+
         kategoriTypeComboBox = new ComboBox<>("Type");
         kategoriTypeComboBox.setItems(KategoriType.values());
         kategoriTypeComboBox.setItemLabelGenerator(KategoriType::getTittel);
-        rekkefoelgeIntegerField = new IntegerField("Rekkefølge");
-        leggTilRedigeringsfelter(hovedtabString, kategoriRetningComboBox, kategoriTypeComboBox, rekkefoelgeIntegerField);
 
+        rekkefoelgeIntegerField = new IntegerField("Rekkefølge");
+
+        hovedKategoriComboBox = new ComboBox<>("Hovedkategori");
+        hovedKategoriComboBox.setItems(Allvitekyklop.hent().getKategoriService().finnAlleHovedkategorier());
+        hovedKategoriComboBox.setItemLabelGenerator(Kategori::getTittel);
+
+        leggTilRedigeringsfelter(hovedtabString, kategoriRetningComboBox, kategoriTypeComboBox);
+
+        leggTilRedigeringsfelter(ekstratabString, rekkefoelgeIntegerField, hovedKategoriComboBox);
         leggTilDatofeltTidOpprettetOgRedigert(ekstratabString);
 
-        setFokusComponent(tittelTextField);
+        settFokusKomponent(tittelTextField);
 
     }
 
@@ -96,6 +110,7 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
         binder.bind(brukesTilBudsjettCheckbox, Kategori::getBrukesTilBudsjett, Kategori::setBrukesTilBudsjett);
         binder.bind(brukesTilFastePosterCheckbox, Kategori::getBrukesTilFastePoster, Kategori::setBrukesTilFastePoster);
         binder.bind(brukesTilRegnskapCheckbox, Kategori::getBrukesTilRegnskap, Kategori::setBrukesTilRegnskap);
+        binder.bind(erOppsummerendeUnderkategoriCheckbox, Kategori::getErOppsummerendeUnderkategori, Kategori::setErOppsummerendeUnderkategori);
         binder.bind(kategoriRetningComboBox, Kategori::getKategoriRetning, Kategori::setKategoriRetning);
         binder.bind(kategoriTypeComboBox, Kategori::getKategoriType, Kategori::setKategoriType);
         binder.bind(rekkefoelgeIntegerField, Kategori::getRekkefoelge, Kategori::setRekkefoelge);

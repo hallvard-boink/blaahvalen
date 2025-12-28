@@ -26,7 +26,8 @@ public class MaanedsoversiktpostService extends PeriodepostServiceMal implements
     @Override
     public void init() {
         if (!erInitiert) {
-            super.initPeriodepostServiceMal(Allvitekyklop.hent().getMaanedsoversiktpostRedigeringsomraade(),
+            super.initPeriodepostServiceMal(
+                    Allvitekyklop.hent().getMaanedsoversiktpostRedigeringsomraade(),
                     PeriodepostTypeEnum.MAANEDSOVERSIKTPOST,
                     Allvitekyklop.hent().getMaanedsoversiktService());
             erInitiert = true;

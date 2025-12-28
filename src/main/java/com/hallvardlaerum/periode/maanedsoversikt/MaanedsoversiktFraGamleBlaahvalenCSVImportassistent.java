@@ -47,7 +47,7 @@ public class MaanedsoversiktFraGamleBlaahvalenCSVImportassistent extends CSVImpo
 
     @Override
     public void ryddOppEtterImport() {
-        maanedsoversiktView.oppdaterSoekeomraade();
+        maanedsoversiktView.oppdaterSoekeomraadeFinnAlleRader();
         Loggekyklop.bruk().avsluttImportloggTilFil();
     }
 }

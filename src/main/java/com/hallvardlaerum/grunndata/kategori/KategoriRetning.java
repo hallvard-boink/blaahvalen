@@ -15,6 +15,10 @@ public enum KategoriRetning implements EnumAktig {
         this.beskrivelse = beskrivelse;
     }
 
+    public static KategoriRetning hentFraTittel(String tittel) {
+        return EnumAktig.hentFraTittel(KategoriRetning.class,tittel);
+    }
+
     @Override
     public String getTittel() {
         return tittel;
@@ -34,7 +38,7 @@ public enum KategoriRetning implements EnumAktig {
         return tittel;
     }
 
-    @Override
+
     public String getTittelMedBeskrivelse() {
         return tittel + ": " + beskrivelse;
     }

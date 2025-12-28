@@ -47,7 +47,7 @@ public enum NormalpoststatusEnum implements EnumAktig {
         return tittel;
     }
 
-    @Override
+
     public String getTittelMedBeskrivelse() {
         return tittel + ": " + beskrivelse;
     }

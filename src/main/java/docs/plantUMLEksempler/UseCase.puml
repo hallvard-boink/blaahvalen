@@ -1,0 +1,37 @@
+@startuml
+'https://plantuml.com/use-case-diagram
+
+title User Case Diagram
+caption \nViser brukerroller og de viktigste oppgavene en applikasjon skal gjøre.
+
+
+:Main Admin: as Admin
+(Use the application) as (Use)
+
+'Også en måte å skrive usecases på:
+usecase UC2 as "
+    **Importere poster**
+    --
+    Det skal være mulig å importere CSV-filer
+    fra Handelsbanken
+"
+
+User -> (Start)
+User -> UC2
+User --> (Use)
+
+Admin ---> (Use)
+
+note right of Admin : This is an example.
+
+note right of (Use)
+    A note can also
+    be on several lines
+end note
+
+note "This note is connected\nto several objects." as N2
+(Start) .. N2
+N2 .. (Use)
+
+
+@enduml

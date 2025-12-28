@@ -7,6 +7,7 @@ import com.hallvardlaerum.libs.database.EntitetAktig;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
@@ -235,6 +236,10 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
 
     public Stream<Post> finnAlleSomStream(PageRequest springPageRequest) {
         return super.hentRepository().findAll(springPageRequest).stream();
+    }
+
+    public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
+        return hentRepository().findByKostnadsPakke(kostnadspakke);
     }
 
 

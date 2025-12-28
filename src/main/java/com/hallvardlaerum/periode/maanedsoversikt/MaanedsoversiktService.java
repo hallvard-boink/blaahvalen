@@ -91,7 +91,7 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
                 lagre(periode);
             }
         }
-        Allvitekyklop.hent().getMaanedsoversiktView().oppdaterSoekeomraade();
+        Allvitekyklop.hent().getMaanedsoversiktView().oppdaterSoekeomraadeFinnAlleRader();
         //hentRedigeringsomraadeAktig().hentView().oppdaterSoekeomraade();
 
     }

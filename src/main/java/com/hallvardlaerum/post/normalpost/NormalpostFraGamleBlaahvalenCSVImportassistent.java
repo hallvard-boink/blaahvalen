@@ -6,6 +6,8 @@ import com.hallvardlaerum.libs.eksportimport.CSVImportassistentMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.TekstKyklop;
+import com.hallvardlaerum.periodepost.Periodepost;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -23,31 +25,30 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
     private ArrayList<Ekstrafeltrad> ekstrafeltradArrayList;
     private KategoriService kategoriService;
     private Kategori skalIkkekategoriseresKategori;
+    private PeriodeoversiktpostService periodeoversiktpostService;
 
     public NormalpostFraGamleBlaahvalenCSVImportassistent() {
         this.normalpostService = Allvitekyklop.hent().getNormalpostService();
         this.normalpostView = Allvitekyklop.hent().getNormalpostView();
         this.kategoriService = Allvitekyklop.hent().getKategoriService();
+        this.periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
     }
 
     @Override
     public void forberedImport() {
-        Loggekyklop.hent().initierLoggfil();
-        Loggekyklop.hent().huskStatus();
-        Loggekyklop.hent().settNivaaINFO();
+        Loggekyklop.bruk().forberedTilImportloggTilFil();
     }
 
     @Override
     public void ryddOppEtterImport() {
 
         skalIkkekategoriseresKategori = kategoriService.hentRepository().findByKategoriType(KategoriType.SKAL_IKKE_KATEGORISERES).getFirst();
-
         importerInnholdIEkstraFeltArrayList();
 
-        normalpostView.oppdaterSoekeomraade();
-        Loggekyklop.hent().lukkLoggfil();
-        Loggekyklop.hent().tilbakestillStatus();
+        normalpostView.oppdaterSoekeomraadeFinnAlleRader();
+        Loggekyklop.bruk().avsluttImportloggTilFil();
     }
+
 
     @Override
     public Post konverterFraTekstRadOgLagre(ArrayList<String> feltnavnCSVArrayList, String[] celler) {
@@ -66,35 +67,10 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
         normalpost.setEkstraInfoString(hentVerdier(true,true,
                 "EkstraInfo", "Valuta", "Kurs", "Original beloep", "tekstFraAvsenderString"));
 
+        knyttTilKostnadspakke(hentVerdi("KostnadspakkeTittel"));
+        knyttTilKategori(hentVerdi("Kategori"));
 
-        String tittelKategoriString = hentVerdi("Kategori");
-        String kostnadspakketittelString = hentVerdi("KostnadspakkeTittel");
-
-        if (kostnadspakketittelString != null && kostnadspakketittelString.length()>1) {
-            String foersteTegnString = kostnadspakketittelString.substring(0,1);
-            try {
-                Integer foersteTegnInteger = Integer.parseInt(foersteTegnString);
-                kostnadspakketittelString = TekstKyklop.hent().fjernFoersteDelAvStrengMedDelimiter(kostnadspakketittelString, "\\ ");
-            } catch (NumberFormatException e) {
-                // Trenger ikke gjøre noe, første tegn er ikke et tall;
-            }
-        }
-
-
-        Optional<Kategori> kategoriOptionalEndenode = kategoriService.finnEtterTittelOgUnderTittel(tittelKategoriString,kostnadspakketittelString);
-        if (kategoriOptionalEndenode.isPresent()) {
-            normalpost.setKategori(kategoriOptionalEndenode.get());
-        } else {
-            Kategori kategori = kategoriService.opprettEntitet();
-            kategori.setKategoriType(KategoriType.DETALJERT);
-            kategori.setKategoriRetning(KategoriRetning.UT);
-            kategori.setTittel(tittelKategoriString);
-            kategori.setUndertittel(kostnadspakketittelString);
-            kategoriService.lagre(kategori);
-            normalpost.setKategori(kategori);
-            Loggekyklop.hent().loggTilFilINFO("La til ny kategori med tittel " + tittelKategoriString + " og undertittel " + kostnadspakketittelString);
-        }
-
+        // Lagre navn på forelderpost nå, knytter senere
         String forelderpostKortnavn = hentVerdi("ForelderpostKortnavn");
         if (!forelderpostKortnavn.isEmpty()) {
             lagreEkstrafeltTilSenere(normalpost, "ForelderpostKortnavn",forelderpostKortnavn, celler);
@@ -104,6 +80,44 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
         return normalpost;
     }
 
+    private void knyttTilKostnadspakke(String kostnadspakketittelString) {
+        if (kostnadspakketittelString==null || kostnadspakketittelString.isEmpty()) {
+            return;
+        }
+
+        Periodepost kostnadspakke = periodeoversiktpostService.finnEtterTittel(kostnadspakketittelString);
+        if (kostnadspakke==null) {
+            Loggekyklop.bruk().loggADVARSEL("Fant ikke kostnadspakke med tittel " + kostnadspakketittelString);
+        } else {
+            normalpost.setKostnadsPakke(kostnadspakke);
+        }
+    }
+
+
+    private void knyttTilKategori(String kategoriString) {
+        Optional<Kategori> kategoriOptional = kategoriService.finnOppsummerendeUnderkategori(kategoriString);
+        //Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(kategoriString,"-");
+        if (kategoriOptional.isEmpty()) {
+            Loggekyklop.bruk().loggINFO("Fant ikke kategori med hovedtittel " + kategoriString + " og undertittel '-'");
+            return;
+        }
+
+        Kategori kategori = kategoriOptional.get();
+        Kategori kategoriFraKostnadspakke = null;
+
+        if (normalpost.getKostnadsPakke()==null) {
+            normalpost.setKategori(kategori);
+        } else {
+            kategoriFraKostnadspakke = normalpost.getKostnadsPakke().getKategori();
+            if (kategoriFraKostnadspakke!=null) {
+                //Samme hovedtittel, men normalposten har
+                if (kategori.getTittel().equals(kategoriFraKostnadspakke.getTittel()) &&
+                        kategori.getErOppsummerendeUnderkategori()){
+                    normalpost.setKategori(kategoriFraKostnadspakke);
+                }
+            }
+        }
+    }
 
 
     public boolean lagreEkstrafeltTilSenere(EntitetAktig entitet, String feltnavnString, String verdiStreng, String[] celler) {

@@ -51,7 +51,7 @@ public final class MainLayout extends AppLayout {
         SideNavItem detaljerSideNavItem = Navigasjonsmenykyklop.hent().leggMenyvalgforelderTilRot(sideNav, "Detaljer");
         Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(detaljerSideNavItem, "Månedsoversiktposter","maanedsoversiktpost");
         Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(detaljerSideNavItem, "Årsoversiktposter","aarsoversiktpost");
-
+        Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(detaljerSideNavItem, "Kostnadspakker","periodeoversiktpost");
 
         SideNavItem innstillingerSideNavItem = Navigasjonsmenykyklop.hent().leggMenyvalgforelderTilRot(sideNav, "Innstillinger");
         Navigasjonsmenykyklop.hent().leggMenyvalgTilForelder(innstillingerSideNavItem, "Kategorier","kategori");

@@ -44,7 +44,7 @@ public enum PostklasseEnum implements EnumAktig {
         return tittel;
     }
 
-    @Override
+
     public String getTittelMedBeskrivelse() {
         return tittel + " (" + beskrivelse + ")";
     }

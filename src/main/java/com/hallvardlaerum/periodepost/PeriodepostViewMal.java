@@ -11,6 +11,7 @@ import com.hallvardlaerum.periode.PeriodeServiceMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -32,6 +33,7 @@ public class PeriodepostViewMal extends MasterDetailViewmal<Periodepost, Periode
     private ComboBox<Kategori> kategoriFilterComboBox;
     private IntegerField sumBudsjettFilterIntegerField;
     private IntegerField sumRegnskapFilterIntegerField;
+    private TextField tittelFilterTextField;
     private TextField beskrivelseFilterTextField;
 
 
@@ -72,12 +74,18 @@ public class PeriodepostViewMal extends MasterDetailViewmal<Periodepost, Periode
             searchCriteriaArrayList.add(new SearchCriteria("kategori",":",kategoriFilterComboBox.getValue()));
         }
 
-        if (sumBudsjettFilterIntegerField.getValue()!=null) {
-            searchCriteriaArrayList.add(new SearchCriteria("sumBudsjettInteger",">",sumBudsjettFilterIntegerField.getValue()));
-        }
-
         if (sumRegnskapFilterIntegerField.getValue()!=null) {
             searchCriteriaArrayList.add(new SearchCriteria("sumRegnskapInteger",">",sumRegnskapFilterIntegerField.getValue()));
+        }
+
+        if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
+            if (tittelFilterTextField.getValue()!=null && !tittelFilterTextField.getValue().isEmpty()) {
+                searchCriteriaArrayList.add(new SearchCriteria("tittelString", ":", tittelFilterTextField.getValue()));
+            }
+        } else {
+            if (sumBudsjettFilterIntegerField.getValue()!=null) {
+                searchCriteriaArrayList.add(new SearchCriteria("sumBudsjettInteger",">",sumBudsjettFilterIntegerField.getValue()));
+            }
         }
 
         if (beskrivelseFilterTextField.getValue()!=null && !beskrivelseFilterTextField.getValue().isEmpty()) {
@@ -107,11 +115,15 @@ public class PeriodepostViewMal extends MasterDetailViewmal<Periodepost, Periode
     @Override
     public void instansOpprettGrid() {
         grid = hentGrid();
-        grid.addColumn(p-> p.getPeriode()!=null ? p.getPeriode().hentBeskrivendeNavn() : "" ).setHeader("Periode");
-        grid.addColumn(p -> p.getKategori()!=null? p.getKategori().getTittel():"").setHeader("Kategori");
-        grid.addColumn(Periodepost::getSumBudsjettInteger).setHeader("Budsjett");
-        grid.addColumn(Periodepost::getSumRegnskapInteger).setHeader("Regnskap");
-        grid.addColumn(Periodepost::getBeskrivelseString).setHeader("Beskrivelse");
+        grid.addColumn(p -> p.getPeriode()!=null ? p.getPeriode().hentBeskrivendeNavn() : "" ).setHeader("Periode").setWidth("200px").setFlexGrow(0); // 0
+        grid.addColumn(p -> p.getKategori()!=null ? p.getKategori().hentKortnavn():"").setHeader("Kategori"); // 1
+        if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
+            grid.addColumn(Periodepost::getTittelString).setHeader("Tittel");  // 2
+        } else {
+            grid.addColumn(Periodepost::getSumBudsjettInteger).setHeader("Budsjett").setWidth("150px").setFlexGrow(0).setTextAlign(ColumnTextAlign.END);  // 2
+        }
+        grid.addColumn(Periodepost::getSumRegnskapInteger).setHeader("Regnskap").setWidth("150px").setFlexGrow(0).setTextAlign(ColumnTextAlign.END);  // 3
+        grid.addColumn(Periodepost::getBeskrivelseString).setHeader("Beskrivelse");  // 4
     }
 
     @Override
@@ -119,11 +131,19 @@ public class PeriodepostViewMal extends MasterDetailViewmal<Periodepost, Periode
         periodeFilterComboBox = leggTilFilterfelt(0,new ComboBox<>(),"valg");
         periodeFilterComboBox.setItemLabelGenerator(Periode::hentBeskrivendeNavn);
         periodeFilterComboBox.setItems(periodeService.finnAlleEgndePerioder(periodetypeEnum));
+
         kategoriFilterComboBox = leggTilFilterfelt(1, new ComboBox<>(),"valg");
-        kategoriFilterComboBox.setItemLabelGenerator(Kategori::getTittel);
+        kategoriFilterComboBox.setItemLabelGenerator(Kategori::hentKortnavn);
         kategoriFilterComboBox.setItems(kategoriService.finnAlle());
-        sumBudsjettFilterIntegerField = leggTilFilterfelt(2, new IntegerField(),">tall");
+
+        if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
+            tittelFilterTextField = leggTilFilterfelt(2, new TextField(),"tekst");
+        } else {
+            sumBudsjettFilterIntegerField = leggTilFilterfelt(2, new IntegerField(),">tall");
+        }
+
         sumRegnskapFilterIntegerField = leggTilFilterfelt(3, new IntegerField(),">tall");
+
         beskrivelseFilterTextField = leggTilFilterfelt(4, new TextField(),"tekst");
 
     }

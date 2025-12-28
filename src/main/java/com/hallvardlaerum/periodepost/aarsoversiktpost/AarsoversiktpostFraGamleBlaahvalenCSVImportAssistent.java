@@ -56,7 +56,7 @@ public class AarsoversiktpostFraGamleBlaahvalenCSVImportAssistent extends CSVImp
 
     @Override
     public void ryddOppEtterImport() {
-        Allvitekyklop.hent().getAarsoversiktpostView().oppdaterSoekeomraade();
+        Allvitekyklop.hent().getAarsoversiktpostView().oppdaterSoekeomraadeFinnAlleRader();
         Loggekyklop.bruk().avsluttImportloggTilFil();
     }
 

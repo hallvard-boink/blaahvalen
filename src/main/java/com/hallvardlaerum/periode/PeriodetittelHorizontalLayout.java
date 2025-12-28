@@ -15,7 +15,7 @@ public class PeriodetittelHorizontalLayout extends HorizontalLayout {
 
     public PeriodetittelHorizontalLayout(PeriodetypeEnum periodetypeEnum) {
         switch (periodetypeEnum) {
-            case MAANEDSOVERSIKT, MAANEDSBUDSJETTMAL -> datopresisjonEnum = DatopresisjonEnum.MAANED;
+            case MAANEDSOVERSIKT -> datopresisjonEnum = DatopresisjonEnum.MAANED;
             case AARSOVERSIKT -> datopresisjonEnum = DatopresisjonEnum.AAR;
             default -> datopresisjonEnum = DatopresisjonEnum.FULL_DATO;
         }

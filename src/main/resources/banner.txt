@@ -1,0 +1,19 @@
+BBBBBBBBBBBBBBBBB   lllllll                                   hhhhhhh                                                  lllllll
+B::::::::::::::::B  l:::::l                                   h:::::h                                                  l:::::l
+B::::::BBBBBB:::::B l:::::l                                   h:::::h                                                  l:::::l
+BB:::::B     B:::::Bl:::::l                                   h:::::h                                                  l:::::l
+  B::::B     B:::::B l::::l   aaaaaaaaaaaaa    aaaaaaaaaaaaa   h::::h hhhhh   vvvvvvv           vvvvvvvaaaaaaaaaaaaa    l::::l     eeeeeeeeeeee    nnnn  nnnnnnnn
+  B::::B     B:::::B l::::l   a::::::::::::a   a::::::::::::a  h::::hh:::::hhh v:::::v         v:::::v a::::::::::::a   l::::l   ee::::::::::::ee  n:::nn::::::::nn
+  B::::BBBBBB:::::B  l::::l   aaaaaaaaa:::::a  aaaaaaaaa:::::a h::::::::::::::hhv:::::v       v:::::v  aaaaaaaaa:::::a  l::::l  e::::::eeeee:::::een::::::::::::::nn
+  B:::::::::::::BB   l::::l            a::::a           a::::a h:::::::hhh::::::hv:::::v     v:::::v            a::::a  l::::l e::::::e     e:::::enn:::::::::::::::n
+  B::::BBBBBB:::::B  l::::l     aaaaaaa:::::a    aaaaaaa:::::a h::::::h   h::::::hv:::::v   v:::::v      aaaaaaa:::::a  l::::l e:::::::eeeee::::::e  n:::::nnnn:::::n
+  B::::B     B:::::B l::::l   aa::::::::::::a  aa::::::::::::a h:::::h     h:::::h v:::::v v:::::v     aa::::::::::::a  l::::l e:::::::::::::::::e   n::::n    n::::n
+  B::::B     B:::::B l::::l  a::::aaaa::::::a a::::aaaa::::::a h:::::h     h:::::h  v:::::v:::::v     a::::aaaa::::::a  l::::l e::::::eeeeeeeeeee    n::::n    n::::n
+  B::::B     B:::::B l::::l a::::a    a:::::aa::::a    a:::::a h:::::h     h:::::h   v:::::::::v     a::::a    a:::::a  l::::l e:::::::e             n::::n    n::::n
+BB:::::BBBBBB::::::Bl::::::la::::a    a:::::aa::::a    a:::::a h:::::h     h:::::h    v:::::::v      a::::a    a:::::a l::::::le::::::::e            n::::n    n::::n
+B:::::::::::::::::B l::::::la:::::aaaa::::::aa:::::aaaa::::::a h:::::h     h:::::h     v:::::v       a:::::aaaa::::::a l::::::l e::::::::eeeeeeee    n::::n    n::::n
+B::::::::::::::::B  l::::::l a::::::::::aa:::aa::::::::::aa:::ah:::::h     h:::::h      v:::v         a::::::::::aa:::al::::::l  ee:::::::::::::e    n::::n    n::::n
+BBBBBBBBBBBBBBBBB   llllllll  aaaaaaaaaa  aaaa aaaaaaaaaa  aaaahhhhhhh     hhhhhhh       vvv           aaaaaaaaaa  aaaallllllll    eeeeeeeeeeeeee    nnnnnn    nnnnnn
+
+${application.title} ${application.version}
+Powered by Spring Boot ${spring-boot.version}

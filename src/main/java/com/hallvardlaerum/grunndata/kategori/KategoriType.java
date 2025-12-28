@@ -10,7 +10,6 @@ public enum KategoriType implements EnumAktig {
     SKAL_IKKE_KATEGORISERES("Skal ikke kategoriseres","Poster som det ikke gir mening å kategorisere"),
     KATEGORI_IKKE_FUNNET("Kategori ikke funnet","Poster vi ikke har klart å finne kategori til"),
     TIL_SPARING("Til sparing","Kategorier som handler om å sette av penger."),
-    DETALJERT("Detaljert","Brukes til budsjettpostgrupper og kostnadspakker.")
     ;
 
 
@@ -20,6 +19,10 @@ public enum KategoriType implements EnumAktig {
     KategoriType(String tittel, String beskrivelse) {
         this.tittel = tittel;
         this.beskrivelse = beskrivelse;
+    }
+
+    public static KategoriType hentFraTittel(String tittel){
+        return EnumAktig.hentFraTittel(KategoriType.class,tittel);
     }
 
     public String getTittel() {
@@ -39,10 +42,6 @@ public enum KategoriType implements EnumAktig {
         return tittel;
     }
 
-    @Override
-    public String getTittelMedBeskrivelse() {
-        return tittel + ": " + beskrivelse;
-    }
 
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;

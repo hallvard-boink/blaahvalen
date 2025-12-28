@@ -54,7 +54,7 @@ public class MaanedsoversiktpostFraGamleBlaahvalenCSVImportassistent extends CSV
 
     @Override
     public void ryddOppEtterImport() {
-        Allvitekyklop.hent().getMaanedsoversiktpostView().oppdaterSoekeomraade();
+        Allvitekyklop.hent().getMaanedsoversiktpostView().oppdaterSoekeomraadeFinnAlleRader();
         Loggekyklop.bruk().avsluttImportloggTilFil();
     }
 }

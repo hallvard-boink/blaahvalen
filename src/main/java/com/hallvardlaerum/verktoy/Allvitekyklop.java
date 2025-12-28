@@ -15,11 +15,13 @@ import com.hallvardlaerum.periodepost.PeriodepostRepository;
 import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostRedigeringsomraade;
 import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostService;
 import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostView;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostView;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostRedigeringsomraade;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostRedigeringsomraade;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostService;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostView;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.post.PostRepository;
-import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostView;
@@ -65,7 +67,9 @@ public class Allvitekyklop {
     private AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog;
     private AarsoversiktpostView aarsoversiktpostView;
 
-
+    private PeriodeoversiktpostRedigeringsomraade periodeoversiktpostRedigeringsomraade;
+    private PeriodeoversiktpostService periodeoversiktpostService;
+    private PeriodeoversiktpostView periodeoversiktpostView;
 
     private VerktoyView verktoyView;
 
@@ -93,15 +97,40 @@ public class Allvitekyklop {
         maanedsoversiktpostRedigeringsomraade.init();
         maanedsoversiktpostRedigeringsomraadeTilDialog.init();
 
-        normalpostService.init();
-        normalpostRedigeringsomraade.init();
-
         budsjettpostService.init();
         budsjettpostRedigeringsomraade.init();
 
+        periodeoversiktpostService.init();
+        periodeoversiktpostRedigeringsomraade.init();
 
+        normalpostService.init();
+        normalpostRedigeringsomraade.init();
     }
 
+
+    public PeriodeoversiktpostRedigeringsomraade getPeriodeoversiktpostRedigeringsomraade() {
+        return periodeoversiktpostRedigeringsomraade;
+    }
+
+    public void setPeriodeoversiktpostRedigeringsomraade(PeriodeoversiktpostRedigeringsomraade periodeoversiktpostRedigeringsomraade) {
+        this.periodeoversiktpostRedigeringsomraade = periodeoversiktpostRedigeringsomraade;
+    }
+
+    public PeriodeoversiktpostService getPeriodeoversiktpostService() {
+        return periodeoversiktpostService;
+    }
+
+    public void setPeriodeoversiktpostService(PeriodeoversiktpostService periodeoversiktpostService) {
+        this.periodeoversiktpostService = periodeoversiktpostService;
+    }
+
+    public PeriodeoversiktpostView getPeriodeoversiktpostView() {
+        return periodeoversiktpostView;
+    }
+
+    public void setPeriodeoversiktpostView(PeriodeoversiktpostView periodeoversiktpostView) {
+        this.periodeoversiktpostView = periodeoversiktpostView;
+    }
 
     public KategoriRepository getKategoriRepository() {
         return kategoriRepository;

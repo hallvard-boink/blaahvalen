@@ -42,7 +42,7 @@ public enum BudsjettpoststatusEnum implements EnumAktig {
         return tittel;
     }
 
-    @Override
+
     public String getTittelMedBeskrivelse() {
         return tittel + " (" + beskrivelse + ")";
     }

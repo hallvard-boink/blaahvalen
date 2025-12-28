@@ -1,0 +1,22 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Sequence diagram
+caption \nBrukes til å vise hvordan objekter (eller roller) agerer med hverandre over tid
+
+autonumber
+
+== Initialization ==
+participant "EPJ-system" as epj
+participant Kjernejournal as kj
+
+epj --> kj: Authentication Request
+kj --> epj: Authentication Response
+
+== Repetition ==
+
+epj -> kj: Another authentication Request
+epj <-- kj: another authentication Response
+
+
+@enduml

@@ -1,0 +1,59 @@
+@startuml
+'https://plantuml.com/salt
+
+scale 1.5
+
+'title Rediger post
+'caption \nKategoriser post på valgfritt nivå, evt. knytte til en kostnadspakke
+
+
+salt
+{
+    =<color:gray>Vinduet Rediger poster
+    .
+    ===<color:gray>1.Standard utseende
+    <color:gray>Dette er slik vinduet ser ut til vanlig.
+    ..
+    { [Vis delposter] | [Ny] | [Lagre] | [Slett] }
+    .
+    {/<b>Hoved</b> | Ekstra }
+    .
+    Tekst fra banken:
+    "01.10 FREDRIKSTAD JBS ST.OLAVSGT.  FREDRIKSTAD"
+    .
+    {
+        Dato:|Inn på konto:|Ut fra konto:
+        "2025-10-01" | "0" | "29 223"
+    }
+    .
+    Egen beskrivelse:
+    "Dette var et større innkjøp "
+    .
+    Søk i kategorier og kostnadspakker:
+    "            "
+    {
+        Kategori: | Underkategori: |. | Kostnadspakke:
+        ^        ^ | ^           ^ | [ + ] | ^          ^ | [ + ]
+        .
+        ^Posttype^ | ^Poststatus^ |
+    }
+    .
+    .
+    .
+    ===<color:gray>2.Bruker skriver inn i søkefeltet for kategorier og kostnadspakker:
+    <color:gray>Dette feltet er ment å brukes til å søke både i kategorier og kostnadspakker.
+    ..
+    Søk i kategorier og kostnadspakker:
+    "<color:blue>Hella"
+    {
+        Kategori: | Underkategori: |. | Kostnadspakke:
+        ^Ferie og Reiser^ | ^Reiser til Hella^ | [ + ] | ^           ^^Vårtur 2025 ^^Sommertur 2025 ^^Høsttur 2025 ^ | [ + ]
+        .
+        ^Posttype^ | ^Poststatus^ |
+    }
+    .
+    .
+}
+
+
+@enduml

@@ -5,6 +5,7 @@ import com.hallvardlaerum.verktoy.Allvitekyklop;
 import java.util.ArrayList;
 import java.util.Optional;
 
+@Deprecated
 public class KategoriFraBudsjettpostgruppeFraCSVImportassistent extends CSVImportassistentMal<Kategori> {
     private KategoriService kategoriService;
 
@@ -38,7 +39,7 @@ public class KategoriFraBudsjettpostgruppeFraCSVImportassistent extends CSVImpor
             kategori.setBrukesTilBudsjett(true);
             kategori.setBrukesTilFastePoster(true);
             kategori.setBrukesTilRegnskap(true);
-            kategori.setKategoriType(KategoriType.DETALJERT);
+            //kategori.setKategoriType(KategoriType.DETALJERT);
 
             kategoriService.lagre(kategori);
             return kategori;
@@ -51,6 +52,6 @@ public class KategoriFraBudsjettpostgruppeFraCSVImportassistent extends CSVImpor
 
     @Override
     public void ryddOppEtterImport() {
-        Allvitekyklop.hent().getKategoriView().oppdaterSoekeomraade();
+        Allvitekyklop.hent().getKategoriView().oppdaterSoekeomraadeFinnAlleRader();
     }
 }

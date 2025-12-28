@@ -49,6 +49,7 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
             leggTilOgTilpassKnapper();
             hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
 
+
             erInitiert = true;
         }
     }

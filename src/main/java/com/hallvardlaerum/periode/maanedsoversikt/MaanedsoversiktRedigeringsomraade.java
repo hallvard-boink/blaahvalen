@@ -109,7 +109,7 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
 
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.add(innLabelSpan, innSpan, new Span(), utLabelSpan, utSpan, new Span(),  resultatLabelSpan, resultatSpan);
-        leggTilRedigeringsfelter(redigerBudsjetttabString,horizontalLayout);
+        leggTilRedigeringsfelter(redigerBudsjetttabString,horizontalLayout, new Span("SHIFT-klikk på en rad for å flytte mellom listene."));
         leggTilRedigeringsfelter(redigerBudsjetttabString, tildelteBudsjettposterGrid, foreslaatteBudsjettposterGrid);
 
 

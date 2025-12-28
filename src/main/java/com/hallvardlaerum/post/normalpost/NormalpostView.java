@@ -2,6 +2,8 @@ package com.hallvardlaerum.post.normalpost;
 
 import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periodepost.Periodepost;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.grunndata.kategori.Kategori;
 import com.hallvardlaerum.grunndata.kategori.KategoriService;
@@ -17,7 +19,9 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
+import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -35,6 +39,7 @@ import java.util.ArrayList;
 public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> implements InitieringsEgnet {
     private Grid<Post> grid;
     private PostServiceMal postService;
+    private PeriodeoversiktpostService periodeoversiktpostService;
     private NormalpostRedigeringsomraade normalPostRedigeringsomraade;
     private boolean erInitiert = false;
 
@@ -46,7 +51,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
     private ComboBox<NormalpoststatusEnum> normalpoststatusFilterCombobox;
     private ComboBox<NormalposttypeEnum> normalposttypeFilterCombobox;
     private ComboBox<Kategori> kategoriFilterComboBox;
-
+    private ComboBox<Periodepost> kostnadspakkeFilterComboBox;
 
     private KategoriService kategoriService;
     private NormaldelpostViewMester normaldelpostViewMester;
@@ -62,6 +67,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
         if (!erInitiert) {
             this.postService = Allvitekyklop.hent().getNormalpostService();
             this.kategoriService = Allvitekyklop.hent().getKategoriService();
+            this.periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
             this.normalPostRedigeringsomraade = Allvitekyklop.hent().getNormalpostRedigeringsomraade();
             this.normalPostRedigeringsomraade.settView(this);
 
@@ -73,9 +79,14 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
 
             hentVerktoeySubMeny().addItem("Importer CSV fra Gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
 
+
             erInitiert = true;
         }
     }
+
+
+
+
 
 
     private void importerCSVFraGamleBlaahvalen() {
@@ -182,22 +193,27 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
             filtre.add(new SearchCriteria("kategori",":",kategoriFilterComboBox.getValue()));
         }
 
-        super.brukFiltreIDataprovider(filtre);
+        if (kostnadspakkeFilterComboBox.getValue()!=null) {
+            filtre.add(new SearchCriteria("kostnadsPakke",":",kostnadspakkeFilterComboBox.getValue()));
+        }
+
+
 
     }
 
     @Override
     public void instansOpprettGrid() {
         grid = super.hentGrid();
-        grid.addColumn(Post::getDatoLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer()).setWidth("60px");
-        grid.addColumn(Post::getTekstFraBankenString).setHeader("Tekst fra banken").setRenderer(opprettTekstFraBankenRenderer()).setWidth("400px");
-        grid.addColumn(Post::getInnPaaKontoInteger).setHeader("Inn på konto").setRenderer(opprettInnPaaKontoRenderer()).setWidth("60px").setTextAlign(ColumnTextAlign.END);
-        grid.addColumn(Post::getUtFraKontoInteger).setHeader("Ut fra konto").setRenderer(opprettUtFraKontoRenderer()).setWidth("60px").setTextAlign(ColumnTextAlign.END);
+        grid.addColumn(Post::getDatoLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer()).setWidth("150px").setFlexGrow(0);
+        grid.addColumn(Post::getTekstFraBankenString).setHeader("Tekst fra banken").setRenderer(opprettTekstFraBankenRenderer());
+        grid.addColumn(Post::getInnPaaKontoInteger).setHeader("Inn på konto").setRenderer(opprettInnPaaKontoRenderer()).setWidth("150px").setTextAlign(ColumnTextAlign.END).setFlexGrow(0);;
+        grid.addColumn(Post::getUtFraKontoInteger).setHeader("Ut fra konto").setRenderer(opprettUtFraKontoRenderer()).setWidth("150px").setTextAlign(ColumnTextAlign.END).setFlexGrow(0);;
 
-        grid.addColumn(Post::getKategori).setHeader("Kategori").setRenderer(opprettKategoriRenderer()).setWidth("100px");
-        grid.addColumn(Post::getBeskrivelseString).setHeader("Egen beskrivelse").setRenderer(opprettEgenbeskrivelseRenderer()).setWidth("200px");
-        grid.addColumn(Post::getNormalPoststatusEnum).setHeader("Status").setRenderer(opprettPoststatusRenderer()).setWidth("50px");
-        grid.addColumn(Post::getNormalPosttypeEnum).setHeader("Type").setRenderer(opprettPosttypeRenderer()).setWidth("50px");
+        grid.addColumn(Post::getKategori).setHeader("Kategori").setRenderer(opprettKategoriRenderer()).setWidth("200px").setFlexGrow(0);;
+        grid.addColumn(Post::getBeskrivelseString).setHeader("Egen beskrivelse").setRenderer(opprettEgenbeskrivelseRenderer());
+        grid.addColumn(Post::getNormalPoststatusEnum).setHeader("Status").setRenderer(opprettPoststatusRenderer()).setWidth("100px").setFlexGrow(0);;
+        grid.addColumn(Post::getNormalPosttypeEnum).setHeader("Type").setRenderer(opprettPosttypeRenderer()).setWidth("100px").setFlexGrow(0);;
+        grid.addColumn(Post::getKostnadsPakke).setHeader("Kostnadspakke").setRenderer(opprettKostnadspakkeRenderer());
 
         // Denne klarer å sette bakgrunnen i hele raden
 //        grid.setPartNameGenerator(post -> {
@@ -213,6 +229,8 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
 //            }
 //        });
     }
+
+
 
     private void settStil(Span span, Post post) {
         if (span == null || post == null) {
@@ -252,6 +270,19 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
         normalposttypeFilterCombobox.setItems(NormalposttypeEnum.values());
         normalposttypeFilterCombobox.setItemLabelGenerator(NormalposttypeEnum::getTittel);
 
+        kostnadspakkeFilterComboBox = leggTilFilterfelt(8, new ComboBox<>(),"Velg");
+        kostnadspakkeFilterComboBox.setItems(periodeoversiktpostService.finnAlleKostnadspakker());
+        kostnadspakkeFilterComboBox.setItemLabelGenerator(Periodepost::getTittelString);
+
+    }
+
+    private ComponentRenderer<Span,Post> opprettKostnadspakkeRenderer(){
+        return new ComponentRenderer<>(post -> {
+            Span span = post.getKostnadsPakke() != null ? new Span(post.getKostnadsPakke().getTittelString()) : new Span("");
+            //span.setClassName(LumoUtility.TextAlignment.RIGHT);
+            settStil(span, post);
+            return span;
+        });
     }
 
     private ComponentRenderer<Span,Post> opprettUtFraKontoRenderer(){

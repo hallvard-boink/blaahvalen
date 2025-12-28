@@ -17,6 +17,14 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
         RepositoryTillegg<Periodepost> {
 
 
+    List<Periodepost> findByPeriodeAndKategori(Periode periode, Kategori kategori);
+
+    Periodepost findByTittelString(String kostnadspakketittelString);
+
+    List<Periodepost> findByPeriodepostTypeEnumOrderByTittelStringDesc(PeriodepostTypeEnum periodepostTypeEnum);
+
+
+
     @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer)+sum(p.ut_fra_konto_integer) " +
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
             "WHERE p.dato_local_date >= ?1 AND " +
@@ -25,7 +33,6 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
             "k.uuid = ?3"
     )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
     List<Tuple> sumPosterFradatoTilDatoKategori(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, UUID kategoriUUID);
-
 
     @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) " +
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
@@ -51,7 +58,14 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
     )
     List<Periodepost> finnEtterPeriodeOgKategorinivaa(UUID periodeUUID, Integer kategoriNivaa);
 
-    List<Periodepost> findByPeriodeAndKategori(Periode periode, Kategori kategori);
-
-
+    @NativeQuery(value =
+            "SELECT pp.*  " +
+                    "FROM " +
+                    "periodepost pp " +
+                    "LEFT JOIN kategori k ON pp.kategori_uuid = k.uuid " +
+                    "LEFT JOIN periode p ON pp.periode_uuid = p.uuid " +
+                    "WHERE " +
+                    "p.dato_fra_local_date = ?1 " +
+                    "AND k.tittel = ?2")
+    List<Periodepost> finnFraPeriodedatostartOgKategoritittel(LocalDate datoFra, String kategoritittel);
 }

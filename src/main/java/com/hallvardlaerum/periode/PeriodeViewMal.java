@@ -41,7 +41,22 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
     public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
                                    ViewmalAktig<Periode, ?> viewmalAktig,
                                    EntitetserviceAktig<Periode,PeriodeRepository> periodeservice,
-                                   RedigeringsomraadeAktig<Periode> redigeringsomraade) {
+                                   RedigeringsomraadeAktig<Periode> redigeringsomraade
+                                   ) {
+
+        initPeriodeViewMal(periodetypeEnum,
+                viewmalAktig,
+                periodeservice,
+                redigeringsomraade,
+        33D);
+
+    }
+
+    public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
+                                   ViewmalAktig<Periode, ?> viewmalAktig,
+                                   EntitetserviceAktig<Periode,PeriodeRepository> periodeservice,
+                                   RedigeringsomraadeAktig<Periode> redigeringsomraade,
+                                   Double splittPlasseringDouble) {
         this.periodetypeEnum = periodetypeEnum;
         this.redigeringsomraade = redigeringsomraade;
         this.redigeringsomraade.settView(viewmalAktig);

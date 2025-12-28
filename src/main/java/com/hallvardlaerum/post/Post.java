@@ -1,6 +1,7 @@
 package com.hallvardlaerum.post;
 
 import com.hallvardlaerum.libs.felter.DatopresisjonEnum;
+import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
 import com.hallvardlaerum.post.budsjettpost.EstimatpresisjonEnum;
 import com.hallvardlaerum.post.budsjettpost.PrioritetEnum;
@@ -41,6 +42,9 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     @SkalEksporteres
     private Integer utFraKontoInteger;
 
+    @SkalEksporteres
+    @ManyToOne(targetEntity = Periodepost.class)
+    private Periodepost kostnadsPakke;
 
 
     // Felter som er unike for normalposter
@@ -82,6 +86,17 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     @SkalEksporteres
     Boolean erRegelmessigBoolean;
 
+
+    // === Getters and Setters ===
+
+
+    public Periodepost getKostnadsPakke() {
+        return kostnadsPakke;
+    }
+
+    public void setKostnadsPakke(Periodepost kostnadsPakke) {
+        this.kostnadsPakke = kostnadsPakke;
+    }
 
     public DatopresisjonEnum getDatopresisjonEnum() {
         return datopresisjonEnum;

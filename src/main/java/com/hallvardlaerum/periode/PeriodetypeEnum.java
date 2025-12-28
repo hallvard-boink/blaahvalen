@@ -9,9 +9,8 @@ public enum PeriodetypeEnum implements EnumAktig {
     AARSOVERSIKT("Årsoversikt","Oversikt over regnskap og budsjett for et helt år",
             DatopresisjonEnum.AAR,PeriodepostTypeEnum.AARSOVERSIKTPOST),
     MAANEDSOVERSIKT("Månedsoversikt","Oversikt over regnskap og budsjett i en gitt måned",
-            DatopresisjonEnum.MAANED, PeriodepostTypeEnum.MAANEDSOVERSIKTPOST),
-    MAANEDSBUDSJETTMAL("Budsjettmal","Utkast til budsjett for en gitt måned og år",
-            DatopresisjonEnum.MAANED, PeriodepostTypeEnum.MAANEDSOVERSIKTPOST);
+            DatopresisjonEnum.MAANED, PeriodepostTypeEnum.MAANEDSOVERSIKTPOST)
+    ;
 
 
     private String tittel;
@@ -46,7 +45,7 @@ public enum PeriodetypeEnum implements EnumAktig {
         return tittel;
     }
 
-    @Override
+
     public String getTittelMedBeskrivelse() {
         return tittel + " (" + beskrivelse + ")";
     }

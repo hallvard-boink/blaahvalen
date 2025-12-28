@@ -18,6 +18,8 @@ import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostRedigerin
 import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostService;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostRedigeringsomraade;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostService;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostRedigeringsomraade;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
@@ -45,7 +47,8 @@ public class OmView extends MainViewmal {
                   MaanedsoversiktpostService maanedsoversiktpostService, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraade, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraadeTilDialog,
                   AarsoversiktpostService aarsoversiktpostService, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog,
                   NormalpostService normalpostService, NormalpostRedigeringsomraade normalPostRedigeringsomraade,
-                  BudsjettpostService budsjettpostService, BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade
+                  BudsjettpostService budsjettpostService, BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade,
+                  PeriodeoversiktpostService periodeoversiktpostService, PeriodeoversiktpostRedigeringsomraade periodeoversiktpostRedigeringsomraade
       )
     {
         super();
@@ -55,7 +58,8 @@ public class OmView extends MainViewmal {
             if (!erInitiert) {
                 erInitiert = true;
 
-                Loggekyklop.hent().settNivaaFEIL();
+                Loggekyklop.hent().settNivaaDEBUG();
+
                 Filkyklop.hent().initierRotmappeFile("blaahvalen");
                 Versjonskyklop.hent().initier(); // for å initiere versjonskyklop
 
@@ -86,6 +90,9 @@ public class OmView extends MainViewmal {
 
                 Allvitekyklop.hent().setBudsjettpostService(budsjettpostService);
                 Allvitekyklop.hent().setBudsjettpostRedigeringsomraade(budsjettpostRedigeringsomraade);
+
+                Allvitekyklop.hent().setPeriodeoversiktpostService(periodeoversiktpostService);
+                Allvitekyklop.hent().setPeriodeoversiktpostRedigeringsomraade(periodeoversiktpostRedigeringsomraade);
 
                 Backupkyklop.hent().leggTilEntitetservice(kategoriService);
                 Backupkyklop.hent().leggTilEntitetservice(maanedsoversiktService); //sjekk at alle poster (også årsoversikter) blir eksportert

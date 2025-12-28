@@ -45,7 +45,7 @@ public enum EstimatpresisjonEnum implements EnumAktig {
         return tittel;
     }
 
-    @Override
+
     public String getTittelMedBeskrivelse() {
         return tittel + " (" + beskrivelse + ")";
     }

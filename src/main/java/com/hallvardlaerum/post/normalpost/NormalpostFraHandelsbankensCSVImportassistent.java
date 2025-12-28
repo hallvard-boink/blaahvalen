@@ -26,7 +26,7 @@ public class NormalpostFraHandelsbankensCSVImportassistent extends CSVImportassi
 
     @Override
     public void ryddOppEtterImport() {
-        normalpostView.oppdaterSoekeomraade();
+        normalpostView.oppdaterSoekeomraadeFinnAlleRader();
     }
 
     @Override

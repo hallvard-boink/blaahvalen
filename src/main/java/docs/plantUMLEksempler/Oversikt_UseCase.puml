@@ -1,0 +1,30 @@
+@startuml
+'https://plantuml.com/use-case-diagram
+
+
+package "Oppdater budsjett" {
+    (Oppdater årets faste utgifter)
+    (Registrer ønsker og behov)
+    (Prioriter store utgifter for året)
+    (Tilpass månedens budsjett)
+}
+
+package "Oppdater regnskapet" {
+    (Importer poster)
+    (Kategoriser poster)
+    (Kommenter poster)
+    (Skriv ut rapport)
+    (Endre budsjett etter behov)
+}
+
+(Importer poster)->(Kategoriser poster)
+(Kategoriser poster)->(Kommenter poster)
+(Kommenter poster)->(Endre budsjett etter behov)
+(Kommenter poster)->(Skriv ut rapport)
+
+
+(Endre budsjett etter behov) --> (Tilpass månedens budsjett)
+
+
+
+@enduml

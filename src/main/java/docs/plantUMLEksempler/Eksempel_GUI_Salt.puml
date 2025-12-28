@@ -1,0 +1,123 @@
+@startuml
+'https://plantuml.com/salt
+
+<style>
+    element {
+        BackGroundColor: #AAA;
+    }
+</style>
+
+
+title Salt / GUI
+caption \nSalt-diagrammer er en enkel måte å lage brukergrensesnitt på
+
+'Scale viser zoom-nivå
+scale 1.5
+
+
+
+salt
+{
+
+  {
+  Knapp: |   [This is my button]
+  Radioknapper: | ()  Unchecked radio  | (X) Checked radio
+  Avkrysningerbokser: | []  Unchecked box  | [X] Checked box
+  Inputfelt: | "Enter text here   "
+  Combobox: |  ^This is a droplist^
+  }
+  .
+  {^"Group box"
+    Knapp: |   [This is my button]
+    Radioknapper: | ()  Unchecked radio  | (X) Checked radio
+    Avkrysningerbokser: | []  Unchecked box  | [X] Checked box
+    Inputfelt: | "Enter text here   "
+    Combobox: |  ^This is a droplist^
+    }
+  .
+  {/ <b>Hoved</b> | Poster | Ekstra}
+  {
+      {
+        Knapp: |   [This is my button]
+        Radioknapper: | ()  Unchecked radio  | (X) Checked radio
+        Avkrysningerbokser: | []  Unchecked box  | [X] Checked box
+        Inputfelt: | "Enter text here   "
+        Combobox: |  ^This is a droplist^
+      }
+  }
+  .
+  .
+  {#
+    . | A | B
+    1 | A1 | B1
+    2 | A2 | B2
+  }
+  .
+  .
+  <b>Med ikoner:</b>
+  {
+      Login<&person> | "MyName   "
+      Password<&key> | "****     "
+      [Cancel <&circle-x>] | [OK <&account-login>]
+  }
+  .
+  <b>Combobox:</b>
+  ^Meny ^^Valg 1 ^^Valg 2 ^^Valg 3 ^
+  .
+  .
+  .
+  .
+  <b>Enkelt tekstfelt:</b>
+  {+Simple textfield}
+  .
+
+  <b>Tekstfelt med vertikal scrollbar:</b>
+  {SI
+    Textfield with vertical scrollbar
+    More text
+    .
+    .
+    "                                         "
+  }
+  .
+  {S-
+    Textfield with horizontal scrollbar
+    .
+    .
+    "                                         "
+
+  }
+  .
+  {#
+    Navn | Alder
+    Hallvard | 55
+    Tina | 59
+
+  }
+
+.
+    Egendefinert Folderikon:
+  <<folder
+  ....................
+  ..XXXXXXXX.............
+  ..X      X.............
+  ..X      X.............
+  ..X      X.............
+  .XXXXXXXXXXXXXXXXXX.
+  .X                X.
+  .X                X.
+  .X                X.
+  .X                X.
+  .X                X.
+  .X                X.
+  .X                X.
+  .X                X.
+  .X                X.
+  .X                X.
+  .X                X.
+  .XXXXXXXXXXXXXXXXXX.
+  >>
+
+
+}
+@enduml

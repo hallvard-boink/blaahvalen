@@ -14,10 +14,12 @@ import java.util.UUID;
 public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSpecificationExecutor<Kategori>, RepositoryTillegg<Kategori> {
     Optional<Kategori> findByTittel(String tittel);
     Optional<Kategori> findByTittelAndUndertittel(String tittel, String undertittel);
-    List<Kategori> findAllByOrderByTittelAscUndertittelAsc();
+    List<Kategori> findAllByOrderByErAktivDescTittelAscUndertittelAsc();
     List<Kategori> findByKategoriType(KategoriType kategoriType);
 
-    List<Kategori> findByTittelAndKategoriTypeOrderByUndertittel(String tittel, KategoriType kategoriType);
+    List<Kategori> findByTittelAndNivaaOrderByUndertittel(String tittel, Integer nivaa);
+
+    List<Kategori> findByNivaa(int nivaa);
 
 
 
@@ -40,4 +42,9 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
         "HAVING count(p.uuid)>0 " +
         "ORDER BY sum(p.inn_paa_konto_integer) desc,sum(p.ut_fra_konto_integer) desc;")
     List<Tuple> byggKategoriMedBudsjettpostList(LocalDate datoFra, LocalDate datoTil, Integer budsjettpoststatusEnumInteger);
+
+    Kategori findByUndertittelAndNivaa(String undertittel, int nivaa);
+
+
+    Optional<Kategori> findByTittelAndErOppsummerendeUnderkategori(String kategoriString, boolean erOppsummerendeunderkategori);
 }

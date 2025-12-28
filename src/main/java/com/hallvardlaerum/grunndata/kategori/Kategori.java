@@ -4,8 +4,7 @@ import com.hallvardlaerum.libs.database.AbstraktEntitet;
 import com.hallvardlaerum.libs.database.EntitetMedBarnAktig;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;
 import com.hallvardlaerum.post.Post;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +48,14 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
     @SkalEksporteres
     private Boolean erAktiv;
 
+    @SkalEksporteres
+    private Boolean erOppsummerendeUnderkategori;
+
     @OneToMany(mappedBy = "kategori")
     private List<Post> poster;
+
+    @ManyToOne(targetEntity = Kategori.class, cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    private Kategori hovedKategori;
 
     @Override
     public ArrayList<Post> hentBarn() {
@@ -62,13 +67,6 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
         return hentBeskrivendeNavn();
     }
 
-    public Integer getNivaa() {
-        return nivaa;
-    }
-
-    public void setNivaa(Integer nivaa) {
-        this.nivaa = nivaa;
-    }
 
     @Override
     public String hentBeskrivendeNavn() {
@@ -90,6 +88,35 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
         } else {
             return tittel;
         }
+    }
+
+
+
+    // === Getters and setters ====
+
+
+    public Boolean getErOppsummerendeUnderkategori() {
+        return erOppsummerendeUnderkategori;
+    }
+
+    public void setErOppsummerendeUnderkategori(Boolean erOppsummerendeUnderkategori) {
+        this.erOppsummerendeUnderkategori = erOppsummerendeUnderkategori;
+    }
+
+    public Kategori getHovedKategori() {
+        return hovedKategori;
+    }
+
+    public void setHovedKategori(Kategori hovedKategori) {
+        this.hovedKategori = hovedKategori;
+    }
+
+    public Integer getNivaa() {
+        return nivaa;
+    }
+
+    public void setNivaa(Integer nivaa) {
+        this.nivaa = nivaa;
     }
 
     public Kategori() {

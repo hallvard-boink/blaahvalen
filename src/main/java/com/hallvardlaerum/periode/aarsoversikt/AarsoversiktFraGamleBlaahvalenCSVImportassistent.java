@@ -43,7 +43,7 @@ public class AarsoversiktFraGamleBlaahvalenCSVImportassistent extends CSVImporta
 
     @Override
     public void ryddOppEtterImport() {
-        aarsoversiktView.oppdaterSoekeomraade();
+        aarsoversiktView.oppdaterSoekeomraadeFinnAlleRader();
         Loggekyklop.bruk().avsluttImportloggTilFil();
     }
 }

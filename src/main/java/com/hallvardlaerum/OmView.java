@@ -58,7 +58,7 @@ public class OmView extends MainViewmal {
             if (!erInitiert) {
                 erInitiert = true;
 
-                Loggekyklop.hent().settNivaaDEBUG();
+                Loggekyklop.hent().settNivaaINFO();
 
                 Filkyklop.hent().initierRotmappeFile("blaahvalen");
                 Versjonskyklop.hent().initier(); // for å initiere versjonskyklop

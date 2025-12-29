@@ -82,13 +82,9 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
 
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
-        Kategori kategori = getEntitet().getKategori();
-        if (kategori!=null) {
-            kategoriDetaljComboBox.setItems(kategoriService.finnDelkategorier(kategori.getTittel()));
-            kategoriDetaljComboBox.setValue(kategori);
-        } else {
-            kategoriDetaljComboBox.setItems(new ArrayList<>());
-        }
+        Kategori kategori = hentEntitet().getKategori();
+        kategoriDetaljCombobox_OppdaterUtvalgOgSettTilOppsummerendeUnderkategori(kategori);
+
     }
 
     @Override
@@ -112,25 +108,34 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         settColspan(egenbeskrivelseTextField,3);
 
         kategoriComboBox = new ComboBox<>("Kategori");
-        kategoriComboBox.setItems(kategoriService.finnAlleHovedkategorier());
+        kategoriComboBox.setItems(kategoriService.finnAlleOppsummerendeUnderkategorier());
         kategoriComboBox.setItemLabelGenerator(Kategori::getTittel);
         kategoriComboBox.addValueChangeListener(event -> {
             if (event != null && hentEntitet()!=null) {
-                if (normalpoststatusComboBox.getValue()==NormalpoststatusEnum.UBEHANDLET) {
-                    normalpoststatusComboBox.setValue(NormalpoststatusEnum.FERDIG);
-                }
 
-                ArrayList<Kategori> underkategorierList = new ArrayList<>();
-                if (event.getValue()!=null) {
-                    underkategorierList = new ArrayList<>(kategoriService.finnDelkategorier(event.getValue().getTittel()));
+                if (event.isFromClient()) {
+                    kategoriDetaljCombobox_OppdaterUtvalgOgSettTilOppsummerendeUnderkategori(event.getValue());
+                    kategoriDetaljComboBox.setValue(kategoriComboBox.getValue());
+                    if (normalpoststatusComboBox.getValue()==NormalpoststatusEnum.UBEHANDLET) {
+                        normalpoststatusComboBox.setValue(NormalpoststatusEnum.FERDIG);
+                    }
                 }
-                kategoriDetaljComboBox.setItems(underkategorierList);
-                kategoriDetaljComboBox.setValue(underkategorierList.getFirst());
+                //Loggekyklop.bruk().loggINFO("Valuechange i kategoriCombobox");
             }
         });
 
         kategoriDetaljComboBox = new ComboBox<>("Underkategori");
+        kategoriDetaljComboBox.setItems(kategoriService.finnAlleUnderkategorier());
         kategoriDetaljComboBox.setItemLabelGenerator(Kategori::getUndertittel);
+        kategoriDetaljComboBox.addValueChangeListener(event -> {
+           if (event != null && hentEntitet()!=null & event.isFromClient())  {
+                if (normalpoststatusComboBox.getValue()==NormalpoststatusEnum.UBEHANDLET) {
+                    normalpoststatusComboBox.setValue(NormalpoststatusEnum.FERDIG);
+                }
+                kategoriComboBox.setValue(kategoriDetaljComboBox.getValue());
+           }
+
+        });
 
 
         kostnadspakkeComboBox = new ComboBox<>("Kostnadspakke");
@@ -142,6 +147,15 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
             }
         });
         kostnadspakkeComboBox.setItems(periodeoversiktpostService.finnAlleKostnadspakker());
+        kostnadspakkeComboBox.addValueChangeListener(event -> {
+            if (event != null && hentEntitet() != null && event.isFromClient() && event.getValue()!=null) {
+                Kategori kostnadspakkensKategori =event.getValue().getKategori();
+                if (kostnadspakkensKategori!=null) {
+                    kategoriComboBox.setValue(kostnadspakkensKategori);
+                    kategoriDetaljComboBox.setValue(kostnadspakkensKategori);
+                }
+            }
+        });
 
         super.leggTilRedigeringsfelter(hovedtabString, kategoriComboBox, kategoriDetaljComboBox, kostnadspakkeComboBox);
 
@@ -163,6 +177,15 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
 
         settFokusKomponent(egenbeskrivelseTextField);
     }
+    
+    private void kategoriDetaljCombobox_OppdaterUtvalgOgSettTilOppsummerendeUnderkategori(Kategori oppsummerendeunderkategori) {
+        ArrayList<Kategori> underkategorierList = new ArrayList<>();
+        if (oppsummerendeunderkategori!=null) {
+            underkategorierList = new ArrayList<>(kategoriService.finnUnderkategorier(oppsummerendeunderkategori.getTittel()));
+        }
+        kategoriDetaljComboBox.setItems(underkategorierList);
+        kategoriDetaljComboBox.setValue(oppsummerendeunderkategori);
+    }
 
     @Override
     public void instansByggOppBinder() {
@@ -175,7 +198,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         binder.bind(normalposttypeComboBox, Post::getNormalPosttypeEnum, Post::setNormalPosttypeEnum);
         binder.bind(normalpoststatusComboBox, Post::getNormalPoststatusEnum, Post::setNormalPoststatusEnum);
         binder.bind(kategoriComboBox, Post::getKategori, Post::setKategori);
-        binder.bind(kategoriDetaljComboBox, Post::getKategori, Post::setKategori);
+        //binder.bind(kategoriDetaljComboBox, Post::getKategori, Post::setKategori);
         binder.bind(ekstraInfoTextArea, Post::getEkstraInfoString, Post::setEkstraInfoString);
         binder.bind(uuidTextField, Post::getUuidString, Post::setUuidStringFake);
         binder.bind(forelderPostUUID, Post::getForelderPostUUID, Post::setForelderPostUUID);

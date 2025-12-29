@@ -78,7 +78,6 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
     }
 
 
-
     @Override
     public void settFilter() {
         GridListDataView<Kategori> listDataView = hentGrid().getListDataView();

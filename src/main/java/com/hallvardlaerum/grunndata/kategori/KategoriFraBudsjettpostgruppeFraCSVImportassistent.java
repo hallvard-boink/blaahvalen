@@ -5,6 +5,11 @@ import com.hallvardlaerum.verktoy.Allvitekyklop;
 import java.util.ArrayList;
 import java.util.Optional;
 
+/**
+@deprecated
+Denne klassen baserer seg på at budsjettpostgrupper skal brukes som underkategorier. Det er feil.
+Bruk heller {@link KategoriFraBlaahvalenCSVImportassistent}
+ */
 @Deprecated
 public class KategoriFraBudsjettpostgruppeFraCSVImportassistent extends CSVImportassistentMal<Kategori> {
     private KategoriService kategoriService;

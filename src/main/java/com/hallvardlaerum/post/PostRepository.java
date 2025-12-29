@@ -64,7 +64,7 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "(" +
                 "SELECT " +
                     "k.tittel, count(p.uuid) " +
-                "FROM" +
+                "FROM " +
                     "post p LEFT JOIN kategori k ON p.kategori_uuid  = k.uuid " +
                 "WHERE " +
                     "p.dato_local_date >=?1 AND p.dato_local_date <= ?2 " +

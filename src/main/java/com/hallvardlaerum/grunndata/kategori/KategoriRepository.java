@@ -19,7 +19,7 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
 
     List<Kategori> findByTittelAndNivaaOrderByUndertittel(String tittel, Integer nivaa);
 
-    List<Kategori> findByNivaa(int nivaa);
+    List<Kategori> findByNivaaOrderByTittelAscUndertittelAsc(int nivaa);
 
 
 
@@ -47,4 +47,6 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
 
 
     Optional<Kategori> findByTittelAndErOppsummerendeUnderkategori(String kategoriString, boolean erOppsummerendeunderkategori);
+
+    List<Kategori> findByErOppsummerendeUnderkategoriOrderByTittelAscUndertittelAsc(boolean erOppsummerende);
 }

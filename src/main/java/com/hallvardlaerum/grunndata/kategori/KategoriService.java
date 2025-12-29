@@ -60,14 +60,18 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     }
 
     public List<Kategori> finnAlleHovedkategorier(){
-        return kategoriRepository.findByNivaa(0);
+        return kategoriRepository.findByNivaaOrderByTittelAscUndertittelAsc(0);
+    }
+
+    public List<Kategori> finnAlleOppsummerendeUnderkategorier(){
+        return kategoriRepository.findByErOppsummerendeUnderkategoriOrderByTittelAscUndertittelAsc(true);
     }
 
     public List<Kategori> finnAlleUnderkategorier(){
-        return kategoriRepository.findByNivaa(1);
+        return kategoriRepository.findByNivaaOrderByTittelAscUndertittelAsc(1);
     }
 
-    public List<Kategori> finnDelkategorier(String hovedtittel){
+    public List<Kategori> finnUnderkategorier(String hovedtittel){
         return kategoriRepository.findByTittelAndNivaaOrderByUndertittel(hovedtittel,1);
     }
 

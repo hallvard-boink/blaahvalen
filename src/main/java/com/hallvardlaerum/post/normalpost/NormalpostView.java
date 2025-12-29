@@ -86,22 +86,16 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
 
 
 
-
-
-
     private void importerCSVFraGamleBlaahvalen() {
         NormalpostFraGamleBlaahvalenCSVImportassistent normalpostFraGamleBlaahvalenCSVImportassistent = new NormalpostFraGamleBlaahvalenCSVImportassistent();
         CSVImportmester csvImportmester = new CSVImportmester(normalpostFraGamleBlaahvalenCSVImportassistent);
         csvImportmester.velgImportfilOgKjoerImport(postService);
     }
 
-
     @Override
     public boolean erInitiert() {
         return erInitiert;
     }
-
-
 
     private void leggTilImporterCSVFraHandelsbankenButton(){
         Button importerCSVFraHandelsbankenButton = new Button("Importer CSV fra Handelsbanken");
@@ -117,7 +111,6 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
         csvImportmester.velgImportfilOgKjoerImport(postService);
 
     }
-
 
     public void oppdaterMarkerteRadiGrid(){
         grid.getDataProvider().refreshItem(normalPostRedigeringsomraade.getEntitet());
@@ -150,14 +143,10 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
 
     }
 
-
-
-
     @Override
     public void settFilter() {
         ArrayList<SearchCriteria> filtre = new ArrayList<>();
 
-        //Oppdater PostSpecification her
 
         filtre.add(new SearchCriteria("postklasseEnum",":", PostklasseEnum.NORMALPOST));
 
@@ -197,7 +186,8 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
             filtre.add(new SearchCriteria("kostnadsPakke",":",kostnadspakkeFilterComboBox.getValue()));
         }
 
-
+        super.brukFiltreIDataprovider(filtre);
+        //super.oppdaterAntallRaderNederstIGrid();
 
     }
 

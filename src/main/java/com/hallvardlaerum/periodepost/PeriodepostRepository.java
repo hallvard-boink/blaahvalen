@@ -59,13 +59,26 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
     List<Periodepost> finnEtterPeriodeOgKategorinivaa(UUID periodeUUID, Integer kategoriNivaa);
 
     @NativeQuery(value =
-            "SELECT pp.*  " +
-                    "FROM " +
-                    "periodepost pp " +
-                    "LEFT JOIN kategori k ON pp.kategori_uuid = k.uuid " +
-                    "LEFT JOIN periode p ON pp.periode_uuid = p.uuid " +
-                    "WHERE " +
-                    "p.dato_fra_local_date = ?1 " +
-                    "AND k.tittel = ?2")
+        "SELECT " +
+            "pp.*  " +
+        "FROM " +
+            "periodepost pp " +
+            "LEFT JOIN kategori k ON pp.kategori_uuid = k.uuid " +
+            "LEFT JOIN periode p ON pp.periode_uuid = p.uuid " +
+        "WHERE " +
+            "p.dato_fra_local_date = ?1 " +
+            "AND k.tittel = ?2")
     List<Periodepost> finnFraPeriodedatostartOgKategoritittel(LocalDate datoFra, String kategoritittel);
+
+    @NativeQuery(value =
+        "SELECT " +
+            "pp.uuid, sum(p.inn_paa_konto_integer) , sum(p.ut_fra_konto_integer) " +
+        "FROM " +
+            "post p LEFT JOIN periodepost pp ON p.kostnads_pakke_uuid = pp.uuid " +
+        "WHERE " +
+            "p.dato_local_date >=?1 AND p.dato_local_date <=?2 " +
+            "AND pp.periodepost_type_enum = 2 " +
+        "GROUP BY " +
+            "pp.uuid")
+    List<Tuple> finnKostnadspakkerForMaaneden(LocalDate datoFra, LocalDate datoTil);
 }

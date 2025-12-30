@@ -41,10 +41,12 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
             this.maanedsoversiktRedigeringsomraade = Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade();
             this.maanedsoversiktRedigeringsomraade.settView(this);
             Allvitekyklop.hent().getMaanedsoversiktpostRedigeringsomraadeTilDialog().settView(this);
+
             super.initPeriodeViewMal(PeriodetypeEnum.MAANEDSOVERSIKT,
                     this,
                     maanedsoversiktService,
-                    maanedsoversiktRedigeringsomraade
+                    maanedsoversiktRedigeringsomraade,
+                    40D
                     );
             leggTilOgTilpassKnapper();
             hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());

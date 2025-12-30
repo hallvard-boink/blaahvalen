@@ -62,7 +62,8 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         this.redigeringsomraade.settView(viewmalAktig);
         this.periodeservice = periodeservice;
 
-        super.opprettLayout(this.periodeservice, redigeringsomraade, SplitLayout.Orientation.HORIZONTAL, 25D);
+        super.opprettLayout(this.periodeservice, redigeringsomraade, SplitLayout.Orientation.HORIZONTAL, splittPlasseringDouble);
+
         hentVindutittel().setText(periodetypeEnum.getTittel());
         initierGridMedPagedSearch();
     }

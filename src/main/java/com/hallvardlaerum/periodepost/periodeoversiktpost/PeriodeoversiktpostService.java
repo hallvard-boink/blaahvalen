@@ -2,6 +2,7 @@
 import com.hallvardlaerum.grunndata.kategori.Kategori;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostRepository;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
@@ -9,6 +10,7 @@ import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
+import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -79,5 +81,14 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
         hentRepository().finnFraPeriodedatostartOgKategoritittel(datoAaretsStart, kategori.getTittel());
 
         return null;
+    }
+
+    public List<Tuple> finnKostnadspakkerForMaaneden(Periode periode) {
+        if (periode==null) {
+            return new ArrayList<>();
+        }
+
+        return periodepostRepository.finnKostnadspakkerForMaaneden(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+
     }
 }

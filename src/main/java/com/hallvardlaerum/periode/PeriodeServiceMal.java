@@ -16,6 +16,7 @@ import jakarta.persistence.Tuple;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -202,7 +203,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         List<Tuple> tuples = periodeRepository.sumInnUtFradatoTilDatoTildelteBudsjettposter(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
         if (tuples.size()==1) {
             Tuple tuple = tuples.getFirst();
-            if (tuple!=null) {
+            if (tuple!=null && tuple.get(0, BigInteger.class)!=null) {
                 Integer sumInn = DesimalMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class));
                 sumInn = sumInn==null ? 0 : sumInn;
                 Integer sumUt = DesimalMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class));

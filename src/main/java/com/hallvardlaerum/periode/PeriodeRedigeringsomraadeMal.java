@@ -112,7 +112,7 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
 
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
-        if (getEntitet()==null) {
+        if (hentEntitet()==null) {
             periodetittelHorizontalLayout.oppdaterTittel("");
         } else {
             periodetittelHorizontalLayout.oppdaterTittel(hentEntitet().getDatoFraLocalDate());
@@ -121,15 +121,16 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
     }
 
     private void oppdaterPeriodepostGrid() {
-        if(getEntitet()==null) {
+        if(hentEntitet()==null) {
             hovedKategorierGrid.setItems(new ArrayList<>());
         } else {
-            hovedKategorierGrid.setItems(periodepostService.finnHovedperiodeposter(getEntitet()));
+            hovedKategorierGrid.setItems(periodepostService.finnHovedperiodeposter(hentEntitet()));
         }
     }
 
+    //TODO: Flytt denne til periodeservice eller periodepostservice
     public ArrayList<Periodepost> hentPeriodepostListSortert(Periode periode) {
-        List<Periodepost> periodeposter = getEntitet().getPeriodeposterList();
+        List<Periodepost> periodeposter = hentEntitet().getPeriodeposterList();
         if (periodeposter==null) {
             return new ArrayList<>();
         } else {
@@ -148,10 +149,9 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         instansOpprettFelter_leggTilHovedkategorierTab();
         instansOpprettFelter_leggTilEkstraTab();
 
-        setFokusComponent(beskrivelseTextArea);
+        settFokusKomponent(beskrivelseTextArea);
 
     }
-
 
 
     private void instansOpprettFelter_leggTilHovedkategorierTab() {
@@ -160,7 +160,7 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         hovedKategorierGrid = new Grid<>();
         hovedKategorierGrid.addColumn(p -> {
             if(p.getKategori()!=null) {
-                return p.getKategori().hentKortnavn();
+                return p.getKategori().getTittel();
             } else {
                 return "";
             }
@@ -175,7 +175,9 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
             periodepostRedigerEntitetDialog.vis(e.getItem());
         });
 
-        Gridkyklop.hent().alleRaderTilpassKolonnerOgOpprettFilteradIGrid(hovedKategorierGrid);
+
+        Gridkyklop.hent().tilpassKolonnerIFastradGrid(hovedKategorierGrid);
+        hovedKategorierGrid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
 
         leggTilRedigeringsfelter(regnskaptabString, hovedKategorierGrid);
         hentFormLayoutFraTab(regnskaptabString).setSizeFull();

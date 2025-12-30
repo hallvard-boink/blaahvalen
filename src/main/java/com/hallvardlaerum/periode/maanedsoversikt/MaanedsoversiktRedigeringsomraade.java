@@ -3,12 +3,14 @@ package com.hallvardlaerum.periode.maanedsoversikt;
 import com.hallvardlaerum.grunndata.kategori.KategoriRetning;
 import com.hallvardlaerum.grunndata.kategori.KategoriService;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.felter.HelTallMester;
+import com.hallvardlaerum.libs.felter.DesimalMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periodepost.HallvardsSpan;
+import com.hallvardlaerum.periodepost.Periodepost;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
@@ -18,7 +20,13 @@ import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.spring.annotation.UIScope;
+import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Component
 @UIScope
@@ -26,8 +34,12 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
     private boolean erInitiert=false;
     private Grid<Post> tildelteBudsjettposterGrid;
     private Grid<Post> foreslaatteBudsjettposterGrid;
+    private Grid<MaanedsradKostnadspakke> kostnadspakkeGrid;
+
     private KategoriService kategoriService;
     private BudsjettpostService budsjettpostService;
+    private PeriodeoversiktpostService kostnadspakkeService;
+
     private HallvardsSpan innSpan;
     private HallvardsSpan utSpan;
     private HallvardsSpan resultatSpan;
@@ -35,9 +47,41 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
         super.instansOppdaterEkstraRedigeringsfelter();
+        oppdaterKostnadspakkeTab();
         oppdaterRedigerbudsjettTabMedInnhold();
 
     }
+
+    private void oppdaterKostnadspakkeTab() {
+        List<Tuple> tupleList = kostnadspakkeService.finnKostnadspakkerForMaaneden(hentEntitet());
+        ArrayList<MaanedsradKostnadspakke> maanedsradKostnadspakkeArrayList = new ArrayList<>();
+        Periode maanedsoversikt = hentEntitet();
+
+        for (Tuple tuple:tupleList) {
+            String kostnadspakkeUUIDString = tuple.get(0, UUID.class).toString();
+            if (kostnadspakkeUUIDString==null) {
+                break;
+            }
+            Periodepost kostnadspakke = kostnadspakkeService.finnEtterUUID(kostnadspakkeUUIDString);
+            if (kostnadspakke!=null) {
+                BigDecimal sumInnBigDecimal = tuple.get(1, BigDecimal.class);
+                Integer sumInnInteger = 0;
+                if (sumInnBigDecimal!=null) {
+                    sumInnInteger= DesimalMester.konverterBigdecimalTilInteger(sumInnBigDecimal);
+                }
+
+                BigDecimal sumUtBigDecimal = tuple.get(2, BigDecimal.class);
+                Integer sumUtInteger = 0;
+                if (sumUtBigDecimal!=null) {
+                    sumUtInteger = DesimalMester.konverterBigdecimalTilInteger(sumUtBigDecimal);
+                }
+
+                maanedsradKostnadspakkeArrayList.add(new MaanedsradKostnadspakke(kostnadspakke,sumInnInteger + sumUtInteger));
+            }
+        }
+        kostnadspakkeGrid.setItems(maanedsradKostnadspakkeArrayList);
+    }
+
 
     private void oppdaterRedigerbudsjettTabMedInnhold() {
         Periode periode = hentEntitet();
@@ -63,8 +107,64 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
     @Override
     public void instansOpprettFelter(){
         super.instansOpprettFelter();
+        instansOpprettFelter_leggTilKostnadspakkerTab_Maanedsoversikt();
         instansOpprettFelter_leggTilBudsjettTab_Maanedsoversikt();
     }
+
+    private void instansOpprettFelter_leggTilKostnadspakkerTab_Maanedsoversikt() {
+        String kostnadspakkeTabString = "Kostnadspakker";
+        kostnadspakkeGrid = new Grid<>();
+        kostnadspakkeGrid.addColumn(MaanedsradKostnadspakke::getTittel).setHeader("Kostnadspakke");
+        kostnadspakkeGrid.addColumn(MaanedsradKostnadspakke::getSumForDenneMaaned).setHeader("Sum for måneden");
+        kostnadspakkeGrid.addColumn(MaanedsradKostnadspakke::getSumTotalt).setHeader("Sum totalt");
+
+        super.leggTilRedigeringsfelt(kostnadspakkeTabString,kostnadspakkeGrid);
+    }
+
+
+    private class MaanedsradKostnadspakke {
+        private Periodepost kostnadspakke;
+        private Integer sumForDenneMaaned ;
+
+
+        public MaanedsradKostnadspakke(Periodepost kostnadspakke, Integer sumForDenneMaaned) {
+            this.kostnadspakke = kostnadspakke;
+            this.sumForDenneMaaned = sumForDenneMaaned;
+        }
+
+        public Periodepost getKostnadspakke() {
+            return kostnadspakke;
+        }
+
+        public void setKostnadspakke(Periodepost kostnadspakke) {
+            this.kostnadspakke = kostnadspakke;
+        }
+
+        public Integer getSumForDenneMaaned() {
+            return sumForDenneMaaned;
+        }
+
+        public void setSumForDenneMaaned(Integer sumForDenneMaaned) {
+            this.sumForDenneMaaned = sumForDenneMaaned;
+        }
+
+        public Integer getSumTotalt(){
+            if (kostnadspakke==null) {
+                return 0;
+            } else {
+                return kostnadspakke.getSumRegnskapInteger();
+            }
+        }
+
+        public String getTittel(){
+            if (kostnadspakke==null) {
+                return "";
+            } else {
+                return kostnadspakke.getTittelString();
+            }
+        }
+    }
+
 
     /**
      * <h1>Rediger budsjett</h1>
@@ -161,6 +261,7 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
                     Allvitekyklop.hent().getMaanedsoversiktService());
             kategoriService = Allvitekyklop.hent().getKategoriService();
             budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
+            kostnadspakkeService = Allvitekyklop.hent().getPeriodeoversiktpostService();
             erInitiert = true;
         }
     }

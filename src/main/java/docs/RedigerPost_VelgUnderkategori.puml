@@ -1,0 +1,42 @@
+@startuml
+
+scale 1.5
+
+start
+:<b>Velg hovedkategori</b>\n{{\nsalt\n{+\nPassword | "****     "\n[Cancel] | [  OK   ]}\n}}\n;
+:<b>Velg underkategori</b>;
+if(Finnes en periodepost/\nkostnadspakke?) then (yes)
+    :<b>Velg periodepost</b>;
+else (no)
+    :<b>Opprett kostnadspakke</b>;
+endif
+
+
+
+'\n{{\nsalt\n{+\nPassword | "****     "\n[Cancel] | [  OK   ]}\n}}\n
+'\n{{salt
+ '    {
+ '        { [Vis delposter] | [Ny] | [Lagre] | [Slett] }
+ '        .
+ '        {/<b>Hoved</b> | Ekstra }
+ '        .
+ '        Tekst fra banken:
+ '        "01.10 FREDRIKSTAD JBS ST.OLAVSGT.  FREDRIKSTAD"
+ '        .
+ '        {
+ '            Dato:|Inn på konto:|Ut fra konto:
+ '            "2025-10-01" | "0" | "29 223"
+ '        }
+ '        .
+ '        Egen beskrivelse:
+ '        "Dette var et større innkjøp"
+ '        .
+ '        {
+ '            ^Kategori^ | ^Underkategori^
+ '            ^Posttype^ | ^Poststatus^
+ '
+ '        }
+ '    }}}
+stop
+
+@enduml

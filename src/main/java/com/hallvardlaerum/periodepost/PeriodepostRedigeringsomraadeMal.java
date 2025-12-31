@@ -31,7 +31,13 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
     private PeriodeServiceMal periodeServiceMal;
     private NormalpostService normalpostService;
 
-    //== FELTENE ===
+    // === TABS OG GRIDS ===
+    private final String ekstratabString = "Ekstra";
+    private final String normalposterTabString = "Regnskap";
+    private Grid<Post> normalposterGrid;
+    private Grid<Post> budsjettposterGrid;
+
+    // === FELTER ===
     private ComboBox<PeriodepostTypeEnum> periodeposttypeEnumComboBox = null;
     private ComboBox<Kategori> kategoriComboBox;
     private HallvardsSpan sumBudsjettSpan;
@@ -41,8 +47,12 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
     private TextField tittelTextField;
     private TextArea beskrivelseTextArea;
 
-    private Grid<Post> normalposterGrid;
-    private Grid<Post> budsjettposterGrid;
+    // === MERKELAPPER ===
+    private final Span sumBudsjettLabelSpan = new Span("Sum budsjett");
+    private final Span sumRegnskapLabelSpan = new Span("Sum regnskap");
+    private final Span sumDifferanseLabelSpan = new Span("Differanse");
+
+
 
 
     public PeriodepostRedigeringsomraadeMal() {
@@ -108,102 +118,22 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
 
     @Override
     public void instansOpprettFelter() {
-
-        instansOpprettFelter_leggTilOverfelter();
-        instansOpprettFelter_opprettNormalposterTab();
-        if (periodepostTypeEnum!= PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
-            instansOpprettFelter_opprettBudsjettposterTab();
-        }
-        instansOpprettFelter_opprettEkstraTab();
         //TODO: Her dukker det opp en "Hoved"-tab vi ikke skal ha. Se på logikken rundt tabe'er i Vaadin en gang til.
 
-        setFokusComponent(beskrivelseTextArea);
-    }
-
-    private void instansOpprettFelter_leggTilOverfelter() {
-        Span sumBudsjettLabelSpan = new Span("Sum budsjett");
-        Span sumRegnskapLabelSpan = new Span("Sum regnskap");
-        Span sumDifferanseLabelSpan = new Span("Differanse");
-
-        sumBudsjettSpan = new HallvardsSpan();
-        sumRegnskapSpan = new HallvardsSpan();
-        sumDifferanseSpan = new HallvardsSpan();
+        instanOpprettFelter_opprettFellesFelter();
+        instansOpprettFelter_leggTilOverfelter();
+        instansOpprettFelter_opprettNormalposterTab();
+        instansOpprettFelter_opprettBudsjettposterTab();
+        instansOpprettFelter_opprettEkstraTab();
 
         if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
-            tittelTextField = new TextField();
-            tittelTextField.setPlaceholder("Tittel");
-            tittelTextField.setWidthFull();
+            settFokusKomponent(tittelTextField);
+        } else {
+            settFokusKomponent(beskrivelseTextArea);
         }
-        beskrivelseTextArea = new TextArea();
-        beskrivelseTextArea.setMinRows(2);
-        beskrivelseTextArea.setPlaceholder("Beskrivelse");
-        beskrivelseTextArea.setSizeFull();
-
-        HorizontalLayout kol1HorizontalLayout = new HorizontalLayout();
-        kol1HorizontalLayout.setWidth("400px");
-        kol1HorizontalLayout.setFlexGrow(0);
-        //kol1HorizontalLayout.setHeight("50px");
-
-
-        VerticalLayout kol1aVerticalLayout = new VerticalLayout();
-        kol1aVerticalLayout.setSizeFull();
-        kol1aVerticalLayout.add(sumBudsjettLabelSpan, sumRegnskapLabelSpan, sumDifferanseLabelSpan);
-
-        VerticalLayout kol1bVerticalLayout = new VerticalLayout();
-        kol1bVerticalLayout.setSizeFull();
-        kol1bVerticalLayout.setAlignItems(Alignment.END);
-        kol1bVerticalLayout.add(sumBudsjettSpan, sumRegnskapSpan, sumDifferanseSpan);
-
-
-        kol1HorizontalLayout.add(kol1aVerticalLayout, kol1bVerticalLayout);
-
-        VerticalLayout kol2VerticalLayout = new VerticalLayout();
-        kol2VerticalLayout.setSizeFull();
-
-        if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
-            kol2VerticalLayout.add(tittelTextField);
-        }
-        kol2VerticalLayout.add(beskrivelseTextArea);
-
-        HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.setSizeFull();
-        horizontalLayout.add(kol1HorizontalLayout,kol2VerticalLayout);
-
-        leggTilAndrefelterOver(horizontalLayout);
-
     }
 
-    private void instansOpprettFelter_opprettBudsjettposterTab() {
-        String budsjettpostertabString = "Budsjett";
-        budsjettposterGrid = opprettStandardPostGrid();
-        leggTilRedigeringsfelt(budsjettpostertabString, budsjettposterGrid);
-
-    }
-
-    private void instansOpprettFelter_opprettNormalposterTab(){
-        String normalposterTabString = "Regnskap";
-        normalposterGrid = opprettStandardPostGrid();
-        leggTilRedigeringsfelt(normalposterTabString, normalposterGrid);
-    }
-
-    private Grid<Post> opprettStandardPostGrid() {
-        Grid<Post> postGrid = new Grid<>();
-        postGrid.addColumn(p -> p.getKategori()!=null? p.getKategori().hentKortnavn() : "").setHeader("Kategori");
-        postGrid.addColumn(Post::getDatoLocalDate).setHeader("Dato").setWidth("150px").setFlexGrow(0);
-        postGrid.addColumn(p -> {
-            if (p.getInnPaaKontoInteger()!=null && p.getInnPaaKontoInteger()>0) {
-                return p.getInnPaaKontoInteger();
-            } else {
-                return p.getUtFraKontoInteger();
-            }
-        } ).setHeader("Sum").setWidth("100px").setFlexGrow(0).setTextAlign(ColumnTextAlign.END);
-        postGrid.addColumn(Post::getBeskrivelseString).setHeader("Beskrivelse");
-        return postGrid;
-    }
-
-    private void instansOpprettFelter_opprettEkstraTab() {
-        String ekstratabString = "Ekstra";
-
+    private void instanOpprettFelter_opprettFellesFelter(){
         periodeposttypeEnumComboBox = new ComboBox<>("Type");
         periodeposttypeEnumComboBox.setItemLabelGenerator(PeriodepostTypeEnum::getTittel);
         periodeposttypeEnumComboBox.setItems(PeriodepostTypeEnum.values());
@@ -216,7 +146,115 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
         kategoriComboBox.setItemLabelGenerator(Kategori::hentKortnavn);
         kategoriComboBox.setItems(kategoriService.finnAlle());
 
-        leggTilRedigeringsfelter(ekstratabString, periodeposttypeEnumComboBox, kategoriComboBox, periodeComboBox);
+        sumBudsjettSpan = new HallvardsSpan();
+        sumRegnskapSpan = new HallvardsSpan();
+        sumDifferanseSpan = new HallvardsSpan();
+
+        beskrivelseTextArea = new TextArea();
+        beskrivelseTextArea.setMinRows(2);
+        beskrivelseTextArea.setSizeFull();
+    }
+
+    private void instansOpprettFelter_leggTilOverfelter() {
+
+        if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
+            instansOpprettFelter_leggTilOverfelter_Kostnadspakke();
+        } else {
+            beskrivelseTextArea.setPlaceholder("Beskrivelse");
+
+            HorizontalLayout kol1HorizontalLayout = new HorizontalLayout();
+            kol1HorizontalLayout.setWidth("400px");
+            kol1HorizontalLayout.setFlexGrow(0);
+
+            VerticalLayout kol1aVerticalLayout = new VerticalLayout();
+            kol1aVerticalLayout.setSizeFull();
+            kol1aVerticalLayout.add(sumBudsjettLabelSpan, sumRegnskapLabelSpan, sumDifferanseLabelSpan);
+
+            VerticalLayout kol1bVerticalLayout = new VerticalLayout();
+            kol1bVerticalLayout.setSizeFull();
+            kol1bVerticalLayout.setAlignItems(Alignment.END);
+            kol1bVerticalLayout.add(sumBudsjettSpan, sumRegnskapSpan, sumDifferanseSpan);
+
+
+            kol1HorizontalLayout.add(kol1aVerticalLayout, kol1bVerticalLayout);
+
+            VerticalLayout kol2VerticalLayout = new VerticalLayout();
+            kol2VerticalLayout.setSizeFull();
+            kol2VerticalLayout.add(beskrivelseTextArea);
+
+            HorizontalLayout horizontalLayout = new HorizontalLayout();
+            horizontalLayout.setSizeFull();
+            horizontalLayout.add(kol1HorizontalLayout,kol2VerticalLayout);
+
+            leggTilAndrefelterOver(horizontalLayout);
+        }
+    }
+
+    private void instansOpprettFelter_leggTilOverfelter_Kostnadspakke() {
+        VerticalLayout bakgrunnVerticalLayout = new VerticalLayout();
+        bakgrunnVerticalLayout.setSizeFull();
+        HorizontalLayout rad1HorizontalLayout = new HorizontalLayout();
+        rad1HorizontalLayout.setWidthFull();
+        rad1HorizontalLayout.setDefaultVerticalComponentAlignment(Alignment.END);
+
+
+        tittelTextField = new TextField("Tittel");
+        tittelTextField.setWidthFull();
+        kategoriComboBox.setWidth("300px");
+        rad1HorizontalLayout.add(kategoriComboBox, tittelTextField, sumRegnskapLabelSpan, sumRegnskapSpan);
+
+        beskrivelseTextArea.setLabel("Beskrivelse");
+
+        bakgrunnVerticalLayout.add(rad1HorizontalLayout);
+        bakgrunnVerticalLayout.add(beskrivelseTextArea);
+
+        leggTilAndrefelterOver(bakgrunnVerticalLayout);
+
+    }
+
+    private void instansOpprettFelter_opprettBudsjettposterTab() {
+        if (periodepostTypeEnum == PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
+            return;  //Avbryt hvis kostnadspakke
+        }
+
+        String budsjettpostertabString = "Budsjett";
+        budsjettposterGrid = opprettStandardPostGrid();
+        leggTilRedigeringsfelt(budsjettpostertabString, budsjettposterGrid);
+
+    }
+
+    private void instansOpprettFelter_opprettNormalposterTab(){
+
+        normalposterGrid = opprettStandardPostGrid();
+        leggTilRedigeringsfelt(normalposterTabString, normalposterGrid);
+    }
+
+    private Grid<Post> opprettStandardPostGrid() {
+        Grid<Post> postGrid = new Grid<>();
+        postGrid.addColumn(p -> p.getKategori()!=null? p.getKategori().hentKortnavn() : "").setHeader("Kategori").setWidth("250px").setFlexGrow(0);
+        postGrid.addColumn(Post::getDatoLocalDate).setHeader("Dato").setWidth("150px").setFlexGrow(0);
+        postGrid.addColumn(Post::getTekstFraBankenString).setHeader("Tekst fra banken");
+        postGrid.addColumn(p -> {
+            if (p.getInnPaaKontoInteger()!=null && p.getInnPaaKontoInteger()>0) {
+                return p.getInnPaaKontoInteger();
+            } else {
+                return p.getUtFraKontoInteger();
+            }
+        } ).setHeader("Sum").setWidth("100px").setFlexGrow(0).setTextAlign(ColumnTextAlign.END);
+        postGrid.addColumn(Post::getBeskrivelseString).setHeader("Beskrivelse");
+        postGrid.setSizeFull();
+//        postGrid.setWidthFull();
+//        postGrid.setHeight("500px"); //virker ikke
+        return postGrid;
+    }
+
+    private void instansOpprettFelter_opprettEkstraTab() {
+
+        if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
+            leggTilRedigeringsfelter(ekstratabString, periodeposttypeEnumComboBox, periodeComboBox);
+        } else {
+            leggTilRedigeringsfelter(ekstratabString, periodeposttypeEnumComboBox, kategoriComboBox, periodeComboBox);
+        }
     }
 
     @Override

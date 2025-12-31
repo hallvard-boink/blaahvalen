@@ -75,20 +75,18 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
             return null;
         }
 
-
-
         LocalDate datoAaretsStart = Datokyklop.hent().finnFoersteIAaret(post.getDatoLocalDate());
         hentRepository().finnFraPeriodedatostartOgKategoritittel(datoAaretsStart, kategori.getTittel());
 
         return null;
     }
 
-    public List<Tuple> finnKostnadspakkerForMaaneden(Periode periode) {
+    public List<Tuple> finnKostnadspakkeUUIDogSummerForPeriode(Periode periode) {
         if (periode==null) {
             return new ArrayList<>();
         }
 
-        return periodepostRepository.finnKostnadspakkerForMaaneden(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+        return periodepostRepository.finnOgOppsummerKostnadspakkerForDatospenn(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
 
     }
 }

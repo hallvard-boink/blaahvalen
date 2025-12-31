@@ -7,6 +7,8 @@ import com.hallvardlaerum.libs.felter.DesimalMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeServiceMal;
+import com.hallvardlaerum.periode.PeriodetypeEnum;
+import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import jakarta.persistence.Tuple;
@@ -14,6 +16,8 @@ import jakarta.persistence.Tuple;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, PeriodepostRepository> {
     private PeriodepostRepository periodepostRepository;
@@ -56,14 +60,15 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         return periodepostRedigeringsomraade;
     }
 
-    public void oppdaterSummer() {
-        oppdaterSummer(periodepostRedigeringsomraade.getEntitet());
+    public void oppdaterOgLagreSummerForValgteVanligePeriodepost() {
+        oppdaterOgLagreSummerForVanligePeriodeposter(periodepostRedigeringsomraade.getEntitet());
         hentRedigeringsomraadeAktig().lesBean();
         hentRedigeringsomraadeAktig().instansOppdaterEkstraRedigeringsfelter();
 
     }
 
-    public void oppdaterSummer(Periodepost periodepost) {
+
+    public void oppdaterOgLagreSummerForVanligePeriodeposter(Periodepost periodepost) {
         if (periodepost.getKategori()==null) {
             return;
         }
@@ -153,6 +158,47 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
 
 
     public List<Periodepost> finnHovedperiodeposter(Periode entitet) {
-        return hentRepository().finnEtterPeriodeOgKategorinivaa(entitet.getUuid(), 0);
+        return periodepostRepository.finnEtterPeriodeOgKategorinivaa(entitet.getUuid(), 0);
+    }
+
+    public List<Periodepost> finnKostnadspakker(Periode periode) {
+        if (periode==null) {
+            return new ArrayList<>();
+        }
+
+        if (periode.getPeriodetypeEnum()== PeriodetypeEnum.AARSOVERSIKT) {
+            return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.PERIODEOVERSIKTPOST, periode);
+
+        } else if (periode.getPeriodetypeEnum()==PeriodetypeEnum.MAANEDSOVERSIKT) {
+            List<Tuple> tuples = periodepostRepository.finnOgOppsummerKostnadspakkerForDatospenn(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+            return finnKostnadspakker_konverterFraTuples(tuples);
+
+        } else {
+            List<Tuple> tuples = periodepostRepository.finnOgOppsummerKostnadspakkerForDatospenn(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+            return finnKostnadspakker_konverterFraTuples(tuples);
+        }
+    }
+
+    /**
+     * Her regner jeg med at første tuple inneholder uuid for kostnadspakke
+     * @param tuples
+     * @return
+     */
+    private ArrayList<Periodepost>finnKostnadspakker_konverterFraTuples(List<Tuple> tuples) {
+        ArrayList<Periodepost> kostnadspakker = new ArrayList<>();
+        if (tuples==null) {
+            return kostnadspakker;
+        }
+
+        for (Tuple tuple:tuples) {
+            UUID uuid = tuple.get(0, UUID.class);
+            if (uuid!=null) {
+                Optional<Periodepost> kostnadspakkeOptional = periodepostRepository.findById(uuid);
+                if (kostnadspakkeOptional.isPresent()) {
+                    kostnadspakker.add(kostnadspakkeOptional.get());
+                }
+            }
+        }
+        return kostnadspakker;
     }
 }

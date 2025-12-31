@@ -23,7 +23,7 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
 
     List<Periodepost> findByPeriodepostTypeEnumOrderByTittelStringDesc(PeriodepostTypeEnum periodepostTypeEnum);
 
-
+    List<Periodepost> findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum periodepostTypeEnum, Periode periode);
 
     @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer)+sum(p.ut_fra_konto_integer) " +
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
@@ -80,5 +80,5 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
             "AND pp.periodepost_type_enum = 2 " +
         "GROUP BY " +
             "pp.uuid")
-    List<Tuple> finnKostnadspakkerForMaaneden(LocalDate datoFra, LocalDate datoTil);
+    List<Tuple> finnOgOppsummerKostnadspakkerForDatospenn(LocalDate datoFra, LocalDate datoTil);
 }

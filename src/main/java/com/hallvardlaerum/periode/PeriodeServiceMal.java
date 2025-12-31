@@ -8,6 +8,7 @@ import com.hallvardlaerum.libs.felter.DesimalMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -16,7 +17,6 @@ import jakarta.persistence.Tuple;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +28,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
     private PostServiceMal postService;
     private PeriodepostServiceMal periodepostService;
     private KategoriService kategoriService;
+    private PeriodeoversiktpostService periodeoversiktpostService;
 
     public PeriodeServiceMal() {
 
@@ -37,12 +38,15 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
                         PeriodetypeEnum periodetypeEnum,
                         PeriodepostServiceMal periodepostServiceMal,
                         PostServiceMal postService) {
-        this.periodeRepository = Allvitekyklop.hent().getPeriodeRepository();
         this.periodeRedigeringsomraade = periodeRedingeringsomraade;
         this.periodetypeEnum = periodetypeEnum;
         this.periodepostService = periodepostServiceMal;
         this.postService = postService;
+
+        this.periodeRepository = Allvitekyklop.hent().getPeriodeRepository();
         this.kategoriService = Allvitekyklop.hent().getKategoriService();
+        this.periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
+
         super.initEntitetserviceMal(Periode.class, periodeRepository);
     }
 
@@ -83,12 +87,23 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
 
         oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(periode, 1);
         oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode,1 );
+        oppdaterPeriodensPeriodeposterOgSummer_oppdaterKostnadspakker(periode);
 
         oppdaterSummer(periode);
         periodeRedigeringsomraade.lesBean();
         periodeRedigeringsomraade.instansOppdaterEkstraRedigeringsfelter();
     }
 
+
+    public void oppdaterPeriodensPeriodeposterOgSummer_oppdaterKostnadspakker(Periode periode) {
+        List<Periodepost> kostnadspakkeList = periodepostService.finnKostnadspakker(periode);
+        for (Periodepost kostnadspakke:kostnadspakkeList) {
+            periodeoversiktpostService.oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
+            periodeoversiktpostService.lagre(kostnadspakke);
+
+        }
+
+    }
 
     public void oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(Periode periode, Integer kategoriNivaa){
         if (periode==null) {
@@ -104,7 +119,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
             if (postList.isEmpty()) {
                 periodepostService.slett(periodepost);
             } else {
-                periodepostService.oppdaterSummer(periodepost);
+                periodepostService.oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
             }
         }
     }
@@ -135,7 +150,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
                 periodepost.setPeriode(periode);
                 periodepost.setKategori(kategori);
                 periodepost.setPeriodepostTypeEnum(periodetypeEnum.getPeriodepostTypeEnum());
-                periodepostService.oppdaterSummer(periodepost);
+                periodepostService.oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
                 periodepostService.lagre(periodepost);
             }
         }
@@ -203,7 +218,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         List<Tuple> tuples = periodeRepository.sumInnUtFradatoTilDatoTildelteBudsjettposter(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
         if (tuples.size()==1) {
             Tuple tuple = tuples.getFirst();
-            if (tuple!=null && tuple.get(0, BigInteger.class)!=null) {
+            if (tuple!=null && tuple.get(0, BigDecimal.class)!=null) {
                 Integer sumInn = DesimalMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class));
                 sumInn = sumInn==null ? 0 : sumInn;
                 Integer sumUt = DesimalMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class));

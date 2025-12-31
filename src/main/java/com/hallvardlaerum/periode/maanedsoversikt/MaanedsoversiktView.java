@@ -20,6 +20,7 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
     private MaanedsoversiktService maanedsoversiktService;
     private MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade;
     private Button oppdaterSummerButton;
+    private Button oppdaterSummerOgPeriodeposterButton;
     private Button skrivUtMaanedsoversiktButton;
     private boolean erInitiert = false;
 
@@ -63,10 +64,15 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
 
 
     private void leggTilOgTilpassKnapper() {
-        oppdaterSummerButton = new Button("Oppdater månedsoversikt");
-        oppdaterSummerButton.addClickListener(e -> maanedsoversiktService.oppdaterOverordnetPeriodensPeriodeposterOgSummer());
-        oppdaterSummerButton.setEnabled(false);
-        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerButton);
+//        oppdaterSummerButton = new Button("Oppdater oversikt");
+//        oppdaterSummerButton.addClickListener(e -> maanedsoversiktService.oppdaterOverordnetPeriodensPeriodeposterOgSummer());
+//        oppdaterSummerButton.setEnabled(false);
+//        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerButton);
+
+        oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
+        oppdaterSummerOgPeriodeposterButton.addClickListener(e -> maanedsoversiktService.oppdaterDetaljertPeriodensPeriodeposterOgSummer());
+        oppdaterSummerOgPeriodeposterButton.setEnabled(false);
+        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerOgPeriodeposterButton);
 
         skrivUtMaanedsoversiktButton = new Button("Lagre PDF");
         skrivUtMaanedsoversiktButton.addClickListener(e -> {
@@ -91,7 +97,8 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
     public void instansAktiverKnapperadRedigeringsfelt(Boolean aktiverBoolean) {
         super.instansAktiverKnapperadRedigeringsfelt(aktiverBoolean);
         skrivUtMaanedsoversiktButton.setEnabled(aktiverBoolean);
-        oppdaterSummerButton.setEnabled(aktiverBoolean);
+        //oppdaterSummerButton.setEnabled(aktiverBoolean);
+        oppdaterSummerOgPeriodeposterButton.setEnabled(aktiverBoolean);
     }
 
 }

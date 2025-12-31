@@ -7,10 +7,8 @@ import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.periodepost.PeriodepostViewMal;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
-import org.apache.xmlbeans.impl.xb.xsdschema.All;
 
 
 @Route("aarsoversiktpost")
@@ -69,7 +67,7 @@ public class AarsoversiktpostView extends PeriodepostViewMal implements Initieri
     private void leggTilOgTilpassKnapper() {
         oppdaterSummerButton = new Button("Oppdater summer");
         oppdaterSummerButton.setEnabled(false);
-        oppdaterSummerButton.addClickListener(e ->  aarsoversiktpostService.oppdaterSummer());
+        oppdaterSummerButton.addClickListener(e ->  aarsoversiktpostService.oppdaterOgLagreSummerForValgteVanligePeriodepost());
         hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerButton);
     }
 

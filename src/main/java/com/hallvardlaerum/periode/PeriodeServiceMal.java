@@ -96,7 +96,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
 
 
     public void oppdaterPeriodensPeriodeposterOgSummer_oppdaterKostnadspakker(Periode periode) {
-        List<Periodepost> kostnadspakkeList = periodepostService.finnKostnadspakker(periode);
+        List<Periodepost> kostnadspakkeList = periodepostService.finnEtterPeriode(periode);
         for (Periodepost kostnadspakke:kostnadspakkeList) {
             periodeoversiktpostService.oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
             periodeoversiktpostService.lagre(kostnadspakke);

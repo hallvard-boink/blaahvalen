@@ -28,6 +28,7 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
         init();
     }
 
+
     @Override
     public boolean erInitiert() {
         return erInitiert;
@@ -42,6 +43,7 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
 
             Allvitekyklop.hent().getAarsoversiktpostRedigeringsomraadeTilDialog().settView(this);
 
+            this.aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
             super.initPeriodeViewMal(PeriodetypeEnum.AARSOVERSIKT,
                     this,
                     aarsoversiktService,
@@ -69,9 +71,8 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
 
         lagrePDFButton = new Button("Lagre PDF");
         lagrePDFButton.addClickListener(e -> {
-            Periode periode = (Periode)hentRedigeringsomraadeAktig().getEntitet();
-            PeriodeRedigeringsomraadeMal redigeringsomraade = (PeriodeRedigeringsomraadeMal)hentRedigeringsomraadeAktig();
-            new PeriodeRapportMester().lagrePeriodeSomPDF(periode, redigeringsomraade.hentPeriodepostListSortert(periode));
+            Periode periode = aarsoversiktRedigeringsomraade.hentEntitet();
+            new PeriodeRapportMester().lagrePeriodeSomPDF(periode, aarsoversiktService.hentPeriodepostListSortert(periode));
         });
         lagrePDFButton.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(lagrePDFButton);

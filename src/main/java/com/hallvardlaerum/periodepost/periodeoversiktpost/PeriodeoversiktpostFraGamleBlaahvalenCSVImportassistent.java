@@ -28,7 +28,7 @@ public class PeriodeoversiktpostFraGamleBlaahvalenCSVImportassistent extends CSV
 
         Periodepost periodeoversiktpost = periodeoversiktpostService.opprettEntitet();
 
-        periodeoversiktpost.setPeriode(aarsoversiktService.PeriodefinnAarsoversiktFraAarString(hentVerdi("år")));
+        periodeoversiktpost.setPeriode(aarsoversiktService.finnAarsoversiktFraAarString(hentVerdi("år")));
         periodeoversiktpost.setTittelString(hentVerdi("tittel"));
         periodeoversiktpost.setBeskrivelseString(hentVerdi("beskrivelse"));
         periodeoversiktpost.setKategori(kategoriService.finnEtterUndertittel(hentVerdi("kategori.undertittel")));

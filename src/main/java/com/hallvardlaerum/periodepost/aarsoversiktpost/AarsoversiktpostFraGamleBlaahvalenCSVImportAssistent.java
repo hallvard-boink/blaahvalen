@@ -10,7 +10,6 @@ import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class AarsoversiktpostFraGamleBlaahvalenCSVImportAssistent extends CSVImportassistentMal<Periodepost> {
     private AarsoversiktpostService aarsoversiktpostService;
@@ -32,7 +31,7 @@ public class AarsoversiktpostFraGamleBlaahvalenCSVImportAssistent extends CSVImp
         super.lesInnFeltnavnogCeller(feltnavnCSVArrayList,celler);
         Periodepost aarsoversiktpost = aarsoversiktpostService.opprettEntitet();
 
-        Periode aarsoversikt = aarsoversiktService.PeriodefinnAarsoversiktFraAarString(hentVerdi("Aarsoversikt"));
+        Periode aarsoversikt = aarsoversiktService.finnAarsoversiktFraAarString(hentVerdi("Aarsoversikt"));
         if (aarsoversikt==null) {
             Loggekyklop.bruk().loggINFO("Fant ikke årsoversikt som passet, importerer ikke raden " + hentImportRadString());
             return null;

@@ -8,7 +8,6 @@ import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeServiceMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
-import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import jakarta.persistence.Tuple;
@@ -161,7 +160,7 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         return periodepostRepository.finnEtterPeriodeOgKategorinivaa(entitet.getUuid(), 0);
     }
 
-    public List<Periodepost> finnKostnadspakker(Periode periode) {
+    public List<Periodepost> finnEtterPeriode(Periode periode) {
         if (periode==null) {
             return new ArrayList<>();
         }

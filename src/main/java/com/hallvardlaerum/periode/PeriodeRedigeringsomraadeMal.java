@@ -29,15 +29,19 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
     private PeriodetypeEnum periodetypeEnum;
     private PeriodepostTypeEnum periodepostTypeEnum;
 
-    private Grid<Periodepost> hovedKategorierGrid;
 
-
+    // === Andre objekter som trengs her ===
     private RedigerEntitetDialog<Periodepost, Periode> periodepostRedigerEntitetDialog;
     private PeriodepostRedigeringsomraadeMal periodepostRedigeringsomraadeTilDialog;
     private PeriodepostServiceMal periodepostService;
     private PeriodeServiceMal periodeService;
 
-    // === FELTENE ===
+    // === GRID ===
+    private Grid<Periodepost> hovedKategorierGrid;
+    private Grid<Periodepost> kostnadspakkerGrid;
+
+
+    // === FELTER ===
     private ComboBox<PeriodetypeEnum> periodetypeComboBox;
     private DatePicker datoFraDatePicker;
     private DatePicker datoTilDatePicker;
@@ -117,10 +121,10 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         } else {
             periodetittelHorizontalLayout.oppdaterTittel(hentEntitet().getDatoFraLocalDate());
         }
-        oppdaterPeriodepostGrid();
+        instansOppdaterEkstraRedigeringsfelter_oppdaterPeriodepostGrid();
     }
 
-    private void oppdaterPeriodepostGrid() {
+    private void instansOppdaterEkstraRedigeringsfelter_oppdaterPeriodepostGrid() {
         if(hentEntitet()==null) {
             hovedKategorierGrid.setItems(new ArrayList<>());
         } else {
@@ -128,19 +132,7 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         }
     }
 
-    //TODO: Flytt denne til periodeservice eller periodepostservice
-    public ArrayList<Periodepost> hentPeriodepostListSortert(Periode periode) {
-        List<Periodepost> periodeposter = hentEntitet().getPeriodeposterList();
-        if (periodeposter==null) {
-            return new ArrayList<>();
-        } else {
-            return new ArrayList<>(periodeposter
-                    .stream()
-                    .sorted(Comparator.comparing(Periodepost::getSumRegnskapInteger, Comparator.nullsLast(Comparator.reverseOrder()))
-                            .thenComparing(Periodepost::getSumBudsjettInteger, Comparator.nullsLast(Comparator.reverseOrder())))
-                    .toList());
-        }
-    }
+
 
     @Override
     public void instansOpprettFelter() {
@@ -154,17 +146,15 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
     }
 
 
+
+
     private void instansOpprettFelter_leggTilHovedkategorierTab() {
         String regnskaptabString = "Kategorier";
 
         hovedKategorierGrid = new Grid<>();
         hovedKategorierGrid.addColumn(p -> {
-            if(p.getKategori()!=null) {
-                return p.getKategori().getTittel();
-            } else {
-                return "";
-            }
-        }).setHeader("Kategori").setWidth("100px");
+            return p.getKategori()!=null? p.getKategori().getTittel() : "";
+        }).setHeader("Kategori").setWidth("150px");
         hovedKategorierGrid.addColumn(Periodepost::getSumBudsjettInteger).setHeader("Budsjett").setWidth("100px").setFlexGrow(0);
         hovedKategorierGrid.addColumn(Periodepost::getSumRegnskapInteger).setHeader("Regnskap").setWidth("100px").setFlexGrow(0);
         hovedKategorierGrid.addColumn(Periodepost::getBeskrivelseString).setHeader("Beskrivelse");

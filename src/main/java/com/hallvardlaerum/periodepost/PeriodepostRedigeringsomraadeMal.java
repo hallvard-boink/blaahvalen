@@ -200,7 +200,9 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
 
         tittelTextField = new TextField("Tittel");
         tittelTextField.setWidthFull();
-        kategoriComboBox.setWidth("300px");
+        kategoriComboBox.setWidth("400px");
+        sumRegnskapLabelSpan.setWidth("200px");
+        sumRegnskapSpan.setWidth("200px");
         rad1HorizontalLayout.add(kategoriComboBox, tittelTextField, sumRegnskapLabelSpan, sumRegnskapSpan);
 
         beskrivelseTextArea.setLabel("Beskrivelse");
@@ -226,6 +228,7 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
     private void instansOpprettFelter_opprettNormalposterTab(){
 
         normalposterGrid = opprettStandardPostGrid();
+        normalposterGrid.setSizeFull();
         leggTilRedigeringsfelt(normalposterTabString, normalposterGrid);
         hentFormLayoutFraTab(normalposterTabString).setSizeFull();
     }

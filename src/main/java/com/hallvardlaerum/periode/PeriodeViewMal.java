@@ -38,6 +38,13 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
 
     }
 
+    /**
+     * Initiering med defaultverdi på plassering av delelinje i SplitLayout (33 % til grid)
+     * @param periodetypeEnum
+     * @param viewmalAktig
+     * @param periodeservice
+     * @param redigeringsomraade
+     */
     public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
                                    ViewmalAktig<Periode, ?> viewmalAktig,
                                    EntitetserviceAktig<Periode,PeriodeRepository> periodeservice,
@@ -52,6 +59,15 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
 
     }
 
+    /**
+     * Faktisk initieringsmetode
+     *
+     * @param periodetypeEnum
+     * @param viewmalAktig
+     * @param periodeservice
+     * @param redigeringsomraade
+     * @param splittPlasseringDouble
+     */
     public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
                                    ViewmalAktig<Periode, ?> viewmalAktig,
                                    EntitetserviceAktig<Periode,PeriodeRepository> periodeservice,
@@ -120,7 +136,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         grid = super.hentGrid();
         grid.addColumn(Periode::getDatoFraLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer()).setWidth("100px").setFlexGrow(0);
         grid.addColumn(Periode::getBeskrivelseString).setHeader("Beskrivelse");
-        grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END).setWidth("100px").setFlexGrow(0);
+        grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END).setWidth("150px").setFlexGrow(0);
 
     }
 

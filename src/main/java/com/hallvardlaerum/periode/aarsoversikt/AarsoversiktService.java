@@ -1,22 +1,23 @@
 package com.hallvardlaerum.periode.aarsoversikt;
 
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.*;
+import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AarsoversiktService extends PeriodeServiceMal implements InitieringsEgnet {
     private boolean erInitiert=false;
 
 
-    public Periode PeriodefinnAarsoversiktFraAarString(String aarString) {
+    public Periode finnAarsoversiktFraAarString(String aarString) {
         if (aarString==null || aarString.isEmpty()) {
             return null;
         }
@@ -35,6 +36,19 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
 
     }
 
+
+    public ArrayList<Periodepost> hentPeriodepostListSortert(Periode periode) {
+        List<Periodepost> periodeposter = periode.getPeriodeposterList();
+        if (periodeposter == null) {
+            return new ArrayList<>();
+        } else {
+            return new ArrayList<>(periodeposter
+                    .stream()
+                    .sorted(Comparator.comparing(Periodepost::getSumRegnskapInteger, Comparator.nullsLast(Comparator.reverseOrder()))
+                            .thenComparing(Periodepost::getSumBudsjettInteger, Comparator.nullsLast(Comparator.reverseOrder())))
+                    .toList());
+        }
+    }
 
     public AarsoversiktService() {
 
@@ -75,7 +89,6 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
 
 
     }
-
 
 
 

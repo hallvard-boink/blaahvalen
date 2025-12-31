@@ -122,7 +122,7 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         if (postklasseEnum==PostklasseEnum.NORMALPOST) {
             periodepost.setSumRegnskapInteger(sumInnInteger + sumUtInteger);
         } else if (postklasseEnum == PostklasseEnum.BUDSJETTPOST) {
-            periodepost.setSumBudsjettInteger(sumInnInteger + + sumUtInteger);
+            periodepost.setSumBudsjettInteger(sumInnInteger + sumUtInteger);
         }
 
     }

@@ -227,6 +227,7 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
 
         normalposterGrid = opprettStandardPostGrid();
         leggTilRedigeringsfelt(normalposterTabString, normalposterGrid);
+        hentFormLayoutFraTab(normalposterTabString).setSizeFull();
     }
 
     private Grid<Post> opprettStandardPostGrid() {

@@ -52,6 +52,9 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
 
     }
 
+    /**
+     * Sum kostnader i denne måneden regnes ut for hver kostnadspakke, og vises sammen med total sum for hver kostnadspakke.
+     */
     private void oppdaterKostnadspakkeTab() {
         List<Tuple> tupleList = kostnadspakkeService.finnKostnadspakkerForMaaneden(hentEntitet());
         ArrayList<MaanedsradKostnadspakke> maanedsradKostnadspakkeArrayList = new ArrayList<>();

@@ -11,8 +11,12 @@ import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -28,6 +32,10 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
     private boolean erInitiert = false;
     private PeriodeoversiktpostService periodeoversiktpostService;
 
+
+    private String hovedtabString= "Hoved";
+    private String ekstratabString = "Ekstra";
+
     private DatePicker datoDatePicker;
     private TextField tekstFraBankenTextField;
     private TextField egenbeskrivelseTextField;
@@ -42,7 +50,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
     private TextField uuidTextField;
     private TextField forelderPostUUID;
     private ComboBox<Periodepost> kostnadspakkeComboBox;
-
+    private KostnadspakkeMester kostnadspakkeMester;
 
     public NormalpostRedigeringsomraade() {
         super();
@@ -54,9 +62,11 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
             super.initRedigeringsomraadeMal();
             this.kategoriService = Allvitekyklop.hent().getKategoriService();
             periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
+            kostnadspakkeMester = new KostnadspakkeMester();
 
             instansOpprettFelter();
             instansByggOppBinder();
+
             erInitiert = true;
         }
     }
@@ -87,17 +97,28 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
 
     }
 
+    private HorizontalLayout kostnadspakkeHaandteringHorizontalLayout;
+
     @Override
     public void instansOpprettFelter() {
-        String hovedtabString= "Hoved";
-        String ekstratabString = "Ekstra";
 
+        instansOpprettFelter_opprettOgLeggTilHovedfelter(hovedtabString);
+
+        instansOpprettFelter_opprettKategoriCombobox();
+        instansOpprettFelter_opprettKategoriDetaljComboBox();
+        instansOpprettFelter_opprettKostnadspakkeHaandteringHorizontallLayout();
+        super.leggTilRedigeringsfelter(hovedtabString, kategoriComboBox, kategoriDetaljComboBox, kostnadspakkeHaandteringHorizontalLayout);
+
+        instansOpprettFelter_opprettEkstraTabMedFelter(ekstratabString);
+
+        settFokusKomponent(egenbeskrivelseTextField);
+    }
+
+
+
+    private void instansOpprettFelter_opprettOgLeggTilHovedfelter(String hovedtabString) {
         tekstFraBankenTextField = super.leggTilRedigeringsfelt(hovedtabString, new TextField("Tekst fra banken"));
         settColspan(tekstFraBankenTextField,3);
-
-        datoDatePicker = new DatePicker("Dato");
-        innPaaKontoIntegerField = new IntegerField("Inn på konto");
-        utFraKontoIntegerField = new IntegerField("Ut fra konto");
 
         datoDatePicker = new DatePicker("Dato");
         innPaaKontoIntegerField = new IntegerField("Inn på konto");
@@ -106,38 +127,43 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
 
         egenbeskrivelseTextField = super.leggTilRedigeringsfelt(hovedtabString, new TextField("Egen beskrivelse"));
         settColspan(egenbeskrivelseTextField,3);
+    }
 
+    private void instansOpprettFelter_opprettKategoriCombobox() {
         kategoriComboBox = new ComboBox<>("Kategori");
         kategoriComboBox.setItems(kategoriService.finnAlleOppsummerendeUnderkategorier());
         kategoriComboBox.setItemLabelGenerator(Kategori::getTittel);
         kategoriComboBox.addValueChangeListener(event -> {
             if (event != null && hentEntitet()!=null) {
-
                 if (event.isFromClient()) {
                     kategoriDetaljCombobox_OppdaterUtvalgOgSettTilOppsummerendeUnderkategori(event.getValue());
                     kategoriDetaljComboBox.setValue(kategoriComboBox.getValue());
-                    if (normalpoststatusComboBox.getValue()==NormalpoststatusEnum.UBEHANDLET) {
-                        normalpoststatusComboBox.setValue(NormalpoststatusEnum.FERDIG);
-                    }
+                    setEventueltNormalpoststatusEnumTilFERDIG();
                 }
-                //Loggekyklop.bruk().loggINFO("Valuechange i kategoriCombobox");
             }
         });
+    }
 
+    private void setEventueltNormalpoststatusEnumTilFERDIG(){
+        if (normalpoststatusComboBox.getValue()==NormalpoststatusEnum.UBEHANDLET) {
+            normalpoststatusComboBox.setValue(NormalpoststatusEnum.FERDIG);
+        }
+    }
+
+    private void instansOpprettFelter_opprettKategoriDetaljComboBox() {
         kategoriDetaljComboBox = new ComboBox<>("Underkategori");
         kategoriDetaljComboBox.setItems(kategoriService.finnAlleUnderkategorier());
         kategoriDetaljComboBox.setItemLabelGenerator(Kategori::getUndertittel);
         kategoriDetaljComboBox.addValueChangeListener(event -> {
            if (event != null && hentEntitet()!=null & event.isFromClient())  {
-                if (normalpoststatusComboBox.getValue()==NormalpoststatusEnum.UBEHANDLET) {
-                    normalpoststatusComboBox.setValue(NormalpoststatusEnum.FERDIG);
-                }
-                kategoriComboBox.setValue(kategoriDetaljComboBox.getValue());
+               setEventueltNormalpoststatusEnumTilFERDIG();
+               kategoriComboBox.setValue(kategoriDetaljComboBox.getValue());
            }
 
         });
+    }
 
-
+    private void instansOpprettFelter_opprettKostnadspakkeHaandteringHorizontallLayout() {
         kostnadspakkeComboBox = new ComboBox<>("Kostnadspakke");
         kostnadspakkeComboBox.setItemLabelGenerator(p -> {
             if (p.getTittelString()==null) {
@@ -153,12 +179,52 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
                 if (kostnadspakkensKategori!=null) {
                     kategoriComboBox.setValue(kostnadspakkensKategori);
                     kategoriDetaljComboBox.setValue(kostnadspakkensKategori);
+                    setEventueltNormalpoststatusEnumTilFERDIG();
                 }
+                kostnadspakkeMester.oppdaterBenyttedeKostnadspakker(event.getValue());
             }
         });
+        kostnadspakkeComboBox.setWidthFull();
 
-        super.leggTilRedigeringsfelter(hovedtabString, kategoriComboBox, kategoriDetaljComboBox, kostnadspakkeComboBox);
+        kostnadspakkeHaandteringHorizontalLayout = new HorizontalLayout();
+        kostnadspakkeHaandteringHorizontalLayout.setDefaultVerticalComponentAlignment(Alignment.END);
+        kostnadspakkeHaandteringHorizontalLayout.setWidthFull();
 
+        Button brukSisteKostnadspakkeButton = new Button(new Icon(VaadinIcon.CARET_LEFT));
+        brukSisteKostnadspakkeButton.setTooltipText("Benytt først brukte kostnadspakke");
+        brukSisteKostnadspakkeButton.addClickListener(e -> {
+            brukKostnadspakke(kostnadspakkeMester.hentSistBenyttedeKostnadspakke());
+        });
+
+        Button brukNestsisteKostnadspakkeButton = new Button(new Icon(VaadinIcon.BACKWARDS));
+        brukNestsisteKostnadspakkeButton.setTooltipText("Benytt nest først brukte kostnadspakke");
+        brukNestsisteKostnadspakkeButton.addClickListener(e -> {
+            brukKostnadspakke(kostnadspakkeMester.hentNestsisteBenyttedeKostnadspakke());
+        });
+
+        Button leggTilNyKostnadspakkeButton = new Button(new Icon(VaadinIcon.PLUS));
+        leggTilNyKostnadspakkeButton.setTooltipText("Legg til ny kostnadspakke");
+        leggTilNyKostnadspakkeButton.addClickListener(e -> {
+            kostnadspakkeMester.leggTilNyKostnadspakke();
+        });
+
+        kostnadspakkeHaandteringHorizontalLayout.add(kostnadspakkeComboBox, brukSisteKostnadspakkeButton,brukNestsisteKostnadspakkeButton, leggTilNyKostnadspakkeButton);
+
+    }
+
+    private void brukKostnadspakke(Periodepost kostnadspakke){
+        if (kostnadspakke!=null) {
+            kostnadspakkeComboBox.setValue(kostnadspakke);
+            Kategori kostnadspakkenskategori = kostnadspakke.getKategori();
+            if (kostnadspakkenskategori != null) {
+                kategoriComboBox.setValue(kostnadspakkenskategori);
+                kategoriDetaljComboBox.setValue(kostnadspakkenskategori);
+                setEventueltNormalpoststatusEnumTilFERDIG();
+            }
+        }
+    }
+
+    private void instansOpprettFelter_opprettEkstraTabMedFelter(String ekstratabString) {
         normalposttypeComboBox = new ComboBox<>("Posttype");
         normalposttypeComboBox.setItemLabelGenerator(NormalposttypeEnum::getTittel);
         normalposttypeComboBox.setItems(NormalposttypeEnum.values());
@@ -170,14 +236,13 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         super.leggTilRedigeringsfelter(ekstratabString, normalposttypeComboBox, normalpoststatusComboBox);
 
         ekstraInfoTextArea = super.leggTilRedigeringsfelt(ekstratabString, new TextArea("Ekstra info"));
+        settColspan(ekstraInfoTextArea,2);
         uuidTextField = super.leggTilRedigeringsfelt(ekstratabString, new TextField("UUID"));
         forelderPostUUID = super.leggTilRedigeringsfelt(ekstratabString, new TextField("ForelderpostUUID"));
 
         super.leggTilDatofeltTidOpprettetOgRedigert(ekstratabString);
-
-        settFokusKomponent(egenbeskrivelseTextField);
     }
-    
+
     private void kategoriDetaljCombobox_OppdaterUtvalgOgSettTilOppsummerendeUnderkategori(Kategori oppsummerendeunderkategori) {
         ArrayList<Kategori> underkategorierList = new ArrayList<>();
         if (oppsummerendeunderkategori!=null) {

@@ -38,9 +38,30 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 
     List<Post> findByDatoLocalDateBetweenAndKategori(LocalDate fraLocalDate, LocalDate tilLocalDate, Kategori kategori);
 
-    List<Post> findByDatoLocalDateBetweenAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(LocalDate fraLocalDate, LocalDate tilLocalDate, BudsjettpoststatusEnum budsjettpoststatusEnum, PostklasseEnum postklasseEnum);
+    List<Post> findByDatoLocalDateBetweenAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(
+            LocalDate fraLocalDate, LocalDate tilLocalDate, BudsjettpoststatusEnum budsjettpoststatusEnum, PostklasseEnum postklasseEnum);
 
     List<Post> findByKostnadsPakke(Periodepost kostnadspakke);
+
+    @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer)+sum(p.ut_fra_konto_integer) " +
+            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
+            "WHERE p.dato_local_date >= ?1 AND " +
+            "p.dato_local_date <= ?2 AND " +
+            "p.normalposttype_enum != 2 AND " +
+            "k.uuid = ?3"
+    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
+    List<Tuple> sumPosterFradatoTilDatoKategori(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, UUID kategoriUUID);
+
+    @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) " +
+            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
+            "WHERE p.dato_local_date >= ?1 AND " +
+            "p.dato_local_date <= ?2 AND " +
+            "(p.normalposttype_enum IS NULL OR p.normalposttype_enum != 2) AND " +
+            "k.nivaa = 1 AND " +
+            "k.tittel = ?3 " +
+            "GROUP BY p.postklasse_enum "
+    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
+    List<Tuple> sumPosterFradatoTilDatoKategoritittel(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, String kategoritittel);
 
     @NativeQuery(
             "SELECT " +
@@ -105,70 +126,6 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "p.postklasse_enum = 1 AND p.budsjettpoststatus_enum = 1"
     )
     List<Tuple> sumInnUtFradatoTilDatoTildelteBudsjettposter(LocalDate fraDato, LocalDate tilDato);
-
-
-
-
-    // === FORELDETE ===
-
-    /**
-     * @deprecated Bruk heller metoden i KategoriRepository
-     *
-     */
-    @Deprecated
-    @NativeQuery(
-        "SELECT " +
-            "k.uuid, COUNT(p.uuid) " +
-        "FROM " +
-            "post p LEFT JOIN kategori k ON p.kategori_uuid  = k.uuid " +
-        "WHERE " +
-            "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 " +
-            "AND p.postklasse_enum = ?3 AND p.normalposttype_enum!=2 " +
-            "GROUP BY k.uuid ")
-    List<Tuple> hentKategorierDetFinnesPosterForFraDatoTilDatoPostklasse(LocalDate fraLocalDate, LocalDate tilLocalDate, PostklasseEnum postklasseEnum);
-
-
-    /**
-     * @deprecated Bruk heller metoden i KategoriRepository
-     *
-     */
-    @Deprecated
-    @NativeQuery(
-        "SELECT " +
-            "k.* FROM post p LEFT JOIN kategori k ON p.kategori_uuid  = k.uuid " +
-        "WHERE " +
-            "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 " +
-        "GROUP BY " +
-            "k.uuid ")
-    List<Kategori> hentKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate);
-
-
-
-    /**
-     * @deprecated Bruk heller metoden i KategoriRepository
-     *
-     */
-    @Deprecated
-    @NativeQuery(
-        "SELECT " +
-            "k2.uuid, k2.tittel " +
-        "FROM " +
-            "(" +
-                "SELECT " +
-                    "k.tittel, count(p.uuid) " +
-                "FROM " +
-                    "post p LEFT JOIN kategori k ON p.kategori_uuid  = k.uuid " +
-                "WHERE " +
-                    "p.dato_local_date >=?1 AND p.dato_local_date <= ?2 " +
-                "GROUP BY " +
-                    "k.tittel" +
-            ") as kjerne " +
-            "LEFT JOIN kategori k2 ON kjerne.tittel = k2.tittel " +
-        "WHERE " +
-            "k2.nivaa =0;"
-    )
-    List<Tuple> hentHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate);
-
 
 
 

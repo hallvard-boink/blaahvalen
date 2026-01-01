@@ -4,7 +4,6 @@ import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.felter.DesimalMester;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periodepost.Periodepost;
@@ -18,6 +17,7 @@ import jakarta.persistence.Tuple;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -52,10 +52,15 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
     }
 
     public List<Periode> finnAlleEgndePerioder(PeriodetypeEnum periodetypeEnum){
-        if (periodeRepository==null) {
-            periodeRepository = Allvitekyklop.hent().getPeriodeRepository();
-        }
         return periodeRepository.findByPeriodetypeEnumOrderByDatoFraLocalDateDesc(periodetypeEnum);
+    }
+
+    public List<Periode> finnEtterPeriodetypeOgFradato(PeriodetypeEnum periodetypeEnum, LocalDate datoFraLocalDate) {
+        return periodeRepository.findByPeriodetypeEnumAndDatoFraLocalDate(periodetypeEnum, datoFraLocalDate);
+    }
+
+    public List<Periode> finnEtterPeriodetypeOgFraTilDato(PeriodetypeEnum periodetypeEnum, LocalDate datoFra, LocalDate datoTil) {
+        return periodeRepository.findByPeriodetypeEnumAndDatoFraLocalDateGreaterThanEqualAndDatoTilLocalDateLessThanEqual(periodetypeEnum, datoFra, datoTil);
     }
 
     @Override
@@ -63,12 +68,6 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         Periode periode = leggTilUUID(new Periode());
         periode.setPeriodetypeEnum(this.periodetypeEnum);
         return periode;
-    }
-
-    @Override
-    @Deprecated
-    public RedigeringsomraadeAktig<Periode> hentRedigeringsomraadeAktig() {
-        return periodeRedigeringsomraade;
     }
 
 
@@ -128,7 +127,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
     public void oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(Periode periode, Integer kategoriNivaa) {
         List<Kategori> kategoriListHarPoster;
         if (kategoriNivaa == 0 ) {
-            List<Tuple> tuples= postService.hentRepository().hentHovedKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+            List<Tuple> tuples= kategoriService.hentHovedKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
             kategoriListHarPoster = new ArrayList<>();
             for (Tuple tuple:tuples) {
                 String uuidString = tuple.get(0, UUID.class).toString();
@@ -141,7 +140,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
             }
 
         } else {
-            kategoriListHarPoster = postService.hentRepository().hentKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+            kategoriListHarPoster = kategoriService.hentKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
         }
 
         for (Kategori kategori:kategoriListHarPoster) {
@@ -158,9 +157,8 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
 
     }
 
-
     @NotNull
-    private ConfirmDialog getConfirmDialog(List<Periodepost> tomperiodepostList) {
+    private ConfirmDialog hentBekreftSlettePeriodeposterDialog(List<Periodepost> tomperiodepostList) {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setHeader("Slette overflødige periodeposter?");
         dialog.setText("Det finnes " + tomperiodepostList.size() + " periodeposter som er tomme. " +
@@ -173,8 +171,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         return dialog;
     }
 
-
-
+    //Litt usikkert om denne hører til her, men beholdes siden den oppdaterer i redigeringsområdet for Perioden-
     private void slettPeriodeposter(List<Periodepost> periodepostList) {
         periodepostService.slettAlle(periodepostList);
         periodeRedigeringsomraade.lesBean();
@@ -188,13 +185,13 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
     public void oppdaterSummer(Periode periode) {
 
         // === Regnskap med overføringer ===
-        Integer sumRegnskapInntekterMedOverfoeringerInteger = periodeRepository.sumInnFradatoTilDatoNormalposterMedOverfoeringer(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+        Integer sumRegnskapInntekterMedOverfoeringerInteger = postService.sumInnFradatoTilDatoNormalposterMedOverfoeringer(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
         if (sumRegnskapInntekterMedOverfoeringerInteger==null) {
             sumRegnskapInntekterMedOverfoeringerInteger=0;
         }
         periode.setSumRegnskapInntektMedOverfoeringerInteger(sumRegnskapInntekterMedOverfoeringerInteger);
 
-        Integer sumRegnskapUtgifterMedOverfoeringerInteger = periodeRepository.sumUtFradatoTilDatoNormalposterMedOverfoeringer(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+        Integer sumRegnskapUtgifterMedOverfoeringerInteger = postService.sumUtFradatoTilDatoNormalposterMedOverfoeringer(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
         if (sumRegnskapUtgifterMedOverfoeringerInteger==null) {
             sumRegnskapUtgifterMedOverfoeringerInteger=0;
         }
@@ -203,12 +200,12 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         periode.setSumRegnskapResultatMedOverfoeringerInteger(sumRegnskapInntekterMedOverfoeringerInteger - sumRegnskapUtgifterMedOverfoeringerInteger);
 
         // == Regnskap uten overføringer ===
-        Integer sumRegnskapInntektInteger = periodeRepository.sumUtFradatoTilDatoNormalposterUtenOverfoeringer(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+        Integer sumRegnskapInntektInteger = postService.sumUtFradatoTilDatoNormalposterUtenOverfoeringer(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
         if (sumRegnskapInntektInteger == null) {
             sumRegnskapInntektInteger = 0;
         }
         periode.setSumRegnskapInntektInteger(sumRegnskapInntektInteger);
-        Integer sumRegnskapUtgifterInteger = periodeRepository.sumInnFradatoTilDatoNormalposterUtenOverfoeringer(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+        Integer sumRegnskapUtgifterInteger = postService.sumInnFradatoTilDatoNormalposterUtenOverfoeringer(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
         if (sumRegnskapUtgifterInteger == null) {
             sumRegnskapUtgifterInteger = 0;
         }
@@ -216,7 +213,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         periode.setSumRegnskapResultatInteger(sumRegnskapInntektInteger - sumRegnskapUtgifterInteger);
 
         // === Budsjett ===
-        List<Tuple> tuples = periodeRepository.sumInnUtFradatoTilDatoTildelteBudsjettposter(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+        List<Tuple> tuples = postService.sumInnUtFradatoTilDatoTildelteBudsjettposter(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
         if (tuples.size()==1) {
             Tuple tuple = tuples.getFirst();
             if (tuple!=null && tuple.get(0, BigDecimal.class)!=null) {
@@ -238,7 +235,6 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         lagre(periode);
         periodeRedigeringsomraade.lesBean();
     }
-
 
 
 }

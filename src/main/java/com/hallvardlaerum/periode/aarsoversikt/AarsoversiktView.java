@@ -72,7 +72,7 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
         lagrePDFButton = new Button("Lagre PDF");
         lagrePDFButton.addClickListener(e -> {
             Periode periode = aarsoversiktRedigeringsomraade.hentEntitet();
-            new PeriodeRapportMester().lagrePeriodeSomPDF(periode, aarsoversiktService.hentPeriodepostListSortert(periode));
+            new PeriodeRapportMester().lagrePeriodeSomPDF(periode, Allvitekyklop.hent().getAarsoversiktpostService().hentPeriodepostListSortert(periode));
         });
         lagrePDFButton.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(lagrePDFButton);

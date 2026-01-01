@@ -3,29 +3,41 @@ package com.hallvardlaerum.periodepost;
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.felter.DesimalMester;
+import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeServiceMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.post.PostklasseEnum;
+import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import jakarta.persistence.Tuple;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, PeriodepostRepository> {
     private PeriodepostRepository periodepostRepository;
     private RedigeringsomraadeAktig<Periodepost> periodepostRedigeringsomraade;
     private PeriodepostTypeEnum periodepostTypeEnum;
     private PeriodeServiceMal periodeService;
+    private NormalpostService normalpostService;
 
     public PeriodepostServiceMal() {
 
+    }
+
+    public ArrayList<Periodepost> hentPeriodepostListSortert(Periode periode) {
+        List<Periodepost> periodeposter = periode.getPeriodeposterList();
+        if (periodeposter == null) {
+            return new ArrayList<>();
+        } else {
+            return new ArrayList<>(periodeposter
+                    .stream()
+                    .sorted(Comparator.comparing(Periodepost::getSumRegnskapInteger, Comparator.nullsLast(Comparator.reverseOrder()))
+                            .thenComparing(Periodepost::getSumBudsjettInteger, Comparator.nullsLast(Comparator.reverseOrder())))
+                    .toList());
+        }
     }
 
     public void initPeriodepostServiceMal(RedigeringsomraadeAktig<Periodepost> periodepostRedigeringsomraade,
@@ -36,6 +48,8 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         this.periodeService = periodeService;
         this.periodepostRedigeringsomraade = periodepostRedigeringsomraade;
         this.periodepostTypeEnum = periodepostTypeEnum;
+
+        normalpostService = Allvitekyklop.hent().getNormalpostService();
     }
 
     public void slettAlle(List<Periodepost> periodepostList) {
@@ -54,15 +68,10 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         return periodepost;
     }
 
-    @Override
-    public RedigeringsomraadeAktig<Periodepost> hentRedigeringsomraadeAktig() {
-        return periodepostRedigeringsomraade;
-    }
-
     public void oppdaterOgLagreSummerForValgteVanligePeriodepost() {
         oppdaterOgLagreSummerForVanligePeriodeposter(periodepostRedigeringsomraade.getEntitet());
-        hentRedigeringsomraadeAktig().lesBean();
-        hentRedigeringsomraadeAktig().instansOppdaterEkstraRedigeringsfelter();
+        periodepostRedigeringsomraade.lesBean();
+        periodepostRedigeringsomraade.instansOppdaterEkstraRedigeringsfelter();
 
     }
 
@@ -71,7 +80,7 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         if (periodepost.getKategori()==null) {
             return;
         }
-        List<Tuple> tuples = periodepostRepository.sumPosterFradatoTilDatoKategoritittel(
+        List<Tuple> tuples = normalpostService.sumPosterFradatoTilDatoKategoritittel(
                 periodepost.getPeriode().getDatoFraLocalDate(),
                 periodepost.getPeriode().getDatoTilLocalDate(),
                 periodepost.getKategori().getTittel());
@@ -109,11 +118,11 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
             return;
         }
 
-        Integer sumInnInteger = DesimalMester.konverterBigdecimalTilInteger(sumBigDecimalInn);
+        Integer sumInnInteger = HelTallMester.konverterBigdecimalTilInteger(sumBigDecimalInn);
         if (sumInnInteger==null) {
             sumInnInteger = 0;
         }
-        Integer sumUtInteger = DesimalMester.konverterBigdecimalTilInteger(sumBigDecimalUt);
+        Integer sumUtInteger = HelTallMester.konverterBigdecimalTilInteger(sumBigDecimalUt);
         if (sumUtInteger==null) {
             sumUtInteger = 0;
         }
@@ -180,8 +189,8 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
 
     /**
      * Her regner jeg med at første tuple inneholder uuid for kostnadspakke
-     * @param tuples
-     * @return
+     * @param tuples rådata fra native query
+     * @return Liste med periodeposter
      */
     private ArrayList<Periodepost>finnKostnadspakker_konverterFraTuples(List<Tuple> tuples) {
         ArrayList<Periodepost> kostnadspakker = new ArrayList<>();
@@ -193,9 +202,7 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
             UUID uuid = tuple.get(0, UUID.class);
             if (uuid!=null) {
                 Optional<Periodepost> kostnadspakkeOptional = periodepostRepository.findById(uuid);
-                if (kostnadspakkeOptional.isPresent()) {
-                    kostnadspakker.add(kostnadspakkeOptional.get());
-                }
+                kostnadspakkeOptional.ifPresent(kostnadspakker::add);
             }
         }
         return kostnadspakker;

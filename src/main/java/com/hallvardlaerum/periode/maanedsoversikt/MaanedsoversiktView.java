@@ -59,16 +59,9 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
 
     private void importerCSVFraGamleBlaahvalen() {
         new CSVImportmester(new MaanedsoversiktFraGamleBlaahvalenCSVImportassistent()).velgImportfilOgKjoerImport(maanedsoversiktService);
-
     }
 
-
     private void leggTilOgTilpassKnapper() {
-//        oppdaterSummerButton = new Button("Oppdater oversikt");
-//        oppdaterSummerButton.addClickListener(e -> maanedsoversiktService.oppdaterOverordnetPeriodensPeriodeposterOgSummer());
-//        oppdaterSummerButton.setEnabled(false);
-//        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerButton);
-
         oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
         oppdaterSummerOgPeriodeposterButton.addClickListener(e -> maanedsoversiktService.oppdaterDetaljertPeriodensPeriodeposterOgSummer());
         oppdaterSummerOgPeriodeposterButton.setEnabled(false);
@@ -80,15 +73,11 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
             PeriodeRedigeringsomraadeMal redigeringsomraade = (PeriodeRedigeringsomraadeMal)hentRedigeringsomraadeAktig();
             PeriodepostServiceMal periodeservice = Allvitekyklop.hent().getMaanedsoversiktpostService();
             new PeriodeRapportMester().lagrePeriodeSomPDF(periode, new ArrayList<>(periodeservice.finnHovedperiodeposter(periode)));
-            //new PeriodeRapportMester().lagrePeriodeSomPDF(periode, redigeringsomraade.hentPeriodepostListSortert(periode));
+
         });
         skrivUtMaanedsoversiktButton.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(skrivUtMaanedsoversiktButton);
-
-        hentVerktoeySubMeny().addItem("Opprett månedsoversikter",
-                e -> maanedsoversiktService.opprettMaanedsoversikterForHeleAaret()
-        );
-
+        hentVerktoeySubMeny().addItem("Opprett månedsoversikter", e -> maanedsoversiktService.opprettMaanedsoversikterForHeleAaret());
 
     }
 
@@ -97,7 +86,6 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
     public void instansAktiverKnapperadRedigeringsfelt(Boolean aktiverBoolean) {
         super.instansAktiverKnapperadRedigeringsfelt(aktiverBoolean);
         skrivUtMaanedsoversiktButton.setEnabled(aktiverBoolean);
-        //oppdaterSummerButton.setEnabled(aktiverBoolean);
         oppdaterSummerOgPeriodeposterButton.setEnabled(aktiverBoolean);
     }
 

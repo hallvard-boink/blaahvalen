@@ -5,6 +5,7 @@ import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.post.Post;
+import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -16,11 +17,12 @@ import java.util.List;
 public class BudsjettpostService extends PostServiceMal implements InitieringsEgnet {
     private boolean erInitiert = false;
     private KategoriService kategoriService;
+    private PostRepository postRepository;
 
 
 
     public List<Post> finnFraPeriodeOgBudsjettstatus(Periode periode, BudsjettpoststatusEnum budsjettpoststatusEnum) {
-        return hentRepository().findByDatoLocalDateBetweenAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(),budsjettpoststatusEnum, PostklasseEnum.BUDSJETTPOST);
+        return postRepository.findByDatoLocalDateBetweenAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(),budsjettpoststatusEnum, PostklasseEnum.BUDSJETTPOST);
     }
 
 
@@ -33,7 +35,9 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
         if (!erInitiert) {
             super.initPostServiceMal(PostklasseEnum.BUDSJETTPOST);
 
-            this.kategoriService = Allvitekyklop.hent().getKategoriService();
+            kategoriService = Allvitekyklop.hent().getKategoriService();
+            postRepository = Allvitekyklop.hent().getPostRepository();
+
             erInitiert = true;
         }
     }
@@ -55,8 +59,4 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
         return budsjettpost;
     }
 
-    @Override
-    public RedigeringsomraadeAktig<Post> hentRedigeringsomraadeAktig() {
-        return null;
-    }
 }

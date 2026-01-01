@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MaanedsoversiktpostService extends PeriodepostServiceMal implements InitieringsEgnet {
-    private MaanedsoversiktService maanedsoversiktService;
     private boolean erInitiert = false;
-
-
 
 
     public MaanedsoversiktpostService(){
@@ -30,6 +27,7 @@ public class MaanedsoversiktpostService extends PeriodepostServiceMal implements
                     Allvitekyklop.hent().getMaanedsoversiktpostRedigeringsomraade(),
                     PeriodepostTypeEnum.MAANEDSOVERSIKTPOST,
                     Allvitekyklop.hent().getMaanedsoversiktService());
+
             erInitiert = true;
         }
     }

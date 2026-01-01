@@ -2,14 +2,13 @@ package com.hallvardlaerum.periode.aarsoversikt;
 
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
-import com.hallvardlaerum.periode.*;
-import com.hallvardlaerum.periodepost.Periodepost;
+import com.hallvardlaerum.periode.Periode;
+import com.hallvardlaerum.periode.PeriodeServiceMal;
+import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -22,9 +21,9 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
             return null;
         }
 
-        Integer aarInteger = Integer.parseInt(aarString);
+        int aarInteger = Integer.parseInt(aarString);
         LocalDate datoFra = LocalDate.of(aarInteger,1,1);
-        List<Periode> aarsoversikter = super.hentRepository().findByPeriodetypeEnumAndDatoFraLocalDate(PeriodetypeEnum.AARSOVERSIKT,datoFra);
+        List<Periode> aarsoversikter = super.finnEtterPeriodetypeOgFradato(PeriodetypeEnum.AARSOVERSIKT,datoFra);
         if (aarsoversikter.isEmpty()) {
             return null;
         } else {
@@ -36,19 +35,6 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
 
     }
 
-
-    public ArrayList<Periodepost> hentPeriodepostListSortert(Periode periode) {
-        List<Periodepost> periodeposter = periode.getPeriodeposterList();
-        if (periodeposter == null) {
-            return new ArrayList<>();
-        } else {
-            return new ArrayList<>(periodeposter
-                    .stream()
-                    .sorted(Comparator.comparing(Periodepost::getSumRegnskapInteger, Comparator.nullsLast(Comparator.reverseOrder()))
-                            .thenComparing(Periodepost::getSumBudsjettInteger, Comparator.nullsLast(Comparator.reverseOrder())))
-                    .toList());
-        }
-    }
 
     public AarsoversiktService() {
 
@@ -77,7 +63,7 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
 
         LocalDate fraLocalDate = LocalDate.of(maanedsOversikt.getDatoFraLocalDate().getYear(),1,1);
 
-        List<Periode> aarsoversiktList = hentRepository().findByPeriodetypeEnumAndDatoFraLocalDate(PeriodetypeEnum.AARSOVERSIKT, fraLocalDate);
+        List<Periode> aarsoversiktList = super.finnEtterPeriodetypeOgFradato(PeriodetypeEnum.AARSOVERSIKT, fraLocalDate);
         if (aarsoversiktList.isEmpty()) {
             return null;
         } else {

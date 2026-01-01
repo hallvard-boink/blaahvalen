@@ -10,7 +10,7 @@ public class HallvardsSpan extends Span {
             setText("-");
             getStyle().set("color", "black");
         } else {
-            String nyTekst = HelTallMester.integerFormatertSomStortTall(nyInteger);
+            String nyTekst = HelTallMester.formaterIntegerSomStortTall(nyInteger);
             setText(nyTekst);
             if (nyInteger<0) {
                 getStyle().set("color", "red");

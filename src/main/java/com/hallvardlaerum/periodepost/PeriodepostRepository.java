@@ -25,25 +25,7 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
 
     List<Periodepost> findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum periodepostTypeEnum, Periode periode);
 
-    @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer)+sum(p.ut_fra_konto_integer) " +
-            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
-            "WHERE p.dato_local_date >= ?1 AND " +
-            "p.dato_local_date <= ?2 AND " +
-            "p.normalposttype_enum != 2 AND " +
-            "k.uuid = ?3"
-    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
-    List<Tuple> sumPosterFradatoTilDatoKategori(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, UUID kategoriUUID);
 
-    @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) " +
-            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
-            "WHERE p.dato_local_date >= ?1 AND " +
-            "p.dato_local_date <= ?2 AND " +
-            "(p.normalposttype_enum IS NULL OR p.normalposttype_enum != 2) AND " +
-            "k.nivaa = 1 AND " +
-            "k.tittel = ?3 " +
-            "GROUP BY p.postklasse_enum "
-    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
-    List<Tuple> sumPosterFradatoTilDatoKategoritittel(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, String kategoritittel);
 
     @NativeQuery(value = "SELECT pp.* " +
             "FROM periodepost pp " +
@@ -58,6 +40,7 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
     )
     List<Periodepost> finnEtterPeriodeOgKategorinivaa(UUID periodeUUID, Integer kategoriNivaa);
 
+
     @NativeQuery(value =
         "SELECT " +
             "pp.*  " +
@@ -70,6 +53,7 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
             "AND k.tittel = ?2")
     List<Periodepost> finnFraPeriodedatostartOgKategoritittel(LocalDate datoFra, String kategoritittel);
 
+
     @NativeQuery(value =
         "SELECT " +
             "pp.uuid, sum(p.inn_paa_konto_integer) , sum(p.ut_fra_konto_integer) " +
@@ -81,4 +65,7 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
         "GROUP BY " +
             "pp.uuid")
     List<Tuple> finnOgOppsummerKostnadspakkerForDatospenn(LocalDate datoFra, LocalDate datoTil);
+
+
+
 }

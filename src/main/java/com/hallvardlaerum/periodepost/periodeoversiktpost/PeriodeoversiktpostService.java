@@ -1,5 +1,5 @@
  package com.hallvardlaerum.periodepost.periodeoversiktpost;
-import com.hallvardlaerum.grunndata.kategori.Kategori;
+import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;

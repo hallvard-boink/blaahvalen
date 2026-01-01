@@ -1,7 +1,9 @@
-package com.hallvardlaerum.grunndata.kategori;
+package com.hallvardlaerum.kategori;
 
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
+import com.hallvardlaerum.libs.felter.DesimalMester;
+import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
@@ -25,7 +27,8 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     private boolean erInitiert = false;
 
 
-
+    public KategoriService() {
+    }
 
     public List<KategoriBudsjettAntallposterSumInnUt> byggKategoriMedBudsjettpostList(Periode periode, BudsjettpoststatusEnum budsjettpoststatusEnum) {
         List<Tuple> tuples = kategoriRepository.byggKategoriMedBudsjettpostList(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), budsjettpoststatusEnum.ordinal());
@@ -33,30 +36,13 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         for (Tuple tuple:tuples) {
 
             String kategoriUUIDString = tuple.get(0, UUID.class).toString();
-            Integer antallInteger = konverterFraLong(tuple.get(1, Long.class));
-            Integer innPaaKontoInteger = konverterFraBigDecimal(tuple.get(2, BigDecimal.class));
-            Integer utFraKontoInteger = konverterFraBigDecimal(tuple.get(3, BigDecimal.class));
+            Integer antallInteger = HelTallMester.konverterLongTilInteger(tuple.get(1, Long.class));
+            Integer innPaaKontoInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(2, BigDecimal.class));
+            Integer utFraKontoInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(3, BigDecimal.class));
             KategoriBudsjettAntallposterSumInnUt kategoriBudsjettAntallposterSumInnUt = new KategoriBudsjettAntallposterSumInnUt(kategoriUUIDString, antallInteger, innPaaKontoInteger, utFraKontoInteger);
             kategoriBudsjettAntallposterSumInnUtArrayList.add(kategoriBudsjettAntallposterSumInnUt);
         }
         return kategoriBudsjettAntallposterSumInnUtArrayList;
-    }
-
-    private Integer konverterFraBigDecimal(BigDecimal bigDecimal) {
-        if (bigDecimal==null) {
-            return null;
-        } else {
-            BigDecimal rounded = bigDecimal.setScale(0, RoundingMode.HALF_UP);
-            return rounded.intValueExact();
-        }
-    }
-
-    private Integer konverterFraLong(Long valueLong) {
-        if (valueLong==null){
-            return null;
-        } else {
-            return valueLong.intValue();
-        }
     }
 
     public List<Kategori> finnAlleHovedkategorier(){
@@ -75,16 +61,13 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         return kategoriRepository.findByTittelAndNivaaOrderByUndertittel(hovedtittel,1);
     }
 
-    public KategoriService() {
-    }
-
     @Override
     public boolean erInitiert() {
         return erInitiert;
     }
 
-    public void init(){
-        if(!erInitiert) {
+    public void init() {
+        if (!erInitiert) {
             super.initEntitetserviceMal(Kategori.class, Allvitekyklop.hent().getKategoriRepository());
             this.kategoriRedigeringsomraade = Allvitekyklop.hent().getKategoriRedigeringsomraade();
             kategoriRepository = Allvitekyklop.hent().getKategoriRepository();

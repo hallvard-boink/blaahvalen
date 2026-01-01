@@ -1,6 +1,6 @@
 package com.hallvardlaerum.periodepost.periodeoversiktpost;
 
-import com.hallvardlaerum.grunndata.kategori.KategoriService;
+import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.eksportimport.CSVImportassistentMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;

@@ -1,17 +1,17 @@
 package com.hallvardlaerum.post.normalpost;
 
-import com.hallvardlaerum.grunndata.kategori.*;
+import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriService;
+import com.hallvardlaerum.kategori.KategoriType;
 import com.hallvardlaerum.libs.database.EntitetAktig;
 import com.hallvardlaerum.libs.eksportimport.CSVImportassistentMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
-import com.hallvardlaerum.libs.felter.TekstKyklop;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import org.springframework.data.domain.Example;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

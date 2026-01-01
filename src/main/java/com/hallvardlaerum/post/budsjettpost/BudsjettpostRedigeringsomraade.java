@@ -1,7 +1,7 @@
 package com.hallvardlaerum.post.budsjettpost;
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
-import com.hallvardlaerum.grunndata.kategori.KategoriService;
+import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.ui.BooleanCombobox;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;

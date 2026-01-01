@@ -1,6 +1,6 @@
 package com.hallvardlaerum.periode.aarsoversikt;
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
+import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;

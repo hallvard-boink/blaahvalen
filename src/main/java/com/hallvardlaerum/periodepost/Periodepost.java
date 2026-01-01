@@ -1,6 +1,6 @@
 package com.hallvardlaerum.periodepost;
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
+import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.database.AbstraktEntitet;
 import com.hallvardlaerum.libs.database.EntitetMedForelderAktig;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;

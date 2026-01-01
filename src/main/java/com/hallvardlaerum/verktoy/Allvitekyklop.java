@@ -1,9 +1,9 @@
 package com.hallvardlaerum.verktoy;
 
-import com.hallvardlaerum.grunndata.kategori.KategoriRedigeringsomraade;
-import com.hallvardlaerum.grunndata.kategori.KategoriRepository;
-import com.hallvardlaerum.grunndata.kategori.KategoriService;
-import com.hallvardlaerum.grunndata.kategori.KategoriView;
+import com.hallvardlaerum.kategori.KategoriRedigeringsomraade;
+import com.hallvardlaerum.kategori.KategoriRepository;
+import com.hallvardlaerum.kategori.KategoriService;
+import com.hallvardlaerum.kategori.KategoriView;
 import com.hallvardlaerum.periode.PeriodeRepository;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktRedigeringsomraade;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;

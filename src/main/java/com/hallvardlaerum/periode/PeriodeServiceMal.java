@@ -1,10 +1,11 @@
 package com.hallvardlaerum.periode;
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
-import com.hallvardlaerum.grunndata.kategori.KategoriService;
+import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.DesimalMester;
+import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
@@ -219,9 +220,9 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         if (tuples.size()==1) {
             Tuple tuple = tuples.getFirst();
             if (tuple!=null && tuple.get(0, BigDecimal.class)!=null) {
-                Integer sumInn = DesimalMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class));
+                Integer sumInn = HelTallMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class));
                 sumInn = sumInn==null ? 0 : sumInn;
-                Integer sumUt = DesimalMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class));
+                Integer sumUt = HelTallMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class));
                 sumUt = sumUt==null ? 0 : sumUt;
 
                 periode.setSumBudsjettInntektInteger(sumInn);

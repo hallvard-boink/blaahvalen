@@ -1,9 +1,9 @@
 package com.hallvardlaerum;
 
 import com.hallvardlaerum.basis.Versjonskyklop;
-import com.hallvardlaerum.grunndata.kategori.KategoriRepository;
-import com.hallvardlaerum.grunndata.kategori.KategoriService;
-import com.hallvardlaerum.grunndata.kategori.KategoriRedigeringsomraade;
+import com.hallvardlaerum.kategori.KategoriRepository;
+import com.hallvardlaerum.kategori.KategoriService;
+import com.hallvardlaerum.kategori.KategoriRedigeringsomraade;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.filerogopplasting.Filkyklop;
 import com.hallvardlaerum.libs.ui.MainViewmal;
@@ -27,7 +27,6 @@ import com.hallvardlaerum.post.normalpost.NormalpostRedigeringsomraade;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.PermitAll;

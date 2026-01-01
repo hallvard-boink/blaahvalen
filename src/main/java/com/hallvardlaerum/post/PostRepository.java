@@ -1,6 +1,6 @@
 package com.hallvardlaerum.post;
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
+import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.database.RepositoryTillegg;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
@@ -36,7 +36,86 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
         LocalDate datoLocalDate, String tekstFraBankenString, Kategori kategori
     );
 
+    List<Post> findByDatoLocalDateBetweenAndKategori(LocalDate fraLocalDate, LocalDate tilLocalDate, Kategori kategori);
 
+    List<Post> findByDatoLocalDateBetweenAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(LocalDate fraLocalDate, LocalDate tilLocalDate, BudsjettpoststatusEnum budsjettpoststatusEnum, PostklasseEnum postklasseEnum);
+
+    List<Post> findByKostnadsPakke(Periodepost kostnadspakke);
+
+    @NativeQuery(
+            "SELECT " +
+                    "p.* " +
+                    "FROM " +
+                    "post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
+                    "WHERE " +
+                    "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 " +
+                    "AND p.postklasse_enum = ?3 " +
+                    "AND k.tittel = ?4"
+    )
+    List<Post> finnEtterFraDatoTilDatoOgPostklasseOgKategoritittel(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, PostklasseEnum postklasseEnum,  String kategoriTittel);
+
+    @NativeQuery(
+            "SELECT " +
+                    "p.* " +
+                    "FROM " +
+                    "post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
+                    "WHERE " +
+                    "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 " +
+                    "AND k.tittel = ?3"
+    )
+    List<Post> finnEtterFraDatoTilDatoOgKategoritittel(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, String kategoriTittel);
+
+    @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) FROM post p " +
+            "WHERE p.dato_local_date >= ?1 AND " +
+            "p.dato_local_date <= ?2 AND " +
+            "p.postklasse_enum = 0 " +
+            "AND p.normalposttype_enum != 2"
+    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
+    Integer sumInnFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+
+    @NativeQuery(value = "SELECT sum(p.ut_fra_konto_integer) FROM post p " +
+            "WHERE p.dato_local_date >= ?1 AND " +
+            "p.dato_local_date <= ?2 AND " +
+            "p.postklasse_enum = 0 AND " +
+            "p.normalposttype_enum != 2"
+    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
+    Integer sumUtFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+
+    @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) " +
+            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
+            "WHERE p.dato_local_date >= ?1 AND " +
+            "p.dato_local_date <= ?2 AND " +
+            "p.postklasse_enum = 0 AND " +
+            "p.normalposttype_enum != 2 AND " +
+            "k.kategori_type != 2"
+    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, Kategoritype 2 = Overføring
+    Integer sumInnFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+
+    @NativeQuery(value = "SELECT sum(p.ut_fra_konto_integer) FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
+            "WHERE p.dato_local_date >= ?1 AND " +
+            "p.dato_local_date <= ?2 AND " +
+            "p.postklasse_enum = 0 AND " +
+            "p.normalposttype_enum != 2 AND " +
+            "k.kategori_type != 2"
+    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, , Kategoritype 2 = Overføring
+    Integer sumUtFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+
+    @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) FROM post p " +
+            "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
+            "p.postklasse_enum = 1 AND p.budsjettpoststatus_enum = 1"
+    )
+    List<Tuple> sumInnUtFradatoTilDatoTildelteBudsjettposter(LocalDate fraDato, LocalDate tilDato);
+
+
+
+
+    // === FORELDETE ===
+
+    /**
+     * @deprecated Bruk heller metoden i KategoriRepository
+     *
+     */
+    @Deprecated
     @NativeQuery(
         "SELECT " +
             "k.uuid, COUNT(p.uuid) " +
@@ -48,6 +127,12 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "GROUP BY k.uuid ")
     List<Tuple> hentKategorierDetFinnesPosterForFraDatoTilDatoPostklasse(LocalDate fraLocalDate, LocalDate tilLocalDate, PostklasseEnum postklasseEnum);
 
+
+    /**
+     * @deprecated Bruk heller metoden i KategoriRepository
+     *
+     */
+    @Deprecated
     @NativeQuery(
         "SELECT " +
             "k.* FROM post p LEFT JOIN kategori k ON p.kategori_uuid  = k.uuid " +
@@ -57,6 +142,13 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "k.uuid ")
     List<Kategori> hentKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate);
 
+
+
+    /**
+     * @deprecated Bruk heller metoden i KategoriRepository
+     *
+     */
+    @Deprecated
     @NativeQuery(
         "SELECT " +
             "k2.uuid, k2.tittel " +
@@ -78,34 +170,8 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
     List<Tuple> hentHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate);
 
 
-    List<Post> findByDatoLocalDateBetweenAndKategori(LocalDate fraLocalDate, LocalDate tilLocalDate, Kategori kategori);
-
-    List<Post> findByDatoLocalDateBetweenAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(LocalDate fraLocalDate, LocalDate tilLocalDate, BudsjettpoststatusEnum budsjettpoststatusEnum, PostklasseEnum postklasseEnum);
-
-    @NativeQuery(
-        "SELECT " +
-            "p.* " +
-        "FROM " +
-            "post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
-        "WHERE " +
-            "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 " +
-            "AND k.tittel = ?3"
-    )
-    List<Post> finnEtterFraDatoTilDatoOgKategoritittel(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, String kategoriTittel);
 
 
-    @NativeQuery(
-        "SELECT " +
-            "p.* " +
-        "FROM " +
-            "post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
-        "WHERE " +
-            "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 " +
-            "AND p.postklasse_enum = ?3 " +
-            "AND k.tittel = ?4"
-    )
-    List<Post> finnEtterFraDatoTilDatoOgPostklasseOgKategoritittel(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, PostklasseEnum postklasseEnum,  String kategoriTittel);
 
-    List<Post> findByKostnadsPakke(Periodepost kostnadspakke);
 }
 

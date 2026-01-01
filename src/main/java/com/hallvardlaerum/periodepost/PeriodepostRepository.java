@@ -1,6 +1,6 @@
 package com.hallvardlaerum.periodepost;
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
+import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.database.RepositoryTillegg;
 import com.hallvardlaerum.periode.Periode;
 import jakarta.persistence.Tuple;

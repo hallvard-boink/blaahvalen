@@ -1,7 +1,7 @@
 package com.hallvardlaerum.periode.maanedsoversikt;
 
-import com.hallvardlaerum.grunndata.kategori.KategoriRetning;
-import com.hallvardlaerum.grunndata.kategori.KategoriService;
+import com.hallvardlaerum.kategori.KategoriRetning;
+import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.DesimalMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;

@@ -2,10 +2,7 @@ package com.hallvardlaerum.periode;
 
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
-import com.hallvardlaerum.libs.ui.Gridkyklop;
-import com.hallvardlaerum.libs.ui.RedigerEntitetDialog;
-import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
-import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
+import com.hallvardlaerum.libs.ui.*;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostRedigeringsomraadeMal;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
@@ -15,14 +12,14 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.textfield.*;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 
 public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode> implements RedigeringsomraadeAktig<Periode> {
@@ -38,7 +35,6 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
 
     // === GRID ===
     private Grid<Periodepost> hovedKategorierGrid;
-    private Grid<Periodepost> kostnadspakkerGrid;
 
 
     // === FELTER ===
@@ -72,31 +68,22 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
     public void initierPeriodeRedigeringsomraadeMal(PeriodetypeEnum periodetypeEnum,
                                                     PeriodepostServiceMal periodepostService,
                                                     PeriodepostRedigeringsomraadeMal periodepostRedigeringsomraadeTilDialog,
-                                                    PeriodeServiceMal periodeService){
+                                                    PeriodeServiceMal periodeService,
+                                                    PeriodepostTypeEnum periodepostTypeEnum,
+                                                    ViewmalAktig<Periode, PeriodeRepository> viewmalAktig){
         this.periodetypeEnum = periodetypeEnum;
         this.periodepostService = periodepostService;
         this.periodeService = periodeService;
         this.periodepostRedigeringsomraadeTilDialog = periodepostRedigeringsomraadeTilDialog;
+        this.periodepostTypeEnum = periodepostTypeEnum;
+        this.settView(viewmalAktig);
 
         super.initRedigeringsomraadeMal();
 
         if (beskrivelseTextArea==null) {
-
             instansOpprettFelter();
-
             periodetittelHorizontalLayout = leggTilAndrefelterOver(new PeriodetittelHorizontalLayout(periodetypeEnum));
             instansByggOppBinder();
-
-
-            if (periodetypeEnum == PeriodetypeEnum.AARSOVERSIKT) {
-                this.periodepostTypeEnum = PeriodepostTypeEnum.AARSOVERSIKTPOST;
-                settView(Allvitekyklop.hent().getAarsoversiktView());
-            } else if (periodetypeEnum == PeriodetypeEnum.MAANEDSOVERSIKT) {
-                this.periodepostTypeEnum = PeriodepostTypeEnum.MAANEDSOVERSIKTPOST;
-                settView(Allvitekyklop.hent().getAarsoversiktView());
-            } else {
-                this.periodepostTypeEnum = null;
-            }
 
             this.periodepostRedigeringsomraadeTilDialog.initierPeriodepostRedigeringsomraadeMal(this.periodepostTypeEnum,
                     this.periodeService,
@@ -106,9 +93,9 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
                     this.periodeService,
                     "Rediger periodepost",
                     "",
-                    this.periodepostRedigeringsomraadeTilDialog
+                    this.periodepostRedigeringsomraadeTilDialog,
+                    this
             );
-
 
         }
     }

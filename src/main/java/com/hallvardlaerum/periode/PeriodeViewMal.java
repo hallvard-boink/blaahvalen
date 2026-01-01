@@ -40,10 +40,10 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
 
     /**
      * Initiering med defaultverdi på plassering av delelinje i SplitLayout (33 % til grid)
-     * @param periodetypeEnum
-     * @param viewmalAktig
-     * @param periodeservice
-     * @param redigeringsomraade
+     * @param periodetypeEnum Aarsoversikt eller Maanedsoversikt
+     * @param viewmalAktig Vinduet
+     * @param periodeservice Aarsoversiktservice eller Maanedsoversiktservice
+     * @param redigeringsomraade redigeringsområdet
      */
     public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
                                    ViewmalAktig<Periode, ?> viewmalAktig,
@@ -62,11 +62,11 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
     /**
      * Faktisk initieringsmetode
      *
-     * @param periodetypeEnum
-     * @param viewmalAktig
-     * @param periodeservice
-     * @param redigeringsomraade
-     * @param splittPlasseringDouble
+     * @param periodetypeEnum Aarsoversikt eller Maanedsoversikt
+     * @param viewmalAktig Vinduet
+     * @param periodeservice Aarsoversiktservice eller Maanedsoversiktservice
+     * @param redigeringsomraade redigeringsområdet
+     * @param splittPlasseringDouble hvor mye av grid som skal vises
      */
     public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
                                    ViewmalAktig<Periode, ?> viewmalAktig,
@@ -146,7 +146,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         return new ComponentRenderer<>(periode -> {
             Span span = new Span();
             if (periode.getSumRegnskapResultatInteger()!=null) {
-                span.setText(HelTallMester.integerFormatertSomStortTall(periode.getSumRegnskapResultatInteger()));
+                span.setText(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapResultatInteger()));
                 if (periode.getSumRegnskapResultatInteger()<0) {
                     span.addClassName(LumoUtility.TextColor.ERROR);
                 }

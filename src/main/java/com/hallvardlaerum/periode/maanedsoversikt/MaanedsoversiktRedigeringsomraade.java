@@ -10,6 +10,7 @@ import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periodepost.HallvardsSpan;
 import com.hallvardlaerum.periodepost.Periodepost;
+import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
@@ -261,7 +262,10 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
             super.initierPeriodeRedigeringsomraadeMal(PeriodetypeEnum.MAANEDSOVERSIKT,
                     Allvitekyklop.hent().getMaanedsoversiktpostService(),
                     Allvitekyklop.hent().getMaanedsoversiktpostRedigeringsomraadeTilDialog(),
-                    Allvitekyklop.hent().getMaanedsoversiktService());
+                    Allvitekyklop.hent().getMaanedsoversiktService(),
+                    PeriodepostTypeEnum.MAANEDSOVERSIKTPOST,
+                    Allvitekyklop.hent().getMaanedsoversiktView()
+            );
             kategoriService = Allvitekyklop.hent().getKategoriService();
             budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
             kostnadspakkeService = Allvitekyklop.hent().getPeriodeoversiktpostService();

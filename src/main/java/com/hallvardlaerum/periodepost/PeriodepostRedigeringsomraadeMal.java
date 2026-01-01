@@ -25,52 +25,49 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Periodepost> implements RedigeringsomraadeAktig<Periodepost> {
-    private PeriodepostTypeEnum periodepostTypeEnum;
-    private PeriodetypeEnum periodetypeEnum;
+    protected PeriodepostTypeEnum periodepostTypeEnum;
+    protected PeriodetypeEnum periodetypeEnum;
     private KategoriService kategoriService;
     private PeriodeServiceMal periodeServiceMal;
     private NormalpostService normalpostService;
 
     // === TABS OG GRIDS ===
-    private final String ekstratabString = "Ekstra";
-    private final String normalposterTabString = "Regnskap";
-    private Grid<Post> normalposterGrid;
-    private Grid<Post> budsjettposterGrid;
+    protected final String ekstratabString = "Ekstra";
+    protected final String normalposterTabString = "Regnskap";
+    protected Grid<Post> normalposterGrid;
+    protected Grid<Post> budsjettposterGrid;
 
     // === FELTER ===
-    private ComboBox<PeriodepostTypeEnum> periodeposttypeEnumComboBox = null;
-    private ComboBox<Kategori> kategoriComboBox;
-    private HallvardsSpan sumBudsjettSpan;
-    private HallvardsSpan sumRegnskapSpan;
-    private HallvardsSpan sumDifferanseSpan;
-    private ComboBox<Periode> periodeComboBox;
-    private TextField tittelTextField;
-    private TextArea beskrivelseTextArea;
+    protected ComboBox<PeriodepostTypeEnum> periodeposttypeEnumComboBox = null;
+    protected ComboBox<Kategori> kategoriComboBox;
+    protected HallvardsSpan sumBudsjettSpan;
+    protected HallvardsSpan sumRegnskapSpan;
+    protected HallvardsSpan sumDifferanseSpan;
+    protected ComboBox<Periode> periodeComboBox;
+    protected TextField tittelTextField;
+    protected TextArea beskrivelseTextArea;
 
     // === MERKELAPPER ===
-    private final Span sumBudsjettLabelSpan = new Span("Sum budsjett");
-    private final Span sumRegnskapLabelSpan = new Span("Sum regnskap");
-    private final Span sumDifferanseLabelSpan = new Span("Differanse");
-
-
+    protected final Span sumBudsjettLabelSpan = new Span("Sum budsjett");
+    protected final Span sumRegnskapLabelSpan = new Span("Sum regnskap");
+    protected final Span sumDifferanseLabelSpan = new Span("Differanse");
 
 
     public PeriodepostRedigeringsomraadeMal() {
         super();
-
     }
 
-    public void initierPeriodepostRedigeringsomraadeMal(PeriodepostTypeEnum periodepostTypeEnum,
-                                                        PeriodeServiceMal periodeServiceMal,
-                                                        PeriodetypeEnum periodetypeEnum) {
+    public void initierPeriodepostRedigeringsomraadeMal(
+        PeriodepostTypeEnum periodepostTypeEnum, PeriodeServiceMal periodeServiceMal,
+        PeriodetypeEnum periodetypeEnum)
+    {
         this.periodepostTypeEnum = periodepostTypeEnum;
         this.periodeServiceMal = periodeServiceMal;
         this.periodetypeEnum = periodetypeEnum;
         this.normalpostService = Allvitekyklop.hent().getNormalpostService();
         this.kategoriService = Allvitekyklop.hent().getKategoriService();
 
-
-        if (periodeposttypeEnumComboBox==null) {
+        if (periodeposttypeEnumComboBox == null) {
             super.initRedigeringsomraadeMal(); //Ny binder
             instansOpprettFelter();
             instansByggOppBinder();
@@ -88,52 +85,38 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
         List<Post> normalposterList = new ArrayList<>();
         List<Post> budsjettposterList = new ArrayList<>();
 
-        if (periodepostTypeEnum== PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
-            normalposterList = normalpostService.finnPosterIKostnadspakken(periodepost);
-            normalposterGrid.setItems(normalposterList);
-
-        } else {
-            if (periodepost.getPeriode()!=null) {
-                normalposterList = normalpostService.finnPosterFraDatoTilDatoPostklasseHovedkategori(
-                        periodepost.getPeriode().getDatoFraLocalDate(),
-                        periodepost.getPeriode().getDatoTilLocalDate(),
-                        PostklasseEnum.NORMALPOST,
-                        periodepost.getKategori()
-                );
-                budsjettposterList = normalpostService.finnPosterFraDatoTilDatoPostklasseHovedkategori(
-                        periodepost.getPeriode().getDatoFraLocalDate(),
-                        periodepost.getPeriode().getDatoTilLocalDate(),
-                        PostklasseEnum.BUDSJETTPOST,
-                        periodepost.getKategori()
-                );
-            }
-            normalposterGrid.setItems(normalposterList);
-            budsjettposterGrid.setItems(budsjettposterList);
+        if (periodepost.getPeriode() != null) {
+            normalposterList = normalpostService.finnPosterFraDatoTilDatoPostklasseHovedkategori(
+                    periodepost.getPeriode().getDatoFraLocalDate(),
+                    periodepost.getPeriode().getDatoTilLocalDate(),
+                    PostklasseEnum.NORMALPOST,
+                    periodepost.getKategori()
+            );
+            budsjettposterList = normalpostService.finnPosterFraDatoTilDatoPostklasseHovedkategori(
+                    periodepost.getPeriode().getDatoFraLocalDate(),
+                    periodepost.getPeriode().getDatoTilLocalDate(),
+                    PostklasseEnum.BUDSJETTPOST,
+                    periodepost.getKategori()
+            );
         }
-
-
+        normalposterGrid.setItems(normalposterList);
+        budsjettposterGrid.setItems(budsjettposterList);
     }
-
 
 
     @Override
     public void instansOpprettFelter() {
-        //TODO: Her dukker det opp en "Hoved"-tab vi ikke skal ha. Se på logikken rundt tabe'er i Vaadin en gang til.
-
-        instanOpprettFelter_opprettFellesFelter();
+        instansOpprettFelter_opprettFellesFelter();
         instansOpprettFelter_leggTilOverfelter();
         instansOpprettFelter_opprettNormalposterTab();
         instansOpprettFelter_opprettBudsjettposterTab();
         instansOpprettFelter_opprettEkstraTab();
 
-        if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
-            settFokusKomponent(tittelTextField);
-        } else {
-            settFokusKomponent(beskrivelseTextArea);
-        }
+        settFokusKomponent(beskrivelseTextArea);
+
     }
 
-    private void instanOpprettFelter_opprettFellesFelter(){
+    protected void instansOpprettFelter_opprettFellesFelter() {
         periodeposttypeEnumComboBox = new ComboBox<>("Type");
         periodeposttypeEnumComboBox.setItemLabelGenerator(PeriodepostTypeEnum::getTittel);
         periodeposttypeEnumComboBox.setItems(PeriodepostTypeEnum.values());
@@ -153,112 +136,74 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
         beskrivelseTextArea = new TextArea();
         beskrivelseTextArea.setMinRows(2);
         beskrivelseTextArea.setSizeFull();
-    }
-
-    private void instansOpprettFelter_leggTilOverfelter() {
-
-        if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
-            instansOpprettFelter_leggTilOverfelter_Kostnadspakke();
-        } else {
-            beskrivelseTextArea.setPlaceholder("Beskrivelse");
-
-            HorizontalLayout kol1HorizontalLayout = new HorizontalLayout();
-            kol1HorizontalLayout.setWidth("400px");
-            kol1HorizontalLayout.setFlexGrow(0);
-
-            VerticalLayout kol1aVerticalLayout = new VerticalLayout();
-            kol1aVerticalLayout.setSizeFull();
-            kol1aVerticalLayout.add(sumBudsjettLabelSpan, sumRegnskapLabelSpan, sumDifferanseLabelSpan);
-
-            VerticalLayout kol1bVerticalLayout = new VerticalLayout();
-            kol1bVerticalLayout.setSizeFull();
-            kol1bVerticalLayout.setAlignItems(Alignment.END);
-            kol1bVerticalLayout.add(sumBudsjettSpan, sumRegnskapSpan, sumDifferanseSpan);
-
-
-            kol1HorizontalLayout.add(kol1aVerticalLayout, kol1bVerticalLayout);
-
-            VerticalLayout kol2VerticalLayout = new VerticalLayout();
-            kol2VerticalLayout.setSizeFull();
-            kol2VerticalLayout.add(beskrivelseTextArea);
-
-            HorizontalLayout horizontalLayout = new HorizontalLayout();
-            horizontalLayout.setSizeFull();
-            horizontalLayout.add(kol1HorizontalLayout,kol2VerticalLayout);
-
-            leggTilAndrefelterOver(horizontalLayout);
-        }
-    }
-
-    private void instansOpprettFelter_leggTilOverfelter_Kostnadspakke() {
-        VerticalLayout bakgrunnVerticalLayout = new VerticalLayout();
-        bakgrunnVerticalLayout.setSizeFull();
-        HorizontalLayout rad1HorizontalLayout = new HorizontalLayout();
-        rad1HorizontalLayout.setWidthFull();
-        rad1HorizontalLayout.setDefaultVerticalComponentAlignment(Alignment.END);
-
 
         tittelTextField = new TextField("Tittel");
-        tittelTextField.setWidthFull();
-        kategoriComboBox.setWidth("400px");
-        sumRegnskapLabelSpan.setWidth("200px");
-        sumRegnskapSpan.setWidth("200px");
-        rad1HorizontalLayout.add(kategoriComboBox, tittelTextField, sumRegnskapLabelSpan, sumRegnskapSpan);
-
-        beskrivelseTextArea.setLabel("Beskrivelse");
-
-        bakgrunnVerticalLayout.add(rad1HorizontalLayout);
-        bakgrunnVerticalLayout.add(beskrivelseTextArea);
-
-        leggTilAndrefelterOver(bakgrunnVerticalLayout);
-
     }
 
-    private void instansOpprettFelter_opprettBudsjettposterTab() {
-        if (periodepostTypeEnum == PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
-            return;  //Avbryt hvis kostnadspakke
-        }
 
+    protected void instansOpprettFelter_leggTilOverfelter() {
+        beskrivelseTextArea.setPlaceholder("Beskrivelse");
+
+        HorizontalLayout kol1HorizontalLayout = new HorizontalLayout();
+        kol1HorizontalLayout.setWidth("400px");
+        kol1HorizontalLayout.setFlexGrow(0);
+
+        VerticalLayout kol1aVerticalLayout = new VerticalLayout();
+        kol1aVerticalLayout.setSizeFull();
+        kol1aVerticalLayout.add(sumBudsjettLabelSpan, sumRegnskapLabelSpan, sumDifferanseLabelSpan);
+
+        VerticalLayout kol1bVerticalLayout = new VerticalLayout();
+        kol1bVerticalLayout.setSizeFull();
+        kol1bVerticalLayout.setAlignItems(Alignment.END);
+        kol1bVerticalLayout.add(sumBudsjettSpan, sumRegnskapSpan, sumDifferanseSpan);
+
+
+        kol1HorizontalLayout.add(kol1aVerticalLayout, kol1bVerticalLayout);
+
+        VerticalLayout kol2VerticalLayout = new VerticalLayout();
+        kol2VerticalLayout.setSizeFull();
+        kol2VerticalLayout.add(beskrivelseTextArea);
+
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.setSizeFull();
+        horizontalLayout.add(kol1HorizontalLayout, kol2VerticalLayout);
+
+        leggTilAndrefelterOver(horizontalLayout);
+    }
+
+
+    protected void instansOpprettFelter_opprettBudsjettposterTab() {
         String budsjettpostertabString = "Budsjett";
         budsjettposterGrid = opprettStandardPostGrid();
         leggTilRedigeringsfelt(budsjettpostertabString, budsjettposterGrid);
-
     }
 
-    private void instansOpprettFelter_opprettNormalposterTab(){
-
+    protected void instansOpprettFelter_opprettNormalposterTab() {
         normalposterGrid = opprettStandardPostGrid();
         normalposterGrid.setSizeFull();
         leggTilRedigeringsfelt(normalposterTabString, normalposterGrid);
         hentFormLayoutFraTab(normalposterTabString).setSizeFull();
     }
 
-    private Grid<Post> opprettStandardPostGrid() {
+    protected Grid<Post> opprettStandardPostGrid() {
         Grid<Post> postGrid = new Grid<>();
-        postGrid.addColumn(p -> p.getKategori()!=null? p.getKategori().hentKortnavn() : "").setHeader("Kategori").setWidth("250px").setFlexGrow(0);
+        postGrid.addColumn(p -> p.getKategori() != null ? p.getKategori().hentKortnavn() : "").setHeader("Kategori").setWidth("250px").setFlexGrow(0);
         postGrid.addColumn(Post::getDatoLocalDate).setHeader("Dato").setWidth("150px").setFlexGrow(0);
         postGrid.addColumn(Post::getTekstFraBankenString).setHeader("Tekst fra banken");
         postGrid.addColumn(p -> {
-            if (p.getInnPaaKontoInteger()!=null && p.getInnPaaKontoInteger()>0) {
+            if (p.getInnPaaKontoInteger() != null && p.getInnPaaKontoInteger() > 0) {
                 return p.getInnPaaKontoInteger();
             } else {
                 return p.getUtFraKontoInteger();
             }
-        } ).setHeader("Sum").setWidth("100px").setFlexGrow(0).setTextAlign(ColumnTextAlign.END);
+        }).setHeader("Sum").setWidth("100px").setFlexGrow(0).setTextAlign(ColumnTextAlign.END);
         postGrid.addColumn(Post::getBeskrivelseString).setHeader("Beskrivelse");
         postGrid.setSizeFull();
-//        postGrid.setWidthFull();
-//        postGrid.setHeight("500px"); //virker ikke
         return postGrid;
     }
 
-    private void instansOpprettFelter_opprettEkstraTab() {
-
-        if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
-            leggTilRedigeringsfelter(ekstratabString, periodeposttypeEnumComboBox, periodeComboBox);
-        } else {
-            leggTilRedigeringsfelter(ekstratabString, periodeposttypeEnumComboBox, kategoriComboBox, periodeComboBox);
-        }
+    protected void instansOpprettFelter_opprettEkstraTab() {
+        leggTilRedigeringsfelter(ekstratabString, periodeposttypeEnumComboBox, kategoriComboBox, periodeComboBox);
     }
 
     @Override
@@ -268,9 +213,7 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
         binder.bind(periodeComboBox, Periodepost::getPeriode, Periodepost::setPeriode);
         binder.bind(kategoriComboBox, Periodepost::getKategori, Periodepost::setKategori);
         binder.bind(beskrivelseTextArea, Periodepost::getBeskrivelseString, Periodepost::setBeskrivelseString);
-        if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
-            binder.bind(tittelTextField, Periodepost::getTittelString, Periodepost::setTittelString);
-        }
+        binder.bind(tittelTextField, Periodepost::getTittelString, Periodepost::setTittelString);
     }
 
 

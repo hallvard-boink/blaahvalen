@@ -111,11 +111,11 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
     }
 
     public void oppdaterMarkerteRadiGrid(){
-        grid.getDataProvider().refreshItem(normalPostRedigeringsomraade.getEntitet());
+        grid.getDataProvider().refreshItem(normalPostRedigeringsomraade.hentEntitet());
     }
 
     public void markerEntitetiGrid(){
-        grid.select(normalPostRedigeringsomraade.getEntitet());
+        grid.select(normalPostRedigeringsomraade.hentEntitet());
     }
 
     public void aktiverDelpostknapperHvisAktuelt(Boolean blnAktiver){

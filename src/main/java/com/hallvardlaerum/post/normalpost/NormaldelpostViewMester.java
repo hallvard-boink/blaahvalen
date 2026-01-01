@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 
 public class NormaldelpostViewMester {
-    private NormalpostView normalpostView;
+    private final NormalpostView normalpostView;
     private Post hovedPost;
 
     private Button leggTilNyDelPostButton;
@@ -26,9 +26,9 @@ public class NormaldelpostViewMester {
     private Button visDelposterButton;
     private Button settTilRestButton;
     private Boolean viserDelposterBoolean = false;
-    private PostServiceMal postService;
+    private final PostServiceMal postService;
     private String originalvinduTittelString;
-    private NormalpostRedigeringsomraade redigeringsomraade;
+    private final NormalpostRedigeringsomraade redigeringsomraade;
 
     public NormaldelpostViewMester(NormalpostView normalpostView,
                                    NormalpostRedigeringsomraade redigeringsomraade,
@@ -80,11 +80,11 @@ public class NormaldelpostViewMester {
         dialog.addConfirmListener((e) -> {
             Grid<Post> grid = normalpostView.hentGrid();
             if (grid.getGenericDataView() instanceof ListDataView) {
-                grid.getListDataView().removeItem(redigeringsomraade.getEntitet());
+                grid.getListDataView().removeItem(redigeringsomraade.hentEntitet());
             }
 
-            postService.slett(redigeringsomraade.getEntitet());
-            redigeringsomraade.setEntitet(null);
+            postService.slett(redigeringsomraade.hentEntitet());
+            redigeringsomraade.settEntitet(null);
             normalpostView.oppdaterRedigeringsomraade();
             normalpostView.setViewCRUDStatus(ViewCRUDStatusEnum.ER_SLETTET);
             settFilterForDelpost();
@@ -95,7 +95,7 @@ public class NormaldelpostViewMester {
 
     private void lagreDelpost() {
         redigeringsomraade.skrivBean();
-        postService.lagre(redigeringsomraade.getEntitet());
+        postService.lagre(redigeringsomraade.hentEntitet());
         redigeringsomraade.lesBean();
         ViewCRUDStatusEnum viewCRUDStatus = normalpostView.getViewCRUDStatus();
         //normalpostView.oppdaterAntallRaderNederstIGrid();  // venter med denne
@@ -215,13 +215,13 @@ public class NormaldelpostViewMester {
             sumUtFraKonto = sumUtFraKonto + (post.getUtFraKontoInteger()!=null? post.getUtFraKontoInteger():0);
         }
         sumUtFraKonto = sumUtFraKonto - hovedPost.getUtFraKontoInteger() - (delpost.getUtFraKontoInteger()!=null?delpost.getUtFraKontoInteger():0);
-        Integer restInteger = hovedPost.getUtFraKontoInteger() - sumUtFraKonto;
+        int restInteger = hovedPost.getUtFraKontoInteger() - sumUtFraKonto;
         if (restInteger>0) {
             redigeringsomraade.oppdaterUtFraKontoIntegerField(restInteger);
         }
 
         if (hovedPost.getInnPaaKontoInteger()!=null && hovedPost.getInnPaaKontoInteger()>0) {
-            Integer sumInnPaaKonto = normalpostView.hentGrid().getGenericDataView().getItems().map(Post::getInnPaaKontoInteger).reduce(0,Integer::sum)
+            int sumInnPaaKonto = normalpostView.hentGrid().getGenericDataView().getItems().map(Post::getInnPaaKontoInteger).reduce(0,Integer::sum)
                     - hovedPost.getInnPaaKontoInteger() - hovedPost.getUtFraKontoInteger();
             if (sumInnPaaKonto<0) {
                 redigeringsomraade.oppdaterInnPaaKontoIntegerField(-sumInnPaaKonto);

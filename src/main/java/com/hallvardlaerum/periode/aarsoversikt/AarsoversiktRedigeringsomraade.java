@@ -5,6 +5,7 @@ import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periodepost.Periodepost;
+import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -102,7 +103,9 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
             super.initierPeriodeRedigeringsomraadeMal(PeriodetypeEnum.AARSOVERSIKT,
                     Allvitekyklop.hent().getAarsoversiktpostService(),
                     Allvitekyklop.hent().getAarsoversiktpostRedigeringsomraadeTilDialog(),
-                    Allvitekyklop.hent().getAarsoversiktService()
+                    Allvitekyklop.hent().getAarsoversiktService(),
+                    PeriodepostTypeEnum.AARSOVERSIKTPOST,
+                    Allvitekyklop.hent().getAarsoversiktView()
             );
 
             erInitiert=true;

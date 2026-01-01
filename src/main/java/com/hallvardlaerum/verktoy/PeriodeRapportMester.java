@@ -81,6 +81,7 @@ public class PeriodeRapportMester {
             filnavnString = "Aarsoversikt_" +
                     Datokyklop.hent().formaterLocalDate_YYYY(periode.getDatoFraLocalDate());
         }
+        filnavnString = filnavnString + "_utskrevet_" + Datokyklop.hent().hentDagensDatoSomEnkelDato();
 
         try {
             report()

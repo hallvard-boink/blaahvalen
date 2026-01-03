@@ -79,15 +79,14 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
             }
 
             for (Tuple tuple:tuples) {
-                oppdaterSummer_tuple(periodepost,tuple);
+                oppdaterOgLagreSummerForVanligePeriodeposter_oppdaterSummer_tuple(periodepost,tuple);
             }
 
         }
         lagre(periodepost);
     }
 
-    private void oppdaterSummer_tuple(Periodepost periodepost, Tuple tuple) {
-
+    private void oppdaterOgLagreSummerForVanligePeriodeposter_oppdaterSummer_tuple(Periodepost periodepost, Tuple tuple) {
         Byte postklasseenumByte = tuple.get(0, Byte.class);
         BigDecimal sumBigDecimalInn = tuple.get(1, BigDecimal.class);
         BigDecimal sumBigDecimalUt = tuple.get(2, BigDecimal.class);
@@ -116,7 +115,6 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         } else if (postklasseEnum == PostklasseEnum.BUDSJETTPOST) {
             periodepost.setSumBudsjettInteger(sumInnInteger + sumUtInteger);
         }
-
     }
 
 

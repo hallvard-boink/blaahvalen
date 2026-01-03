@@ -40,9 +40,9 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
     // === FELTER ===
     protected ComboBox<PeriodepostTypeEnum> periodeposttypeEnumComboBox = null;
     protected ComboBox<Kategori> kategoriComboBox;
-    protected HallvardsSpan sumBudsjettSpan;
-    protected HallvardsSpan sumRegnskapSpan;
-    protected HallvardsSpan sumDifferanseSpan;
+    protected HallvardsIntegerSpan sumBudsjettSpan;
+    protected HallvardsIntegerSpan sumRegnskapSpan;
+    protected HallvardsIntegerSpan sumDifferanseSpan;
     protected ComboBox<Periode> periodeComboBox;
     protected TextField tittelTextField;
     protected TextArea beskrivelseTextArea;
@@ -129,9 +129,9 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
         kategoriComboBox.setItemLabelGenerator(Kategori::hentKortnavn);
         kategoriComboBox.setItems(kategoriService.finnAlle());
 
-        sumBudsjettSpan = new HallvardsSpan();
-        sumRegnskapSpan = new HallvardsSpan();
-        sumDifferanseSpan = new HallvardsSpan();
+        sumBudsjettSpan = new HallvardsIntegerSpan();
+        sumRegnskapSpan = new HallvardsIntegerSpan();
+        sumDifferanseSpan = new HallvardsIntegerSpan();
 
         beskrivelseTextArea = new TextArea();
         beskrivelseTextArea.setMinRows(2);

@@ -32,7 +32,6 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
     private PeriodeoversiktpostService periodeoversiktpostService;
 
     public PeriodeServiceMal() {
-
     }
 
     public void initier(RedigeringsomraadeAktig<Periode> periodeRedingeringsomraade,
@@ -51,7 +50,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         super.initEntitetserviceMal(Periode.class, periodeRepository);
     }
 
-    public List<Periode> finnAlleEgndePerioder(PeriodetypeEnum periodetypeEnum){
+    public List<Periode> finnAlleEgnedePerioder(PeriodetypeEnum periodetypeEnum) {
         return periodeRepository.findByPeriodetypeEnumOrderByDatoFraLocalDateDesc(periodetypeEnum);
     }
 
@@ -74,66 +73,78 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
     public void oppdaterOverordnetPeriodensPeriodeposterOgSummer() {
         Periode periode = periodeRedigeringsomraade.getEntitet();
         oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(periode, 0);
-        oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode,0);
+        oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode, 0);
 
-        oppdaterSummer(periode);
+        oppdaterLagredeSummer(periode);
         periodeRedigeringsomraade.lesBean();
         periodeRedigeringsomraade.instansOppdaterEkstraRedigeringsfelter();
-
     }
 
-    public void oppdaterDetaljertPeriodensPeriodeposterOgSummer(){
+    public void oppdaterDetaljertPeriodensPeriodeposterOgSummer() {
         Periode periode = periodeRedigeringsomraade.getEntitet();
 
         oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(periode, 1);
-        oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode,1 );
+        periode = periodeRedigeringsomraade.getEntitet(); //hvis det å slette periodepost setter den til null
+        oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode, 1);
+        oppdaterPeriodensPeriodeposterOgSummer_OppdaterHovedperiodepostene(periode);
         oppdaterPeriodensPeriodeposterOgSummer_oppdaterKostnadspakker(periode);
 
-        oppdaterSummer(periode);
+        oppdaterLagredeSummer(periode);
         periodeRedigeringsomraade.lesBean();
         periodeRedigeringsomraade.instansOppdaterEkstraRedigeringsfelter();
+    }
+
+
+    private void oppdaterPeriodensPeriodeposterOgSummer_OppdaterHovedperiodepostene(Periode periode) {
+        List<Periodepost> periodepostArrayList = periodepostService.finnHovedperiodeposter(periode);
+        for (Periodepost periodepost : periodepostArrayList) {
+            periodepostService.oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
+        }
     }
 
 
     public void oppdaterPeriodensPeriodeposterOgSummer_oppdaterKostnadspakker(Periode periode) {
         List<Periodepost> kostnadspakkeList = periodepostService.finnEtterPeriode(periode);
-        for (Periodepost kostnadspakke:kostnadspakkeList) {
+        for (Periodepost kostnadspakke : kostnadspakkeList) {
             periodeoversiktpostService.oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
             periodeoversiktpostService.lagre(kostnadspakke);
-
         }
-
     }
 
-    public void oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(Periode periode, Integer kategoriNivaa){
-        if (periode==null) {
+    public void oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(Periode periode, Integer kategoriNivaa) {
+        if (periode == null) {
             return;
         }
 
+        ArrayList<Periodepost> periodeposterSomSkalSlettesArrayList = new ArrayList<>();
         List<Periodepost> periodepostList = periodepostService.hentRepository().finnEtterPeriodeOgKategorinivaa(periode.getUuid(), kategoriNivaa);
 
         PostServiceMal postService = Allvitekyklop.hent().getNormalpostService();
 
-        for (Periodepost periodepost:periodepostList) {
+        for (Periodepost periodepost : periodepostList) {
             List<Post> postList = postService.finnPosterFradatoTilDatoOgKategoriOgNivaa(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), periodepost.getKategori(), kategoriNivaa);
             if (postList.isEmpty()) {
-                periodepostService.slett(periodepost);
+                periodeposterSomSkalSlettesArrayList.add(periodepost);
             } else {
                 periodepostService.oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
             }
+        }
+
+        if (!periodeposterSomSkalSlettesArrayList.isEmpty()) {
+            hentBekreftSlettePeriodeposterDialog(periodeposterSomSkalSlettesArrayList).open();
         }
     }
 
     public void oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(Periode periode, Integer kategoriNivaa) {
         List<Kategori> kategoriListHarPoster;
-        if (kategoriNivaa == 0 ) {
-            List<Tuple> tuples= kategoriService.hentHovedKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+        if (kategoriNivaa == 0) {
+            List<Tuple> tuples = kategoriService.hentHovedKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
             kategoriListHarPoster = new ArrayList<>();
-            for (Tuple tuple:tuples) {
+            for (Tuple tuple : tuples) {
                 String uuidString = tuple.get(0, UUID.class).toString();
                 Kategori kategori = kategoriService.finnEtterUUID(uuidString);
-                if (kategori==null) {
-                    Loggekyklop.bruk().loggINFO("Fant ikke kategorien " + tuple.get(1,String.class));
+                if (kategori == null) {
+                    Loggekyklop.bruk().loggINFO("Fant ikke kategorien " + tuple.get(1, String.class));
                 } else {
                     kategoriListHarPoster.add(kategori);
                 }
@@ -143,8 +154,8 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
             kategoriListHarPoster = kategoriService.hentKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
         }
 
-        for (Kategori kategori:kategoriListHarPoster) {
-            List<Periodepost> periodepostList = periodepostService.finnFraPeriodeOgKategori(periode,kategori);
+        for (Kategori kategori : kategoriListHarPoster) {
+            List<Periodepost> periodepostList = periodepostService.finnFraPeriodeOgKategori(periode, kategori);
             if (periodepostList.isEmpty()) {
                 Periodepost periodepost = periodepostService.opprettEntitet();
                 periodepost.setPeriode(periode);
@@ -162,8 +173,8 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setHeader("Slette overflødige periodeposter?");
         dialog.setText("Det finnes " + tomperiodepostList.size() + " periodeposter som er tomme. " +
-                        "(" + periodepostService.presenterPeriodeposterMenIkkeVisPeriode(tomperiodepostList) + ")." +
-                        "Skal jeg fjerne dem?");
+                "(" + periodepostService.presenterPeriodeposterMenIkkeVisPeriode(tomperiodepostList) + ")." +
+                "Skal jeg fjerne dem?");
         dialog.setRejectable(true);
         dialog.setCancelText("Nei, avbryt");
         dialog.setConfirmText("Ok, slett dem");
@@ -177,26 +188,21 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         periodeRedigeringsomraade.lesBean();
     }
 
-    public void oppdaterSummer() {
-        Periode periode = periodeRedigeringsomraade.getEntitet();
-        oppdaterSummer(periode);
-    }
 
-    public void oppdaterSummer(Periode periode) {
+    public void oppdaterLagredeSummer(Periode periode) {
 
         // === Regnskap med overføringer ===
         Integer sumRegnskapInntekterMedOverfoeringerInteger = postService.sumInnFradatoTilDatoNormalposterMedOverfoeringer(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-        if (sumRegnskapInntekterMedOverfoeringerInteger==null) {
-            sumRegnskapInntekterMedOverfoeringerInteger=0;
+        if (sumRegnskapInntekterMedOverfoeringerInteger == null) {
+            sumRegnskapInntekterMedOverfoeringerInteger = 0;
         }
         periode.setSumRegnskapInntektMedOverfoeringerInteger(sumRegnskapInntekterMedOverfoeringerInteger);
 
         Integer sumRegnskapUtgifterMedOverfoeringerInteger = postService.sumUtFradatoTilDatoNormalposterMedOverfoeringer(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-        if (sumRegnskapUtgifterMedOverfoeringerInteger==null) {
-            sumRegnskapUtgifterMedOverfoeringerInteger=0;
+        if (sumRegnskapUtgifterMedOverfoeringerInteger == null) {
+            sumRegnskapUtgifterMedOverfoeringerInteger = 0;
         }
         periode.setSumRegnskapUtgifterMedOverfoeringerInteger(sumRegnskapUtgifterMedOverfoeringerInteger);
-
         periode.setSumRegnskapResultatMedOverfoeringerInteger(sumRegnskapInntekterMedOverfoeringerInteger - sumRegnskapUtgifterMedOverfoeringerInteger);
 
         // == Regnskap uten overføringer ===
@@ -214,17 +220,17 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
 
         // === Budsjett ===
         List<Tuple> tuples = postService.sumInnUtFradatoTilDatoTildelteBudsjettposter(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-        if (tuples.size()==1) {
+        if (tuples.size() == 1) {
             Tuple tuple = tuples.getFirst();
-            if (tuple!=null && tuple.get(0, BigDecimal.class)!=null) {
+            if (tuple != null && tuple.get(0, BigDecimal.class) != null) {
                 Integer sumInn = HelTallMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class));
-                sumInn = sumInn==null ? 0 : sumInn;
+                sumInn = sumInn == null ? 0 : sumInn;
                 Integer sumUt = HelTallMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class));
-                sumUt = sumUt==null ? 0 : sumUt;
+                sumUt = sumUt == null ? 0 : sumUt;
 
                 periode.setSumBudsjettInntektInteger(sumInn);
                 periode.setSumBudsjettUtgifterInteger(sumUt);
-                periode.setSumBudsjettResultatInteger(sumInn-sumUt);
+                periode.setSumBudsjettResultatInteger(sumInn - sumUt);
             } else {
                 periode.setSumBudsjettInntektInteger(0);
                 periode.setSumBudsjettUtgifterInteger(0);
@@ -232,8 +238,39 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
             }
         }
 
+
         lagre(periode);
         periodeRedigeringsomraade.lesBean();
+    }
+
+    public String hentDifferanseBudsjettRegnskapInntekter(Periode periode) {
+        if (periode == null) {
+            return "";
+        } else if (periode.getSumBudsjettInntektInteger() == null || periode.getSumRegnskapInntektInteger() == null) {
+            return "";
+        } else {
+            return HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettInntektInteger() - periode.getSumRegnskapInntektInteger());
+        }
+    }
+
+    public String hentDifferanseBudsjettRegnskapUtgifter(Periode periode) {
+        if (periode == null) {
+            return "";
+        } else if (periode.getSumBudsjettUtgifterInteger() == null || periode.getSumRegnskapUtgifterInteger() == null) {
+            return "";
+        } else {
+            return HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettUtgifterInteger() - periode.getSumRegnskapUtgifterInteger());
+        }
+    }
+
+    public String hentDifferanseBudsjettRegnskapResultat(Periode periode) {
+        if (periode == null) {
+            return "";
+        } else if (periode.getSumBudsjettResultatInteger() == null || periode.getSumRegnskapResultatInteger()==null) {
+            return "";
+        } else {
+            return HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettResultatInteger()-periode.getSumRegnskapResultatInteger());
+        }
     }
 
 

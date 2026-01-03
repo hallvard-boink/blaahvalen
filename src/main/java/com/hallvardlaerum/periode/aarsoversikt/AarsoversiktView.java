@@ -9,6 +9,17 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 
+/**
+ * <h1>Årsoversikt</h1>
+ * Dette vinduet brukes til å redigere Årsoversikter. En årsoversikt er oppsummerte inntekter, utgifter og overføringer
+ * i budsjett og regnskap. Den skal vise om vi går med over- eller underskudd, og i hvilken grad opppsparte midler har
+ * blitt økt eller redusert.
+ * <br/><br/>
+ * Årsoversikten skal også brukes til å sette opp faste utgifter for året (altså budsjettposter), og planlegge eventuelle
+ * store utgifter. Hvis vi dermed bruker for mye en måned, kan vi legge inn tilsvarende lavere budsjett i måneden(e)
+ * etter, slik at resultatet blir bra til slutt.
+ * <br/><br/>
+ */
 @Route("aarsoversikt")
 @UIScope
 //@Menu(order=30, title="Årsoversikt")

@@ -123,6 +123,7 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
             return "(tom liste)";
         } else {
             StringBuilder sb = new StringBuilder();
+            sb.append("\n");
             for (int i = 0; i<periodepostList.size(); i++) {
                 Periodepost periodepost = periodepostList.get(i);
                 String kategori = "(kategori ikke satt)";
@@ -131,16 +132,16 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
                 }
                 sb.append(kategori).append(" ");
                 if (periodepost.getSumBudsjettInteger()==null) {
-                    sb.append("b:null ");
+                    sb.append("budsjett: null ");
                 } else {
-                    sb.append("b:").append(periodepost.getSumBudsjettInteger());
+                    sb.append("budsjett: ").append(periodepost.getSumBudsjettInteger()).append(" ");
                 }
                 if (periodepost.getSumRegnskapInteger()==null) {
-                    sb.append("r:null ");
+                    sb.append("regnskap: null ");
                 } else {
-                    sb.append("r:").append(periodepost.getSumRegnskapInteger());
+                    sb.append("regnskap: ").append(periodepost.getSumRegnskapInteger()).append(" ");
                 }
-                if (i>0){sb.append(", ");}
+                if (i>0){sb.append("\n");}
             }
             return sb.toString();
         }

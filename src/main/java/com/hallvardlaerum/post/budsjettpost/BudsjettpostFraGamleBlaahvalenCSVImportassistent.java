@@ -81,39 +81,33 @@ public class BudsjettpostFraGamleBlaahvalenCSVImportassistent extends CSVImporta
         Allvitekyklop.hent().getBudsjettpostView().oppdaterSoekeomraadeFinnAlleRader();
     }
 
-    private Kategori finnKategoriFraBudsjettpostgruppe(String kategoriTittel, String budsjettpostgruppeTittel) {
-        if (kategoriTittel==null || kategoriTittel.isEmpty()) {
-            return null;
-        }
+//    private Kategori finnKategoriFraBudsjettpostgruppe(String kategoriTittel, String budsjettpostgruppeTittel) {
+//        if (kategoriTittel==null || kategoriTittel.isEmpty()) {
+//            return null;
+//        }
+//
+//        if (budsjettpostgruppeTittel==null || budsjettpostgruppeTittel.isEmpty()) {
+//            return finnHovedkategoriFraTittel(kategoriTittel);
+//        }
+//
+//        int intStart = budsjettpostgruppeTittel.indexOf(kategoriTittel) + kategoriTittel.length() + 1;
+//        if (intStart>budsjettpostgruppeTittel.length()) {
+//            Loggekyklop.hent().loggTilFilINFO("Budsjettpostgruppenavn har ikke kategoritittel i seg. Kategoritittel: " + kategoriTittel +
+//                    " Budsjettpostgruppetittel:" + budsjettpostgruppeTittel);
+//            return null;
+//        }
+//        String underTittel = budsjettpostgruppeTittel.substring(intStart);
+//
+//        Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(kategoriTittel,underTittel);
+//        if (kategoriOptional.isPresent()) {
+//            return kategoriOptional.get();
+//        } else {
+//            Loggekyklop.hent().loggTilFilINFO("Fant ikke kategori med tittel " + kategoriTittel + " og undertittel " + budsjettpostgruppeTittel);
+//            return null;
+//        }
+//    }
 
-        if (budsjettpostgruppeTittel==null || budsjettpostgruppeTittel.isEmpty()) {
-            return finnHovedkategoriFraTittel(kategoriTittel);
-        }
 
-        int intStart = budsjettpostgruppeTittel.indexOf(kategoriTittel) + kategoriTittel.length() + 1;
-        if (intStart>budsjettpostgruppeTittel.length()) {
-            Loggekyklop.hent().loggTilFilINFO("Budsjettpostgruppenavn har ikke kategoritittel i seg. Kategoritittel: " + kategoriTittel +
-                    " Budsjettpostgruppetittel:" + budsjettpostgruppeTittel);
-            return null;
-        }
-        String underTittel = budsjettpostgruppeTittel.substring(intStart);
-
-        Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(kategoriTittel,underTittel);
-        if (kategoriOptional.isPresent()) {
-            return kategoriOptional.get();
-        } else {
-            Loggekyklop.hent().loggTilFilINFO("Fant ikke kategori med tittel " + kategoriTittel + " og undertittel " + budsjettpostgruppeTittel);
-            return null;
-        }
-    }
-
-    private Kategori finnHovedkategoriFraTittel(String kategoriTittel) {
-        Kategori kategori = kategoriService.finnHovedKategoriEtterTittel(kategoriTittel);
-        if (kategori==null) {
-            Loggekyklop.hent().loggTilFilINFO("Fant ikke hovedkategori med tittel " + kategoriTittel);
-        }
-        return kategori;
-    }
 
 
 }

@@ -6,18 +6,21 @@ import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
-import com.hallvardlaerum.periodepost.HallvardsSpan;
+import com.hallvardlaerum.periodepost.HallvardsIntegerSpan;
 import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodedelAvKostnadspakkeRad;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,9 +31,9 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
     private Grid<Post> foreslaatteBudsjettposterGrid;
     private Grid<PeriodedelAvKostnadspakkeRad> kostnadspakkeGrid;
     private BudsjettpostService budsjettpostService;
-    private HallvardsSpan innSpan;
-    private HallvardsSpan utSpan;
-    private HallvardsSpan resultatSpan;
+    private HallvardsIntegerSpan innSpan;
+    private HallvardsIntegerSpan utSpan;
+    private HallvardsIntegerSpan resultatSpan;
 
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
@@ -82,12 +85,21 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
         String kostnadspakkeTabString = "Kostnadspakker";
         kostnadspakkeGrid = new Grid<>();
         kostnadspakkeGrid.addColumn(PeriodedelAvKostnadspakkeRad::getTittel).setHeader("Kostnadspakke");
-        kostnadspakkeGrid.addColumn(PeriodedelAvKostnadspakkeRad::getSumForDenneMaaned).setHeader("Sum for måneden");
-        kostnadspakkeGrid.addColumn(PeriodedelAvKostnadspakkeRad::getSumTotalt).setHeader("Sum totalt");
+        kostnadspakkeGrid.addColumn(PeriodedelAvKostnadspakkeRad::getSumForDenneMaaned).setHeader("Sum for måneden")
+                .setWidth("150px").setFlexGrow(0).setTextAlign(ColumnTextAlign.END).setRenderer(opprettMaanedsSumRenderer());
+        kostnadspakkeGrid.addColumn(PeriodedelAvKostnadspakkeRad::getSumTotalt).setHeader("Sum totalt")
+                .setWidth("150px").setFlexGrow(0).setTextAlign(ColumnTextAlign.END).setRenderer(opprettTotalSumRenderer());
 
         super.leggTilRedigeringsfelt(kostnadspakkeTabString, kostnadspakkeGrid);
     }
 
+    private ComponentRenderer<Span, PeriodedelAvKostnadspakkeRad> opprettMaanedsSumRenderer(){
+        return new ComponentRenderer<>(periodedelAvKostnadspakkeRad -> opprettSpanFraInteger(periodedelAvKostnadspakkeRad.getSumForDenneMaaned()));
+    }
+
+    private ComponentRenderer<Span, PeriodedelAvKostnadspakkeRad> opprettTotalSumRenderer(){
+        return new ComponentRenderer<>(periodedelAvKostnadspakkeRad -> opprettSpanFraInteger(periodedelAvKostnadspakkeRad.getSumTotalt()));
+    }
 
     /**
      * <h1>Rediger budsjett</h1>
@@ -107,13 +119,14 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
      */
     private void instansOpprettFelter_leggTilBudsjettTab_Maanedsoversikt() {
         String redigerBudsjetttabString = "Rediger budsjett";
-        Span innLabelSpan = new Span("Budsjetterte inntekter:");
-        Span utLabelSpan = new Span("Budsjetterte utgifter:");
-        Span resultatLabelSpan = new Span("Budsjettert resultat:");
+        Span innMerkelappSpan = new Span("Budsjetterte inntekter:");
+        Span utMerkelappSpan = new Span("Budsjetterte utgifter:");
+        Span resultatMerkelappSpan = new Span("Budsjettert resultat:");
 
-        innSpan = new HallvardsSpan();
-        utSpan = new HallvardsSpan();
-        resultatSpan = new HallvardsSpan();
+        innSpan = new HallvardsIntegerSpan();
+        utSpan = new HallvardsIntegerSpan();
+        resultatSpan = new HallvardsIntegerSpan();
+        resultatSpan.addClassName(LumoUtility.FontWeight.BOLD);
 
         tildelteBudsjettposterGrid = opprettGeneriskBudsjettpostGrid(BudsjettpoststatusEnum.TILDELT);  // Inkluderte Budsjettposter for markert kategori
         tildelteBudsjettposterGrid.setHeightFull();
@@ -131,7 +144,7 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
         });
 
         HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.add(innLabelSpan, innSpan, new Span(), utLabelSpan, utSpan, new Span(), resultatLabelSpan, resultatSpan);
+        horizontalLayout.add(innMerkelappSpan, innSpan, new Span(), utMerkelappSpan, utSpan, new Span(), resultatMerkelappSpan, resultatSpan);
         leggTilRedigeringsfelter(redigerBudsjetttabString, horizontalLayout, new Span("SHIFT-klikk på en rad for å flytte mellom listene."));
         leggTilRedigeringsfelter(redigerBudsjetttabString, tildelteBudsjettposterGrid, foreslaatteBudsjettposterGrid);
 

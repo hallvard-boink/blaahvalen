@@ -243,35 +243,4 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         periodeRedigeringsomraade.lesBean();
     }
 
-    public String hentDifferanseBudsjettRegnskapInntekter(Periode periode) {
-        if (periode == null) {
-            return "";
-        } else if (periode.getSumBudsjettInntektInteger() == null || periode.getSumRegnskapInntektInteger() == null) {
-            return "";
-        } else {
-            return HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettInntektInteger() - periode.getSumRegnskapInntektInteger());
-        }
-    }
-
-    public String hentDifferanseBudsjettRegnskapUtgifter(Periode periode) {
-        if (periode == null) {
-            return "";
-        } else if (periode.getSumBudsjettUtgifterInteger() == null || periode.getSumRegnskapUtgifterInteger() == null) {
-            return "";
-        } else {
-            return HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettUtgifterInteger() - periode.getSumRegnskapUtgifterInteger());
-        }
-    }
-
-    public String hentDifferanseBudsjettRegnskapResultat(Periode periode) {
-        if (periode == null) {
-            return "";
-        } else if (periode.getSumBudsjettResultatInteger() == null || periode.getSumRegnskapResultatInteger()==null) {
-            return "";
-        } else {
-            return HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettResultatInteger()-periode.getSumRegnskapResultatInteger());
-        }
-    }
-
-
 }

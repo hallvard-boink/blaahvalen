@@ -27,9 +27,7 @@ import java.util.ArrayList;
 @Route("budsjettpost")
 @UIScope
 public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> implements InitieringsEgnet {
-    private Grid<Post> grid;
     private BudsjettpostService budsjettpostService;
-    private BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade;
     private boolean erInitiert = false;
     private KategoriService kategoriService;
 
@@ -76,7 +74,7 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
 
     @Override
     public void instansOpprettGrid() {
-        grid = super.hentGrid();
+        Grid<Post> grid = super.hentGrid();
         grid.addColumn(Post::getDatoLocalDate).setHeader("Dato");
         grid.addColumn(Post::getKategori).setHeader("Kategori");
         grid.addColumn(Post::getBeskrivelseString).setHeader("Beskrivelse");
@@ -87,11 +85,7 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
     }
 
     private ComponentRenderer<Span,Post> opprettBudsjettpoststatusRenderer(){
-        return new ComponentRenderer<>(post -> {
-            Span span = post.getBudsjettpoststatusEnum() != null ? new Span(post.getBudsjettpoststatusEnum().getTittel()) : new Span("");
-            //settStil(span, post);
-            return span;
-        });
+        return new ComponentRenderer<>(post -> post.getBudsjettpoststatusEnum() != null ? new Span(post.getBudsjettpoststatusEnum().getTittel()) : new Span(""));
     }
 
     @Override
@@ -114,8 +108,8 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
         if (!erInitiert) {
             this.budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
             this.kategoriService = Allvitekyklop.hent().getKategoriService();
-            this.budsjettpostRedigeringsomraade = Allvitekyklop.hent().getBudsjettpostRedigeringsomraade();
-            this.budsjettpostRedigeringsomraade.settView(this);
+            BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade = Allvitekyklop.hent().getBudsjettpostRedigeringsomraade();
+            budsjettpostRedigeringsomraade.settView(this);
 
             super.opprettLayout(budsjettpostService, budsjettpostRedigeringsomraade, SplitLayout.Orientation.VERTICAL);
             initierGridMedNormalSoek();

@@ -1,6 +1,7 @@
 package com.hallvardlaerum.verktoy;
 
 
+import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.periode.Periode;
@@ -9,42 +10,15 @@ import com.hallvardlaerum.periodepost.Periodepost;
 import net.sf.dynamicreports.report.builder.column.Columns;
 import net.sf.dynamicreports.report.builder.datatype.DataTypes;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
-import net.sf.dynamicreports.report.constant.HorizontalAlignment;
 import net.sf.dynamicreports.report.constant.HorizontalTextAlignment;
 import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JRDataSource;
 
-
 import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-
-/**
- * private void build() {
- *      try {
- *        report()//create new report design
- *          .columns(...) //adds columns
- *          .groupBy(...) //adds groups
- *          .subtotalsAtSummary(...) //adds subtotals
- *          ...
- *          //set datasource
- *          .setDataSource(...)
- *          //export report
- *          .toPdf(...) //export report to pdf
- *          .toXls(...) //export report to excel
- *          ...
- *          //other outputs
- *          .toJasperPrint() //creates jasperprint object
- *          .show() //shows report
- *          .print() //prints report
- *          ...
- *      } catch (DRException e) {
- *        e.printStackTrace();
- *      }
- *    }
- */
 
 import static net.sf.dynamicreports.report.builder.DynamicReports.*;
 public class PeriodeRapportMester {
@@ -156,12 +130,9 @@ public class PeriodeRapportMester {
 
                 .toPdf(new FileOutputStream(filnavnString));
 
-        } catch (DRException e) {
-            throw new RuntimeException(e);
-        } catch (FileNotFoundException e) {
+        } catch (DRException | FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        ;
     }
 
     private JRDataSource lagRaderAvPerioder() {
@@ -229,7 +200,7 @@ public class PeriodeRapportMester {
                     // Export to PDF
                     .toPdf(new FileOutputStream("employee_report.pdf"));
         } catch (DRException | FileNotFoundException e) {
-            e.printStackTrace();
+            Loggekyklop.bruk().loggFEIL("Feil ved opprettelse av pdf-filen for utskrift av perioderapport.");
         }
     }
 
@@ -242,5 +213,29 @@ public class PeriodeRapportMester {
         return dataSource;
     }
 
+// Info om struktur i rapporter:
+// * private void build() {
+// *      try {
+// *        report()//create new report design
+// *          .columns(...) //adds columns
+// *          .groupBy(...) //adds groups
+// *          .subtotalsAtSummary(...) //adds subtotals
+// *          ...
+// *          //set datasource
+// *          .setDataSource(...)
+// *          //export report
+// *          .toPdf(...) //export report to pdf
+// *          .toXls(...) //export report to excel
+// *          ...
+// *          //other outputs
+// *          .toJasperPrint() //creates jasperprint object
+// *          .show() //shows report
+// *          .print() //prints report
+// *          ...
+// *      } catch (DRException e) {
+// *        e.printStackTrace();
+// *      }
+// *    }
+// */
 
 }

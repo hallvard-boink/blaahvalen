@@ -26,8 +26,7 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
         if (!erInitiert) {
             super.initPeriodepostServiceMal(
                 Allvitekyklop.hent().getPeriodeoversiktpostRedigeringsomraade(),
-                PeriodepostTypeEnum.PERIODEOVERSIKTPOST,
-                Allvitekyklop.hent().getAarsoversiktService()
+                PeriodepostTypeEnum.PERIODEOVERSIKTPOST
             );
             normalpostService = Allvitekyklop.hent().getNormalpostService();
             periodepostRepository = super.hentRepository();

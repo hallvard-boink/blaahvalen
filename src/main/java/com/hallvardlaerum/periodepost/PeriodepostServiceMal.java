@@ -6,7 +6,6 @@ import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periode.Periode;
-import com.hallvardlaerum.periode.PeriodeServiceMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
@@ -20,32 +19,18 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
     private PeriodepostRepository periodepostRepository;
     private RedigeringsomraadeAktig<Periodepost> periodepostRedigeringsomraade;
     private PeriodepostTypeEnum periodepostTypeEnum;
-    private PeriodeServiceMal periodeService;
     private NormalpostService normalpostService;
 
     public PeriodepostServiceMal() {
 
     }
 
-    public ArrayList<Periodepost> hentPeriodepostListSortert(Periode periode) {
-        List<Periodepost> periodeposter = periode.getPeriodeposterList();
-        if (periodeposter == null) {
-            return new ArrayList<>();
-        } else {
-            return new ArrayList<>(periodeposter
-                    .stream()
-                    .sorted(Comparator.comparing(Periodepost::getSumRegnskapInteger, Comparator.nullsLast(Comparator.reverseOrder()))
-                            .thenComparing(Periodepost::getSumBudsjettInteger, Comparator.nullsLast(Comparator.reverseOrder())))
-                    .toList());
-        }
-    }
 
     public void initPeriodepostServiceMal(RedigeringsomraadeAktig<Periodepost> periodepostRedigeringsomraade,
                                           PeriodepostTypeEnum periodepostTypeEnum,
                                           PeriodeServiceMal periodeService) {
         this.periodepostRepository = Allvitekyklop.hent().getPeriodepostRepository();
         super.initEntitetserviceMal(Periodepost.class, periodepostRepository);
-        this.periodeService = periodeService;
         this.periodepostRedigeringsomraade = periodepostRedigeringsomraade;
         this.periodepostTypeEnum = periodepostTypeEnum;
 

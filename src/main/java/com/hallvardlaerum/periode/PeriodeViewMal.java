@@ -23,9 +23,7 @@ import java.util.ArrayList;
 
 
 public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeRepository> {
-    private Grid<Periode> grid;
     private EntitetserviceAktig<Periode, PeriodeRepository> periodeservice;
-    private RedigeringsomraadeAktig<Periode> redigeringsomraade;
     private PeriodetypeEnum periodetypeEnum;
 
     private DatePicker fraDatoFilterDatePicker;
@@ -74,8 +72,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
                                    RedigeringsomraadeAktig<Periode> redigeringsomraade,
                                    Double splittPlasseringDouble) {
         this.periodetypeEnum = periodetypeEnum;
-        this.redigeringsomraade = redigeringsomraade;
-        this.redigeringsomraade.settView(viewmalAktig);
+        redigeringsomraade.settView(viewmalAktig);
         this.periodeservice = periodeservice;
 
         super.opprettLayout(this.periodeservice, redigeringsomraade, SplitLayout.Orientation.HORIZONTAL, splittPlasseringDouble);
@@ -133,7 +130,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
 
     @Override
     public void instansOpprettGrid() {
-        grid = super.hentGrid();
+        Grid<Periode> grid = super.hentGrid();
         grid.addColumn(Periode::getDatoFraLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer()).setWidth("100px").setFlexGrow(0);
         grid.addColumn(Periode::getBeskrivelseString).setHeader("Beskrivelse");
         grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END).setWidth("150px").setFlexGrow(0);
@@ -157,7 +154,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
 
     private ComponentRenderer<Span, Periode> opprettDatoRenderer() {
         return new ComponentRenderer<>(periode -> {
-            DatopresisjonEnum datopresisjonEnum = null;
+            DatopresisjonEnum datopresisjonEnum;
             if (periode.getPeriodetypeEnum()==PeriodetypeEnum.MAANEDSOVERSIKT) {
                 datopresisjonEnum = DatopresisjonEnum.MAANED;
             } else if (periode.getPeriodetypeEnum()==PeriodetypeEnum.AARSOVERSIKT) {

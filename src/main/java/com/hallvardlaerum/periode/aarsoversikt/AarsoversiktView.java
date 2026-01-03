@@ -2,12 +2,9 @@ package com.hallvardlaerum.periode.aarsoversikt;
 
 import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
-import com.hallvardlaerum.periode.Periode;
-import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodeViewMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import com.hallvardlaerum.verktoy.PeriodeRapportMester;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -20,7 +17,6 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
     private Button oppdaterSummerButton;
     private Button lagrePDFButton;
     private boolean erInitiert = false;
-    private AarsoversiktRedigeringsomraade aarsoversiktRedigeringsomraade;
 
     public AarsoversiktView() {
         super();
@@ -38,9 +34,8 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
     public void init(){
         if (!erInitiert) {
             this.aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
-            this.aarsoversiktRedigeringsomraade = Allvitekyklop.hent().getAarsoversiktRedigeringsomraade();
-            this.aarsoversiktRedigeringsomraade.settView(this);
-
+            AarsoversiktRedigeringsomraade aarsoversiktRedigeringsomraade = Allvitekyklop.hent().getAarsoversiktRedigeringsomraade();
+            aarsoversiktRedigeringsomraade.settView(this);
             Allvitekyklop.hent().getAarsoversiktpostRedigeringsomraadeTilDialog().settView(this);
 
             this.aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
@@ -60,7 +55,6 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
         AarsoversiktFraGamleBlaahvalenCSVImportassistent aarsoversiktFraGamleBlaahvalenCSVImportassistent = new AarsoversiktFraGamleBlaahvalenCSVImportassistent();
         CSVImportmester csvImportmester = new CSVImportmester(aarsoversiktFraGamleBlaahvalenCSVImportassistent);
         csvImportmester.velgImportfilOgKjoerImport(aarsoversiktService);
-
     }
 
     private void leggTilOgTilpassKnapper() {
@@ -76,7 +70,6 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
         });
         lagrePDFButton.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(lagrePDFButton);
-
     }
 
     @Override

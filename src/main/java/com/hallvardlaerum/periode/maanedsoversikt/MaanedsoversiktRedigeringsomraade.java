@@ -35,12 +35,8 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
     private boolean erInitiert=false;
     private Grid<Post> tildelteBudsjettposterGrid;
     private Grid<Post> foreslaatteBudsjettposterGrid;
-    private Grid<MaanedsradKostnadspakke> kostnadspakkeGrid;
-
-    private KategoriService kategoriService;
+    private Grid<PeriodedelAvKostnadspakkeRad> kostnadspakkeGrid;
     private BudsjettpostService budsjettpostService;
-    private PeriodeoversiktpostService kostnadspakkeService;
-
     private HallvardsSpan innSpan;
     private HallvardsSpan utSpan;
     private HallvardsSpan resultatSpan;
@@ -266,9 +262,7 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
                     PeriodepostTypeEnum.MAANEDSOVERSIKTPOST,
                     Allvitekyklop.hent().getMaanedsoversiktView()
             );
-            kategoriService = Allvitekyklop.hent().getKategoriService();
             budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
-            kostnadspakkeService = Allvitekyklop.hent().getPeriodeoversiktpostService();
             erInitiert = true;
         }
     }

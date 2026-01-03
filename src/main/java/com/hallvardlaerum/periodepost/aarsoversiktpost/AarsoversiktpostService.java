@@ -1,7 +1,6 @@
 package com.hallvardlaerum.periodepost.aarsoversiktpost;
 
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
-import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
 import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -29,8 +28,8 @@ public class AarsoversiktpostService extends PeriodepostServiceMal implements In
         if (!erInitiert) {
             super.initPeriodepostServiceMal(
                     Allvitekyklop.hent().getAarsoversiktpostRedigeringsomraade(),
-                    PeriodepostTypeEnum.AARSOVERSIKTPOST,
-                    Allvitekyklop.hent().getAarsoversiktService());
+                    PeriodepostTypeEnum.AARSOVERSIKTPOST
+                    );
 
             erInitiert = true;
         }

@@ -1,7 +1,7 @@
 package com.hallvardlaerum.periodepost;
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
-import com.hallvardlaerum.grunndata.kategori.KategoriService;
+import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.SearchCriteria;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
@@ -21,12 +21,10 @@ import org.springframework.data.domain.Sort;
 import java.util.ArrayList;
 
 public class PeriodepostViewMal extends MasterDetailViewmal<Periodepost, PeriodepostRepository> {
-    private Grid<Periodepost> grid;
     private PeriodepostServiceMal periodepostService;
     private PeriodepostTypeEnum periodepostTypeEnum;
     private PeriodeServiceMal periodeService;
     private PeriodetypeEnum periodetypeEnum;
-    private RedigeringsomraadeAktig<Periodepost> redigeringsomraade;
     private KategoriService kategoriService;
 
     private ComboBox<Periode> periodeFilterComboBox;
@@ -49,15 +47,12 @@ public class PeriodepostViewMal extends MasterDetailViewmal<Periodepost, Periode
                                           PeriodeServiceMal periodeService) {
         this.periodepostTypeEnum = periodepostTypeEnum;
         this.periodetypeEnum = periodetypeEnum;
-        this.redigeringsomraade = redigeringsomraade;
-        this.redigeringsomraade.settView(periodepostView);
+        redigeringsomraade.settView(periodepostView);
         this.periodepostService = periodepostService;
         this.periodeService = periodeService;
         kategoriService = Allvitekyklop.hent().getKategoriService();
 
-        redigeringsomraade.settView(periodepostView);
-
-        super.opprettLayout(this.periodepostService, this.redigeringsomraade, SplitLayout.Orientation.HORIZONTAL);
+        super.opprettLayout(this.periodepostService, redigeringsomraade, SplitLayout.Orientation.HORIZONTAL);
         hentVindutittel().setText(periodepostTypeEnum.getTittel());
         initierGridMedPagedSearch();
     }
@@ -114,7 +109,7 @@ public class PeriodepostViewMal extends MasterDetailViewmal<Periodepost, Periode
 
     @Override
     public void instansOpprettGrid() {
-        grid = hentGrid();
+        Grid<Periodepost> grid = hentGrid();
         grid.addColumn(p -> p.getPeriode()!=null ? p.getPeriode().hentBeskrivendeNavn() : "" ).setHeader("Periode").setWidth("200px").setFlexGrow(0); // 0
         grid.addColumn(p -> p.getKategori()!=null ? p.getKategori().hentKortnavn():"").setHeader("Kategori"); // 1
         if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
@@ -130,7 +125,7 @@ public class PeriodepostViewMal extends MasterDetailViewmal<Periodepost, Periode
     public void instansOpprettFilterFelter() {
         periodeFilterComboBox = leggTilFilterfelt(0,new ComboBox<>(),"valg");
         periodeFilterComboBox.setItemLabelGenerator(Periode::hentBeskrivendeNavn);
-        periodeFilterComboBox.setItems(periodeService.finnAlleEgndePerioder(periodetypeEnum));
+        periodeFilterComboBox.setItems(periodeService.finnAlleEgnedePerioder(periodetypeEnum));
 
         kategoriFilterComboBox = leggTilFilterfelt(1, new ComboBox<>(),"valg");
         kategoriFilterComboBox.setItemLabelGenerator(Kategori::hentKortnavn);

@@ -1,4 +1,4 @@
-package com.hallvardlaerum.grunndata.kategori;
+package com.hallvardlaerum.kategori;
 
 import com.hallvardlaerum.libs.eksportimport.CSVImportassistentMal;
 import com.hallvardlaerum.libs.felter.BoolskMester;
@@ -6,8 +6,6 @@ import com.hallvardlaerum.verktoy.Allvitekyklop;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 
 /**
  * Hjelpeklasse for å importere standard kategorier fra gamle Blaahvalen.

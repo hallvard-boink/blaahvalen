@@ -1,4 +1,4 @@
-package com.hallvardlaerum.grunndata.kategori;
+package com.hallvardlaerum.kategori;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 

@@ -1,6 +1,6 @@
 package com.hallvardlaerum.periode;
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
+import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 

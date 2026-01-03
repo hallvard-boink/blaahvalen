@@ -6,18 +6,17 @@ import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.*;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
-import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MaanedsoversiktService extends PeriodeServiceMal implements InitieringsEgnet {
     private AarsoversiktService aarsoversiktService;
     private boolean erInitiert = false;
+    private MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade;
 
 
     public Periode finnMaanedsoversiktFraAarMnd(String aarMnd){
@@ -28,7 +27,7 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
         String datoString = aarMnd + "-01";
         LocalDate datoFra = LocalDate.parse(datoString);
 
-        List<Periode> periodeList = hentRepository().findByPeriodetypeEnumAndDatoFraLocalDate(PeriodetypeEnum.MAANEDSOVERSIKT, datoFra);
+        List<Periode> periodeList = super.finnEtterPeriodetypeOgFradato(PeriodetypeEnum.MAANEDSOVERSIKT, datoFra);
         if (periodeList.isEmpty()) {
             return null;
         } else {
@@ -58,27 +57,23 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
                     Allvitekyklop.hent().getMaanedsoversiktpostService(),
                     Allvitekyklop.hent().getNormalpostService()
             );
-            this.aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
+
+            aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
+            maanedsoversiktRedigeringsomraade = Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade();
             erInitiert = true;
         }
     }
 
 
-
-
-    /**
-     * Det opprettes maanedsoversiktposter, men de vises ikke i oversikten - bare de som er opprettet manuelt.
-     */
-
     public void opprettMaanedsoversikterForHeleAaret() {
-        Periode aarsoversiktPeriode = aarsoversiktService.finnAarsoversiktFraMaanedsoversikt(hentRedigeringsomraadeAktig().getEntitet());
+        Periode aarsoversiktPeriode = aarsoversiktService.finnAarsoversiktFraMaanedsoversikt(maanedsoversiktRedigeringsomraade.hentEntitet());
         if (aarsoversiktPeriode==null) {
             Loggekyklop.hent().loggADVARSEL("Fant ikke årsoversikt som passet med månedsoversikten med datoFra " +
-                    hentRedigeringsomraadeAktig().getEntitet().getDatoFraLocalDate());
+                    maanedsoversiktRedigeringsomraade.hentEntitet().getDatoFraLocalDate());
             return;
         }
 
-        List<Periode> maanedsoversiktList = hentRepository().findByPeriodetypeEnumAndDatoFraLocalDateGreaterThanEqualAndDatoTilLocalDateLessThanEqual(PeriodetypeEnum.MAANEDSOVERSIKT,
+        List<Periode> maanedsoversiktList = super.finnEtterPeriodetypeOgFraTilDato(PeriodetypeEnum.MAANEDSOVERSIKT,
                 aarsoversiktPeriode.getDatoFraLocalDate(), aarsoversiktPeriode.getDatoTilLocalDate());
         for (int i =1; i<=12; i++) {
             int finalI = i;
@@ -92,7 +87,6 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
             }
         }
         Allvitekyklop.hent().getMaanedsoversiktView().oppdaterSoekeomraadeFinnAlleRader();
-        //hentRedigeringsomraadeAktig().hentView().oppdaterSoekeomraade();
 
     }
 

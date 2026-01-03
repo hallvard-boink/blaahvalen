@@ -1,6 +1,6 @@
 package com.hallvardlaerum.verktoy;
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
+import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.post.normalpost.NormalpostService;

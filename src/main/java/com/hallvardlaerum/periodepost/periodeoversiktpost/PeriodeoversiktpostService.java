@@ -1,37 +1,39 @@
  package com.hallvardlaerum.periodepost.periodeoversiktpost;
-import com.hallvardlaerum.grunndata.kategori.Kategori;
-import com.hallvardlaerum.libs.felter.Datokyklop;
-import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
-import com.hallvardlaerum.periodepost.Periodepost;
-import com.hallvardlaerum.periodepost.PeriodepostRepository;
-import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
-import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
-import com.hallvardlaerum.post.Post;
-import com.hallvardlaerum.post.normalpost.NormalpostService;
-import com.hallvardlaerum.verktoy.Allvitekyklop;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+ import com.hallvardlaerum.libs.felter.HelTallMester;
+ import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+ import com.hallvardlaerum.periode.Periode;
+ import com.hallvardlaerum.periodepost.Periodepost;
+ import com.hallvardlaerum.periodepost.PeriodepostRepository;
+ import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
+ import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
+ import com.hallvardlaerum.post.Post;
+ import com.hallvardlaerum.post.normalpost.NormalpostService;
+ import com.hallvardlaerum.verktoy.Allvitekyklop;
+ import jakarta.persistence.Tuple;
+ import org.springframework.stereotype.Service;
 
-@Service
+ import java.math.BigDecimal;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.UUID;
+
+ @Service
 public class PeriodeoversiktpostService extends PeriodepostServiceMal implements InitieringsEgnet {
-    private boolean erIntiert;
+    private boolean erInitiert;
     private NormalpostService normalpostService;
     private PeriodepostRepository periodepostRepository;
 
     @Override
     public void init() {
-        if (!erIntiert) {
+        if (!erInitiert) {
             super.initPeriodepostServiceMal(
                 Allvitekyklop.hent().getPeriodeoversiktpostRedigeringsomraade(),
-                PeriodepostTypeEnum.PERIODEOVERSIKTPOST,
-                Allvitekyklop.hent().getAarsoversiktService()
+                PeriodepostTypeEnum.PERIODEOVERSIKTPOST
             );
             normalpostService = Allvitekyklop.hent().getNormalpostService();
             periodepostRepository = super.hentRepository();
-            erIntiert = true;
+            erInitiert = true;
         }
     }
 
@@ -42,7 +44,7 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
 
     @Override
     public boolean erInitiert() {
-        return erIntiert;
+        return erInitiert;
     }
 
     public void oppdaterSumUtgifterFraTilknyttedePoster(Periodepost kostnadspakke) {
@@ -58,7 +60,7 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
 
     /**
      * Periodeoversiktspost og kostnadspakke er synonymer.
-     * @return
+     * @return liste av kostnadspakker
      */
     public ArrayList<Periodepost> finnAlleKostnadspakker(){
         return new ArrayList<>(periodepostRepository.findByPeriodepostTypeEnumOrderByTittelStringDesc(PeriodepostTypeEnum.PERIODEOVERSIKTPOST));
@@ -68,16 +70,46 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
         return periodepostRepository.findByTittelString(kostnadspakketittelString);
     }
 
-    public Periodepost finnFraPostOgKategori(Post post, Kategori kategori) {
-        if (post==null) {
-            return null;
+
+    public List<Tuple> finnKostnadspakkeUUIDogSummerForPeriode(Periode periode) {
+        if (periode==null) {
+            return new ArrayList<>();
         }
 
+        return periodepostRepository.finnOgOppsummerKostnadspakkerForDatospenn(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
 
-
-        LocalDate datoAaretsStart = Datokyklop.hent().finnFoersteIAaret(post.getDatoLocalDate());
-        hentRepository().finnFraPeriodedatostartOgKategoritittel(datoAaretsStart, kategori.getTittel());
-
-        return null;
     }
+
+
+    public ArrayList<PeriodedelAvKostnadspakkeRad> hentKostnadspakkerForPeriodenMedPeriodensSum(Periode periode) {
+        List<Tuple> tupleList = finnKostnadspakkeUUIDogSummerForPeriode(periode);
+        ArrayList<PeriodedelAvKostnadspakkeRad> periodedelAvKostnadspakkeRadArrayList = new ArrayList<>();
+
+        for (Tuple tuple : tupleList) {
+            String kostnadspakkeUUIDString = tuple.get(0, UUID.class).toString();
+            if (kostnadspakkeUUIDString == null) {
+                break;
+            }
+            Periodepost kostnadspakke = finnEtterUUID(kostnadspakkeUUIDString);
+            if (kostnadspakke != null) {
+                BigDecimal sumInnBigDecimal = tuple.get(1, BigDecimal.class);
+                Integer sumInnInteger = 0;
+                if (sumInnBigDecimal != null) {
+                    sumInnInteger = HelTallMester.konverterBigdecimalTilInteger(sumInnBigDecimal);
+                }
+
+                BigDecimal sumUtBigDecimal = tuple.get(2, BigDecimal.class);
+                Integer sumUtInteger = 0;
+                if (sumUtBigDecimal != null) {
+                    sumUtInteger = HelTallMester.konverterBigdecimalTilInteger(sumUtBigDecimal);
+                }
+
+                periodedelAvKostnadspakkeRadArrayList.add(new PeriodedelAvKostnadspakkeRad(kostnadspakke, sumInnInteger + sumUtInteger));
+            }
+        }
+        return periodedelAvKostnadspakkeRadArrayList;
+    }
+
+
+
 }

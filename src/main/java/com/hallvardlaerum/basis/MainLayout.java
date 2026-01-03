@@ -27,8 +27,9 @@ public final class MainLayout extends AppLayout {
     }
 
     private Div createHeader() {
-        // TODO Replace with real application logo and name
-        var appLogo = VaadinIcon.CUBES.create();
+
+        var appLogo = VaadinIcon.COIN_PILES.create();
+
         appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
 
         var appName = new Span("Blåhvalen");

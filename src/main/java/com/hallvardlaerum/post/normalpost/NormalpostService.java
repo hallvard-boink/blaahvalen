@@ -1,11 +1,10 @@
 package com.hallvardlaerum.post.normalpost;
 
 
-import com.hallvardlaerum.grunndata.kategori.Kategori;
-import com.hallvardlaerum.grunndata.kategori.KategoriService;
+import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.EntitetAktig;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.post.Post;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,28 +23,19 @@ import java.util.stream.Stream;
 
 @Service
 public class NormalpostService extends PostServiceMal implements InitieringsEgnet {
-    private NormalpostRedigeringsomraade normalPostRedigeringsomraade;
     private KategoriService kategoriService;
     private ArrayList<Ekstrafeltrad> ekstrafeltradArrayList;
     private Boolean erInitiert = false;
     private PostRepository postRepository;
 
-    public List<Post> hentNormalposterFradatoTilDatoKategori(LocalDate fraDatoLocalDate, LocalDate tiDatoLocalDate, Kategori kategori) {
-        return super.finnPosterFradatoTilDatoPostklasseenumKategori(fraDatoLocalDate,tiDatoLocalDate,PostklasseEnum.NORMALPOST,kategori);
-    }
-
-    public ArrayList<Kategori> hentKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
-        return super.finnKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate,PostklasseEnum.NORMALPOST);
-    }
-
 
     //TODO: Hva brukes denne til?
-
     @Override
     public Post opprettEntitetMedForelder() {
         return opprettEntitet();
         //Skulle det ha vært satt inn en forelder her? Fra hvor???
     }
+
     @Override
     public Post opprettEntitet() {
         Post normalpost = leggTilUUID(new Post());
@@ -94,7 +83,6 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
     public void init() {
         if (!erInitiert) {
             super.initPostServiceMal(PostklasseEnum.NORMALPOST);
-            this.normalPostRedigeringsomraade = Allvitekyklop.hent().getNormalpostRedigeringsomraade();
             this.kategoriService = Allvitekyklop.hent().getKategoriService();
             this.postRepository = Allvitekyklop.hent().getPostRepository();
             erInitiert=true;
@@ -175,7 +163,7 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
         }
 
 
-        List<Post> forelderposter = super.hentRepository().findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(
+        List<Post> forelderposter = super.findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(
                 ekstrafeltrad.getPost().getDatoLocalDate(),
                 ekstrafeltrad.getPost().getTekstFraBankenString(),
                 NormalposttypeEnum.UTELATES
@@ -203,7 +191,7 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
             return null;
         }
 
-        Ekstrafeltrad ekstrafeltrad = null;
+        Ekstrafeltrad ekstrafeltrad;
         if (ekstrafeltradArrayList==null) {
             ekstrafeltradArrayList = new ArrayList<>();
             ekstrafeltrad = new Ekstrafeltrad(post);
@@ -223,27 +211,17 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
     }
 
 
-    @Override
-    @Deprecated
-    /*
-    Hent heller redigeringsområdet fra Allvitekyklop
-     */
-    public RedigeringsomraadeAktig<Post> hentRedigeringsomraadeAktig() {
-        return normalPostRedigeringsomraade;
-    }
-
-
 
     public Stream<Post> finnAlleSomStream(PageRequest springPageRequest) {
-        return super.hentRepository().findAll(springPageRequest).stream();
+        return postRepository.findAll(springPageRequest).stream();
     }
 
     public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
-        return hentRepository().findByKostnadsPakke(kostnadspakke);
+        return postRepository.findByKostnadsPakke(kostnadspakke);
     }
 
 
-    private class Ekstrafeltrad {
+    private static class Ekstrafeltrad {
         Post post;
         String forelderpostkortnavnString;
         String kursString;
@@ -258,10 +236,6 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
 
         public Post getPost() {
             return post;
-        }
-
-        public void setPost(Post post) {
-            this.post = post;
         }
 
         public String getForelderpostkortnavnString() {
@@ -302,10 +276,6 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
 
         public void setEkstraInfoString(String ekstraInfoString) {
             this.ekstraInfoString = ekstraInfoString;
-        }
-
-        public String getImportradString() {
-            return importradString;
         }
 
         public void setImportradString(String importradString) {

@@ -2,63 +2,61 @@ package com.hallvardlaerum.periode;
 
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
-import com.hallvardlaerum.libs.ui.Gridkyklop;
-import com.hallvardlaerum.libs.ui.RedigerEntitetDialog;
-import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
-import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
-import com.hallvardlaerum.periodepost.Periodepost;
-import com.hallvardlaerum.periodepost.PeriodepostRedigeringsomraadeMal;
-import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
-import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
-import com.hallvardlaerum.verktoy.Allvitekyklop;
+import com.hallvardlaerum.libs.ui.*;
+import com.hallvardlaerum.periodepost.*;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.textfield.*;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 
 public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode> implements RedigeringsomraadeAktig<Periode> {
-    private PeriodetypeEnum periodetypeEnum;
-    private PeriodepostTypeEnum periodepostTypeEnum;
-
-    private Grid<Periodepost> hovedKategorierGrid;
+    protected PeriodetypeEnum periodetypeEnum;
+    protected PeriodepostTypeEnum periodepostTypeEnum;
 
 
-    private RedigerEntitetDialog<Periodepost, Periode> periodepostRedigerEntitetDialog;
-    private PeriodepostRedigeringsomraadeMal periodepostRedigeringsomraadeTilDialog;
-    private PeriodepostServiceMal periodepostService;
-    private PeriodeServiceMal periodeService;
+    // === Andre objekter som trengs her ===
+    protected RedigerEntitetDialog<Periodepost, Periode> periodepostRedigerEntitetDialog;
+    protected PeriodepostRedigeringsomraadeMal periodepostRedigeringsomraadeTilDialog;
+    protected PeriodepostServiceMal periodepostService;
+    protected PeriodeServiceMal periodeService;
 
-    // === FELTENE ===
-    private ComboBox<PeriodetypeEnum> periodetypeComboBox;
-    private DatePicker datoFraDatePicker;
-    private DatePicker datoTilDatePicker;
+    // === GRID ===
+    protected Grid<Periodepost> hovedKategorierGrid;
 
-    private TextArea beskrivelseTextArea;
 
-    private TextField sumBudsjettInntekterTextField;
-    private TextField sumBudsjettUtgifterTextField;
-    private TextField sumBudsjettResultatTextField;
+    // === FELTER ===
+    protected ComboBox<PeriodetypeEnum> periodetypeComboBox;
+    protected DatePicker datoFraDatePicker;
+    protected DatePicker datoTilDatePicker;
 
-    private TextField sumRegnskapInntekterTextField;
-    private TextField sumRegnskapUtgifterTextField;
-    private TextField sumRegnskapResultatTextField;
+    protected TextArea beskrivelseTextArea;
 
-    private TextField sumDifferanseResultatBudsjettRegnskapTextField;
+    protected HallvardsIntegerSpan sumBudsjettInntekterSpan;
+    protected HallvardsIntegerSpan sumBudsjettUtgifterSpan;
+    protected HallvardsIntegerSpan sumBudsjettResultatSpan;
 
-    private TextField sumRegnskapInntekterMedOverfoeringerTextField;
-    private TextField sumRegnskapUtgifterMedOverfoeringerTextField;
-    private TextField sumRegnskapResultatMedOverfoeringerTextField;
+    protected HallvardsIntegerSpan sumRegnskapInntekterSpan;
+    protected HallvardsIntegerSpan sumRegnskapUtgifterSpan;
+    protected HallvardsIntegerSpan sumRegnskapResultatSpan;
 
-    private PeriodetittelHorizontalLayout periodetittelHorizontalLayout;
+    protected HallvardsIntegerSpan sumDifferanseBudsjettRegnskapInntekterSpan;
+    protected HallvardsIntegerSpan sumDifferanseBudsjettRegnskapUtgifterSpan;
+    protected HallvardsIntegerSpan sumDifferanseBudsjettRegnskapResultatSpan;
+
+    protected HallvardsIntegerSpan sumRegnskapInntekterMedOverfoeringerSpan;
+    protected HallvardsIntegerSpan sumRegnskapUtgifterMedOverfoeringerSpan;
+    protected HallvardsIntegerSpan sumRegnskapResultatMedOverfoeringerSpan;
+
+    protected PeriodetittelHorizontalLayout periodetittelHorizontalLayout;
 
 
     public PeriodeRedigeringsomraadeMal() {
@@ -68,31 +66,22 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
     public void initierPeriodeRedigeringsomraadeMal(PeriodetypeEnum periodetypeEnum,
                                                     PeriodepostServiceMal periodepostService,
                                                     PeriodepostRedigeringsomraadeMal periodepostRedigeringsomraadeTilDialog,
-                                                    PeriodeServiceMal periodeService){
+                                                    PeriodeServiceMal periodeService,
+                                                    PeriodepostTypeEnum periodepostTypeEnum,
+                                                    ViewmalAktig<Periode, PeriodeRepository> viewmalAktig) {
         this.periodetypeEnum = periodetypeEnum;
         this.periodepostService = periodepostService;
         this.periodeService = periodeService;
         this.periodepostRedigeringsomraadeTilDialog = periodepostRedigeringsomraadeTilDialog;
+        this.periodepostTypeEnum = periodepostTypeEnum;
+        this.settView(viewmalAktig);
 
         super.initRedigeringsomraadeMal();
 
-        if (beskrivelseTextArea==null) {
-
+        if (beskrivelseTextArea == null) {
             instansOpprettFelter();
-
             periodetittelHorizontalLayout = leggTilAndrefelterOver(new PeriodetittelHorizontalLayout(periodetypeEnum));
             instansByggOppBinder();
-
-
-            if (periodetypeEnum == PeriodetypeEnum.AARSOVERSIKT) {
-                this.periodepostTypeEnum = PeriodepostTypeEnum.AARSOVERSIKTPOST;
-                settView(Allvitekyklop.hent().getAarsoversiktView());
-            } else if (periodetypeEnum == PeriodetypeEnum.MAANEDSOVERSIKT) {
-                this.periodepostTypeEnum = PeriodepostTypeEnum.MAANEDSOVERSIKTPOST;
-                settView(Allvitekyklop.hent().getAarsoversiktView());
-            } else {
-                this.periodepostTypeEnum = null;
-            }
 
             this.periodepostRedigeringsomraadeTilDialog.initierPeriodepostRedigeringsomraadeMal(this.periodepostTypeEnum,
                     this.periodeService,
@@ -102,9 +91,9 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
                     this.periodeService,
                     "Rediger periodepost",
                     "",
-                    this.periodepostRedigeringsomraadeTilDialog
+                    this.periodepostRedigeringsomraadeTilDialog,
+                    this
             );
-
 
         }
     }
@@ -112,163 +101,185 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
 
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
-        if (getEntitet()==null) {
+        instansOppdaterEkstraRedigeringsfelter_oppdaterTittelMedTidsperiode();
+        instansOppdaterEkstraRedigeringsfelter_oppdaterPeriodepostGrid();
+        instansOppdaterEkstraRedigeringsfelter_oppdaterSummer();
+    }
+
+    private void instansOppdaterEkstraRedigeringsfelter_oppdaterTittelMedTidsperiode() {
+        if (hentEntitet() == null) {
             periodetittelHorizontalLayout.oppdaterTittel("");
         } else {
             periodetittelHorizontalLayout.oppdaterTittel(hentEntitet().getDatoFraLocalDate());
         }
-        oppdaterPeriodepostGrid();
     }
 
-    private void oppdaterPeriodepostGrid() {
-        if(getEntitet()==null) {
+    private void instansOppdaterEkstraRedigeringsfelter_oppdaterPeriodepostGrid() {
+        if (hentEntitet() == null) {
             hovedKategorierGrid.setItems(new ArrayList<>());
         } else {
-            hovedKategorierGrid.setItems(periodepostService.finnHovedperiodeposter(getEntitet()));
+            hovedKategorierGrid.setItems(periodepostService.finnHovedperiodeposter(hentEntitet()));
         }
     }
 
-    public ArrayList<Periodepost> hentPeriodepostListSortert(Periode periode) {
-        List<Periodepost> periodeposter = getEntitet().getPeriodeposterList();
-        if (periodeposter==null) {
-            return new ArrayList<>();
+    private void instansOppdaterEkstraRedigeringsfelter_oppdaterSummer() {
+        Periode periode = hentEntitet();
+        if (periode==null) {
+            sumBudsjettInntekterSpan.settInteger(null);
+            sumBudsjettUtgifterSpan.settInteger(null);
+            sumBudsjettResultatSpan.settInteger(null);
+
+            sumRegnskapInntekterSpan.settInteger(null);
+            sumRegnskapUtgifterSpan.settInteger(null);
+            sumRegnskapResultatSpan.settInteger(null);
+
+            sumDifferanseBudsjettRegnskapInntekterSpan.settInteger(null);
+            sumDifferanseBudsjettRegnskapUtgifterSpan.settInteger(null);
+            sumDifferanseBudsjettRegnskapResultatSpan.settInteger(null);
+
+            sumRegnskapInntekterMedOverfoeringerSpan.settInteger(null);
+            sumRegnskapUtgifterMedOverfoeringerSpan.settInteger(null);
+            sumRegnskapResultatMedOverfoeringerSpan.settInteger(null);
+
         } else {
-            return new ArrayList<>(periodeposter
-                    .stream()
-                    .sorted(Comparator.comparing(Periodepost::getSumRegnskapInteger, Comparator.nullsLast(Comparator.reverseOrder()))
-                            .thenComparing(Periodepost::getSumBudsjettInteger, Comparator.nullsLast(Comparator.reverseOrder())))
-                    .toList());
+            sumBudsjettInntekterSpan.settInteger(periode.getSumBudsjettInntektInteger());
+            sumBudsjettUtgifterSpan.settInteger(periode.getSumBudsjettUtgifterInteger());
+            sumBudsjettResultatSpan.settInteger(periode.getSumBudsjettResultatInteger());
+
+            sumRegnskapInntekterSpan.settInteger(periode.getSumRegnskapInntektInteger());
+            sumRegnskapUtgifterSpan.settInteger(periode.getSumRegnskapUtgifterInteger());
+            sumRegnskapResultatSpan.settInteger(periode.getSumRegnskapResultatInteger());
+
+            sumDifferanseBudsjettRegnskapInntekterSpan.settDifferanseInteger(periode.getSumBudsjettInntektInteger(), periode.getSumRegnskapInntektInteger());
+            sumDifferanseBudsjettRegnskapUtgifterSpan.settDifferanseInteger(periode.getSumBudsjettUtgifterInteger(), periode.getSumRegnskapUtgifterInteger());
+            sumDifferanseBudsjettRegnskapResultatSpan.settDifferanseInteger(periode.getSumBudsjettResultatInteger(), periode.getSumRegnskapResultatInteger());
+
+            sumRegnskapInntekterMedOverfoeringerSpan.settInteger(periode.getSumRegnskapInntektMedOverfoeringerInteger());
+            sumRegnskapUtgifterMedOverfoeringerSpan.settInteger(periode.getSumRegnskapUtgifterMedOverfoeringerInteger());
+            sumRegnskapResultatMedOverfoeringerSpan.settInteger(periode.getSumRegnskapResultatMedOverfoeringerInteger());
         }
     }
+
 
     @Override
     public void instansOpprettFelter() {
-
         instansOpprettFelter_leggTilHovedTab();
         instansOpprettFelter_leggTilHovedkategorierTab();
         instansOpprettFelter_leggTilEkstraTab();
 
-        setFokusComponent(beskrivelseTextArea);
+        settFokusKomponent(beskrivelseTextArea);
 
     }
 
 
-
-    private void instansOpprettFelter_leggTilHovedkategorierTab() {
+    protected void instansOpprettFelter_leggTilHovedkategorierTab() {
         String regnskaptabString = "Kategorier";
 
         hovedKategorierGrid = new Grid<>();
-        hovedKategorierGrid.addColumn(p -> {
-            if(p.getKategori()!=null) {
-                return p.getKategori().hentKortnavn();
-            } else {
-                return "";
-            }
-        }).setHeader("Kategori").setWidth("100px");
-        hovedKategorierGrid.addColumn(Periodepost::getSumBudsjettInteger).setHeader("Budsjett").setWidth("100px").setFlexGrow(0);
-        hovedKategorierGrid.addColumn(Periodepost::getSumRegnskapInteger).setHeader("Regnskap").setWidth("100px").setFlexGrow(0);
+        hovedKategorierGrid.addColumn(p -> p.getKategori() != null ? p.getKategori().getTittel() : "")
+                .setHeader("Kategori").setWidth("150px");
+        hovedKategorierGrid.addColumn(Periodepost::getSumBudsjettInteger).setHeader("Budsjett").setWidth("150px").setFlexGrow(0)
+                .setTextAlign(ColumnTextAlign.END).setRenderer(opprettSumBudsjettRenderer());
+        hovedKategorierGrid.addColumn(Periodepost::getSumRegnskapInteger).setHeader("Regnskap").setWidth("150px").setFlexGrow(0)
+                .setTextAlign(ColumnTextAlign.END).setRenderer(opprettSumRegnskapRenderer());
         hovedKategorierGrid.addColumn(Periodepost::getBeskrivelseString).setHeader("Beskrivelse");
         hovedKategorierGrid.setSizeFull();
+        hovedKategorierGrid.addItemDoubleClickListener(e -> periodepostRedigerEntitetDialog.vis(e.getItem()));
 
-
-        hovedKategorierGrid.addItemDoubleClickListener(e -> {
-            periodepostRedigerEntitetDialog.vis(e.getItem());
-        });
-
-        Gridkyklop.hent().alleRaderTilpassKolonnerOgOpprettFilteradIGrid(hovedKategorierGrid);
+        Gridkyklop.hent().tilpassKolonnerIFastradGrid(hovedKategorierGrid);
+        hovedKategorierGrid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
 
         leggTilRedigeringsfelter(regnskaptabString, hovedKategorierGrid);
         hentFormLayoutFraTab(regnskaptabString).setSizeFull();
     }
 
-    private void instansOpprettFelter_leggTilHovedTab() {
-        String hovedtabString ="Hoved";
-        Span innSpan = new Span("Inn");
-        innSpan.addClassName(LumoUtility.TextAlignment.RIGHT);
-        Span utSpan = new Span("Ut");
-        utSpan.addClassName(LumoUtility.TextAlignment.RIGHT);
-        Span resultatSpan = new Span("Resultat");
-        resultatSpan.addClassName(LumoUtility.TextAlignment.RIGHT);
-        Span regnskapSpan = new Span("Regnskap");
-        regnskapSpan.addClassName(LumoUtility.TextAlignment.RIGHT);
-        Span budsjettSpan = new Span("Budsjett");
-        budsjettSpan.addClassName(LumoUtility.TextAlignment.RIGHT);
-        Span differanseSpan = new Span("Differanse");
-        differanseSpan.addClassName(LumoUtility.TextAlignment.RIGHT);
-        Span tomSpan = new Span(" ");
-        Span regnskapMedOverfoeringerSpan = new Span("Regnskap med overføringer");
-        regnskapMedOverfoeringerSpan.addClassName(LumoUtility.TextAlignment.RIGHT);
+    protected ComponentRenderer<Span,Periodepost> opprettSumRegnskapRenderer(){
+        return new ComponentRenderer<>(periodepost -> opprettSpanFraInteger(periodepost.getSumRegnskapInteger()));
+    }
 
-        sumBudsjettInntekterTextField = new TextField();
-        sumBudsjettInntekterTextField.setReadOnly(true);
-        sumBudsjettInntekterTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+    protected ComponentRenderer<Span,Periodepost> opprettSumBudsjettRenderer(){
+        return new ComponentRenderer<>(periodepost -> opprettSpanFraInteger(periodepost.getSumBudsjettInteger()));
+    }
 
-        sumRegnskapInntekterTextField = new TextField();
-        sumRegnskapInntekterTextField.setReadOnly(true);
-        sumRegnskapInntekterTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+    protected Span opprettSpanFraInteger(Integer integer) {
+        if (integer==null) {
+            return new Span("");
+        } else {
+            return new Span(HelTallMester.formaterIntegerSomStortTall(integer));
+        }
+    }
 
-        sumBudsjettUtgifterTextField = new TextField();
-        sumBudsjettUtgifterTextField.setReadOnly(true);
-        sumBudsjettUtgifterTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+    protected void instansOpprettFelter_leggTilHovedTab() {
+        String hovedtabString = "Hoved";
 
-        sumRegnskapUtgifterTextField = new TextField();
-        sumRegnskapUtgifterTextField.setReadOnly(true);
-        sumRegnskapUtgifterTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+        Span innMerkelappSpan = new Span("Inn");
+        innMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT);
 
-        sumBudsjettResultatTextField = new TextField();
-        sumBudsjettResultatTextField.setReadOnly(true);
-        sumBudsjettResultatTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+        Span utMerkelappSpan = new Span("Ut");
+        utMerkelappSpan.addClassName(LumoUtility.TextAlignment.RIGHT);
 
-        sumRegnskapResultatTextField = new TextField();
-        sumRegnskapResultatTextField.setReadOnly(true);
-        sumRegnskapResultatTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+        Span resultatMerkelappSpan = new Span("Resultat");
+        resultatMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT);
 
-        sumDifferanseResultatBudsjettRegnskapTextField = new TextField();
-        sumDifferanseResultatBudsjettRegnskapTextField.setReadOnly(true);
-        sumDifferanseResultatBudsjettRegnskapTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+        Span regnskapMerkelappSpan = new Span("Regnskap");
+        regnskapMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT, LumoUtility.TextColor.TERTIARY);
 
-        sumRegnskapInntekterMedOverfoeringerTextField = new TextField();
-        sumRegnskapInntekterMedOverfoeringerTextField.setReadOnly(true);
-        sumRegnskapInntekterMedOverfoeringerTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+        Span budsjettMerkelappSpan = new Span("Budsjett");
+        budsjettMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT, LumoUtility.TextColor.TERTIARY);
 
-        sumRegnskapUtgifterMedOverfoeringerTextField = new TextField();
-        sumRegnskapUtgifterMedOverfoeringerTextField.setReadOnly(true);
-        sumRegnskapUtgifterMedOverfoeringerTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+        Span differanseMerkelappSpan = new Span("Differanse");
+        differanseMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT, LumoUtility.TextColor.TERTIARY);
 
-        sumRegnskapResultatMedOverfoeringerTextField = new TextField();
-        sumRegnskapResultatMedOverfoeringerTextField.setReadOnly(true);
-        sumRegnskapResultatMedOverfoeringerTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+        Span regnskapMedOverfoeringerMerkelappSpan = new Span("Regnskap med overføringer");
+        regnskapMedOverfoeringerMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT, LumoUtility.TextColor.TERTIARY);
+
+        sumBudsjettInntekterSpan = new HallvardsIntegerSpan();
+        sumBudsjettUtgifterSpan = new HallvardsIntegerSpan();
+        sumBudsjettResultatSpan = new HallvardsIntegerSpan.Builder().settErBold(true).build();
+
+        sumRegnskapInntekterSpan = new HallvardsIntegerSpan();
+        sumRegnskapUtgifterSpan = new HallvardsIntegerSpan();
+        sumRegnskapResultatSpan = new HallvardsIntegerSpan.Builder().settErBold(true).build();
+
+        sumDifferanseBudsjettRegnskapInntekterSpan = new HallvardsIntegerSpan();
+        sumDifferanseBudsjettRegnskapUtgifterSpan = new HallvardsIntegerSpan();
+        sumDifferanseBudsjettRegnskapResultatSpan = new HallvardsIntegerSpan();
+
+        sumRegnskapInntekterMedOverfoeringerSpan = new HallvardsIntegerSpan();
+        sumRegnskapUtgifterMedOverfoeringerSpan = new HallvardsIntegerSpan();
+        sumRegnskapResultatMedOverfoeringerSpan = new HallvardsIntegerSpan();
 
         leggTilRedigeringsfelter(hovedtabString, new Span(""));
-        leggTilRedigeringsfelter(hovedtabString, new Span(""), budsjettSpan, regnskapSpan, differanseSpan, regnskapMedOverfoeringerSpan);
-        leggTilRedigeringsfelter(hovedtabString, innSpan, sumBudsjettInntekterTextField, sumRegnskapInntekterTextField, new Span(""), sumRegnskapInntekterMedOverfoeringerTextField);
-        leggTilRedigeringsfelter(hovedtabString, utSpan, sumBudsjettUtgifterTextField, sumRegnskapUtgifterTextField, new Span(""), sumRegnskapUtgifterMedOverfoeringerTextField);
-        leggTilRedigeringsfelter(hovedtabString, resultatSpan, sumBudsjettResultatTextField, sumRegnskapResultatTextField, sumDifferanseResultatBudsjettRegnskapTextField, sumRegnskapResultatMedOverfoeringerTextField);
+        leggTilRedigeringsfelter(hovedtabString, new Span(""), budsjettMerkelappSpan, regnskapMerkelappSpan, differanseMerkelappSpan, regnskapMedOverfoeringerMerkelappSpan);
+        leggTilRedigeringsfelter(hovedtabString, innMerkelappSpan, sumBudsjettInntekterSpan, sumRegnskapInntekterSpan, sumDifferanseBudsjettRegnskapInntekterSpan, sumRegnskapInntekterMedOverfoeringerSpan);
+        leggTilRedigeringsfelter(hovedtabString, utMerkelappSpan, sumBudsjettUtgifterSpan, sumRegnskapUtgifterSpan, sumDifferanseBudsjettRegnskapUtgifterSpan, sumRegnskapUtgifterMedOverfoeringerSpan);
+        leggTilRedigeringsfelter(hovedtabString, resultatMerkelappSpan, sumBudsjettResultatSpan, sumRegnskapResultatSpan, sumDifferanseBudsjettRegnskapResultatSpan, sumRegnskapResultatMedOverfoeringerSpan);
 
         beskrivelseTextArea = leggTilRedigeringsfelt(hovedtabString, new TextArea("Beskrivelse"));
         beskrivelseTextArea.setMinRows(4);
-        settColspan(beskrivelseTextArea,5);
+
+        settColspan(beskrivelseTextArea, 5);
     }
 
-    private void instansOpprettFelter_leggTilEkstraTab() {
+    protected void instansOpprettFelter_leggTilEkstraTab() {
         String ekstratabString = "Ekstra";
         periodetypeComboBox = new ComboBox<>("Periodetype");
         periodetypeComboBox.setItems(PeriodetypeEnum.values());
         periodetypeComboBox.setItemLabelGenerator(PeriodetypeEnum::getTittel);
         periodetypeComboBox.setEnabled(false);
         datoFraDatePicker = new DatePicker("Fra");
-        datoFraDatePicker.addValueChangeListener(e ->{
-            if (e.getValue()==null) {
+        datoFraDatePicker.addValueChangeListener(e -> {
+            if (e.getValue() == null) {
                 return;
             }
 
             //Flytt dato til første i måneden og datoTil til siste i måneden
             LocalDate dato = e.getValue();
-            datoFraDatePicker.setValue(LocalDate.of(dato.getYear(), dato.getMonth(),1));
-            if (periodetypeEnum==PeriodetypeEnum.MAANEDSOVERSIKT) {
+            datoFraDatePicker.setValue(LocalDate.of(dato.getYear(), dato.getMonth(), 1));
+            if (periodetypeEnum == PeriodetypeEnum.MAANEDSOVERSIKT) {
                 datoTilDatePicker.setValue(Datokyklop.hent().finnSisteIMaaneden(datoFraDatePicker.getValue()));
-            } else if (periodetypeEnum==PeriodetypeEnum.AARSOVERSIKT) {
-                datoTilDatePicker.setValue(LocalDate.of(e.getValue().getYear(), 12,31));
+            } else if (periodetypeEnum == PeriodetypeEnum.AARSOVERSIKT) {
+                datoTilDatePicker.setValue(LocalDate.of(e.getValue().getYear(), 12, 31));
             }
         });
 
@@ -285,16 +296,15 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         binder.bind(datoFraDatePicker, Periode::getDatoFraLocalDate, Periode::setDatoFraLocalDate);
         binder.bind(datoTilDatePicker, Periode::getDatoTilLocalDate, Periode::setDatoTilLocalDate);
         binder.bind(beskrivelseTextArea, Periode::getBeskrivelseString, Periode::setBeskrivelseString);
-        binder.bind(sumBudsjettInntekterTextField, periode -> HelTallMester.integerFormatertSomStortTall(periode.getSumBudsjettInntektInteger()), null);
-        binder.bind(sumBudsjettUtgifterTextField, periode -> HelTallMester.integerFormatertSomStortTall(periode.getSumBudsjettUtgifterInteger()), null);
-        binder.bind(sumRegnskapInntekterTextField, periode -> HelTallMester.integerFormatertSomStortTall(periode.getSumRegnskapInntektInteger()), null);
-        binder.bind(sumRegnskapUtgifterTextField, periode -> HelTallMester.integerFormatertSomStortTall(periode.getSumRegnskapUtgifterInteger()), null);
-        binder.bind(sumBudsjettResultatTextField, periode -> HelTallMester.integerFormatertSomStortTall(periode.getSumBudsjettResultatInteger()), null);
-        binder.bind(sumRegnskapResultatTextField, periode -> HelTallMester.integerFormatertSomStortTall(periode.getSumRegnskapResultatInteger()), null);
-        binder.bind(sumDifferanseResultatBudsjettRegnskapTextField, periode -> HelTallMester.integerFormatertSomStortTall(periode.getSumDifferanseResultatBudsjettRegnskap()), null);
-
-        binder.bind(sumRegnskapInntekterMedOverfoeringerTextField, periode -> HelTallMester.integerFormatertSomStortTall(periode.getSumRegnskapInntektMedOverfoeringerInteger()), null);
-        binder.bind(sumRegnskapUtgifterMedOverfoeringerTextField, periode -> HelTallMester.integerFormatertSomStortTall(periode.getSumRegnskapUtgifterMedOverfoeringerInteger()), null);
-        binder.bind(sumRegnskapResultatMedOverfoeringerTextField, periode -> HelTallMester.integerFormatertSomStortTall(periode.getSumRegnskapResultatMedOverfoeringerInteger()), null);
+//        binder.bind(sumBudsjettInntekterSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettInntektInteger()), null);
+//        binder.bind(sumBudsjettUtgifterSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettUtgifterInteger()), null);
+//        binder.bind(sumRegnskapInntekterSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapInntektInteger()), null);
+//        binder.bind(sumRegnskapUtgifterSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapUtgifterInteger()), null);
+//        binder.bind(sumBudsjettResultatSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettResultatInteger()), null);
+//        binder.bind(sumRegnskapResultatSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapResultatInteger()), null);
+        //binder.bind(sumDifferanseResultatBudsjettUtgifterTextField, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumDifferanseResultatBudsjettRegnskap()), null);
+//        binder.bind(sumRegnskapInntekterMedOverfoeringerSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapInntektMedOverfoeringerInteger()), null);
+//        binder.bind(sumRegnskapUtgifterMedOverfoeringerSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapUtgifterMedOverfoeringerInteger()), null);
+//        binder.bind(sumRegnskapResultatMedOverfoeringerSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapResultatMedOverfoeringerInteger()), null);
     }
 }

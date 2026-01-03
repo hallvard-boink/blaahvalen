@@ -5,7 +5,7 @@ import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
 import com.hallvardlaerum.post.budsjettpost.EstimatpresisjonEnum;
 import com.hallvardlaerum.post.budsjettpost.PrioritetEnum;
-import com.hallvardlaerum.grunndata.kategori.Kategori;
+import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.database.AbstraktEntitet;
 import com.hallvardlaerum.libs.database.EntitetMedForelderAktig;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;

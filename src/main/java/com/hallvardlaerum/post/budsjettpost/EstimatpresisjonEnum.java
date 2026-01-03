@@ -4,10 +4,13 @@ import com.hallvardlaerum.libs.database.EnumAktig;
 
 public enum EstimatpresisjonEnum implements EnumAktig {
     LAV("Lav","F.eks. gjettet på"),
+
     MIDDELS("Middels","F.eks. estimert med regnestykke med sammenligningsgrunnlag, "+
             "eller oppgitt som veiledende sum fra leverandør eller annen kilde"),
+
     HOY("Høy","F.eks. hentet fra tidligere registreringer i regnskapet, "+
-            "eller oppgitt som presis sum i konkret tilbud fra leverandør");
+            "eller oppgitt som presis sum i konkret tilbud fra leverandør")
+    ;
 
     private String tittel;
     private String beskrivelse;

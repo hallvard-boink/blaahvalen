@@ -1,29 +1,29 @@
 package com.hallvardlaerum.periode.aarsoversikt;
 
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
-import com.hallvardlaerum.periode.*;
+import com.hallvardlaerum.periode.Periode;
+import com.hallvardlaerum.periode.PeriodeServiceMal;
+import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AarsoversiktService extends PeriodeServiceMal implements InitieringsEgnet {
     private boolean erInitiert=false;
 
 
-    public Periode PeriodefinnAarsoversiktFraAarString(String aarString) {
+    public Periode finnAarsoversiktFraAarString(String aarString) {
         if (aarString==null || aarString.isEmpty()) {
             return null;
         }
 
-        Integer aarInteger = Integer.parseInt(aarString);
+        int aarInteger = Integer.parseInt(aarString);
         LocalDate datoFra = LocalDate.of(aarInteger,1,1);
-        List<Periode> aarsoversikter = super.hentRepository().findByPeriodetypeEnumAndDatoFraLocalDate(PeriodetypeEnum.AARSOVERSIKT,datoFra);
+        List<Periode> aarsoversikter = super.finnEtterPeriodetypeOgFradato(PeriodetypeEnum.AARSOVERSIKT,datoFra);
         if (aarsoversikter.isEmpty()) {
             return null;
         } else {
@@ -63,7 +63,7 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
 
         LocalDate fraLocalDate = LocalDate.of(maanedsOversikt.getDatoFraLocalDate().getYear(),1,1);
 
-        List<Periode> aarsoversiktList = hentRepository().findByPeriodetypeEnumAndDatoFraLocalDate(PeriodetypeEnum.AARSOVERSIKT, fraLocalDate);
+        List<Periode> aarsoversiktList = super.finnEtterPeriodetypeOgFradato(PeriodetypeEnum.AARSOVERSIKT, fraLocalDate);
         if (aarsoversiktList.isEmpty()) {
             return null;
         } else {
@@ -75,7 +75,6 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
 
 
     }
-
 
 
 

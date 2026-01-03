@@ -10,6 +10,9 @@ public class Versjonskyklop extends Versjonskyklopmal implements InitieringsEgne
 
     @Override
     public void byggOppVersjoner() {
+        super.leggTilVersjon("0.5.6","2026-01-01","Før rydding i serviceklasser og repositories","");
+        super.leggTilVersjon("0.5.5","2025-12-31","Kostnadspakkemester","Støtte for HentSiste og HentNestSiste kostnadspakke. Og ymse bugfiks.");
+        super.leggTilVersjon("0.5.4","2025-12-29","Finpusset kategorisering av poster","Hoved- og underkategorier, samt kostnadspakker");
         super.leggTilVersjon("0.5.3","2025-12-22","Opprettet kostnadspakker","Endret datastrukturen, med kobling mellom post og periodepost.");
         super.leggTilVersjon("0.5.2","2025-12-21","Normalpostlister og busjettposterlister","La til oversikter i Perioderedigeringsmaler");
         super.leggTilVersjon("0.5.1","2025-12-20","To-nivå budsjettering","Begynte på mekanismer for bygging av budsjett i to nivåer. Virket for tungvint.");

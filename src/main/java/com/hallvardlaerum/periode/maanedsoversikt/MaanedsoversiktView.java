@@ -2,15 +2,12 @@ package com.hallvardlaerum.periode.maanedsoversikt;
 
 import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
-import com.hallvardlaerum.periode.*;
-import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
+import com.hallvardlaerum.periode.PeriodeViewMal;
+import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import com.hallvardlaerum.verktoy.PeriodeRapportMester;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
-
-import java.util.ArrayList;
 
 
 @Route("maanedsoversikt")
@@ -18,8 +15,6 @@ import java.util.ArrayList;
 //@Menu(order=20, title="Månedsoversikt")
 public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEgnet {
     private MaanedsoversiktService maanedsoversiktService;
-    private MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade;
-    private Button oppdaterSummerButton;
     private Button oppdaterSummerOgPeriodeposterButton;
     private Button skrivUtMaanedsoversiktButton;
     private boolean erInitiert = false;
@@ -38,15 +33,15 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
     @Override
     public void init(){
         if (!erInitiert) {
-            this.maanedsoversiktService = Allvitekyklop.hent().getMaanedsoversiktService();
-            this.maanedsoversiktRedigeringsomraade = Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade();
-            this.maanedsoversiktRedigeringsomraade.settView(this);
+            Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade().settView(this);
             Allvitekyklop.hent().getMaanedsoversiktpostRedigeringsomraadeTilDialog().settView(this);
 
-            super.initPeriodeViewMal(PeriodetypeEnum.MAANEDSOVERSIKT,
+            maanedsoversiktService = Allvitekyklop.hent().getMaanedsoversiktService();
+            super.initPeriodeViewMal(
+                    PeriodetypeEnum.MAANEDSOVERSIKT,
                     this,
                     maanedsoversiktService,
-                    maanedsoversiktRedigeringsomraade,
+                    Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade(),
                     40D
                     );
             leggTilOgTilpassKnapper();
@@ -68,13 +63,7 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
         hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerOgPeriodeposterButton);
 
         skrivUtMaanedsoversiktButton = new Button("Lagre PDF");
-        skrivUtMaanedsoversiktButton.addClickListener(e -> {
-            Periode periode = (Periode)hentRedigeringsomraadeAktig().getEntitet();
-            PeriodeRedigeringsomraadeMal redigeringsomraade = (PeriodeRedigeringsomraadeMal)hentRedigeringsomraadeAktig();
-            PeriodepostServiceMal periodeservice = Allvitekyklop.hent().getMaanedsoversiktpostService();
-            new PeriodeRapportMester().lagrePeriodeSomPDF(periode, new ArrayList<>(periodeservice.finnHovedperiodeposter(periode)));
-
-        });
+        skrivUtMaanedsoversiktButton.addClickListener(e -> super.skrivUtPerioderapport());
         skrivUtMaanedsoversiktButton.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(skrivUtMaanedsoversiktButton);
         hentVerktoeySubMeny().addItem("Opprett månedsoversikter", e -> maanedsoversiktService.opprettMaanedsoversikterForHeleAaret());

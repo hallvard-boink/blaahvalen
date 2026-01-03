@@ -1,17 +1,14 @@
 package com.hallvardlaerum.periode.maanedsoversikt;
 
 import com.hallvardlaerum.kategori.KategoriRetning;
-import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.felter.DesimalMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periodepost.HallvardsSpan;
-import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
+import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodedelAvKostnadspakkeRad;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
@@ -21,18 +18,12 @@ import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.spring.annotation.UIScope;
-import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @Component
 @UIScope
 public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal implements InitieringsEgnet {
-    private boolean erInitiert=false;
+    private boolean erInitiert = false;
     private Grid<Post> tildelteBudsjettposterGrid;
     private Grid<Post> foreslaatteBudsjettposterGrid;
     private Grid<PeriodedelAvKostnadspakkeRad> kostnadspakkeGrid;
@@ -53,39 +44,15 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
      * Sum kostnader i denne måneden regnes ut for hver kostnadspakke, og vises sammen med total sum for hver kostnadspakke.
      */
     private void oppdaterKostnadspakkeTab() {
-        List<Tuple> tupleList = kostnadspakkeService.finnKostnadspakkeUUIDogSummerForPeriode(hentEntitet());
-        ArrayList<MaanedsradKostnadspakke> maanedsradKostnadspakkeArrayList = new ArrayList<>();
-        Periode maanedsoversikt = hentEntitet();
-
-        for (Tuple tuple:tupleList) {
-            String kostnadspakkeUUIDString = tuple.get(0, UUID.class).toString();
-            if (kostnadspakkeUUIDString==null) {
-                break;
-            }
-            Periodepost kostnadspakke = kostnadspakkeService.finnEtterUUID(kostnadspakkeUUIDString);
-            if (kostnadspakke!=null) {
-                BigDecimal sumInnBigDecimal = tuple.get(1, BigDecimal.class);
-                Integer sumInnInteger = 0;
-                if (sumInnBigDecimal!=null) {
-                    sumInnInteger= DesimalMester.konverterBigdecimalTilInteger(sumInnBigDecimal);
-                }
-
-                BigDecimal sumUtBigDecimal = tuple.get(2, BigDecimal.class);
-                Integer sumUtInteger = 0;
-                if (sumUtBigDecimal!=null) {
-                    sumUtInteger = DesimalMester.konverterBigdecimalTilInteger(sumUtBigDecimal);
-                }
-
-                maanedsradKostnadspakkeArrayList.add(new MaanedsradKostnadspakke(kostnadspakke,sumInnInteger + sumUtInteger));
-            }
-        }
-        kostnadspakkeGrid.setItems(maanedsradKostnadspakkeArrayList);
+        kostnadspakkeGrid.setItems(
+                Allvitekyklop.hent().getPeriodeoversiktpostService().hentKostnadspakkerForPeriodenMedPeriodensSum(hentEntitet())
+        );
     }
 
 
     private void oppdaterRedigerbudsjettTabMedInnhold() {
         Periode periode = hentEntitet();
-        if (periode==null) {
+        if (periode == null) {
             Loggekyklop.bruk().loggADVARSEL("Periode er null, oppdaterer ikke innholdet");
             return;
         }
@@ -93,10 +60,10 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
         utSpan.settInteger(periode.getSumBudsjettUtgifterInteger());
         resultatSpan.settInteger(periode.getSumBudsjettResultatInteger());
 
-        if (periode.getSumRegnskapResultatInteger()!=null && periode.getSumBudsjettResultatInteger()<0) {
-            resultatSpan.getStyle().set("color","red");
+        if (periode.getSumRegnskapResultatInteger() != null && periode.getSumBudsjettResultatInteger() < 0) {
+            resultatSpan.getStyle().set("color", "red");
         } else {
-            resultatSpan.getStyle().set("color","black");
+            resultatSpan.getStyle().set("color", "black");
         }
 
         tildelteBudsjettposterGrid.setItems(budsjettpostService.finnFraPeriodeOgBudsjettstatus(hentEntitet(), BudsjettpoststatusEnum.TILDELT));
@@ -105,7 +72,7 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
 
 
     @Override
-    public void instansOpprettFelter(){
+    public void instansOpprettFelter() {
         super.instansOpprettFelter();
         instansOpprettFelter_leggTilKostnadspakkerTab_Maanedsoversikt();
         instansOpprettFelter_leggTilBudsjettTab_Maanedsoversikt();
@@ -114,55 +81,11 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
     private void instansOpprettFelter_leggTilKostnadspakkerTab_Maanedsoversikt() {
         String kostnadspakkeTabString = "Kostnadspakker";
         kostnadspakkeGrid = new Grid<>();
-        kostnadspakkeGrid.addColumn(MaanedsradKostnadspakke::getTittel).setHeader("Kostnadspakke");
-        kostnadspakkeGrid.addColumn(MaanedsradKostnadspakke::getSumForDenneMaaned).setHeader("Sum for måneden");
-        kostnadspakkeGrid.addColumn(MaanedsradKostnadspakke::getSumTotalt).setHeader("Sum totalt");
+        kostnadspakkeGrid.addColumn(PeriodedelAvKostnadspakkeRad::getTittel).setHeader("Kostnadspakke");
+        kostnadspakkeGrid.addColumn(PeriodedelAvKostnadspakkeRad::getSumForDenneMaaned).setHeader("Sum for måneden");
+        kostnadspakkeGrid.addColumn(PeriodedelAvKostnadspakkeRad::getSumTotalt).setHeader("Sum totalt");
 
-        super.leggTilRedigeringsfelt(kostnadspakkeTabString,kostnadspakkeGrid);
-    }
-
-
-    private class MaanedsradKostnadspakke {
-        private Periodepost kostnadspakke;
-        private Integer sumForDenneMaaned ;
-
-
-        public MaanedsradKostnadspakke(Periodepost kostnadspakke, Integer sumForDenneMaaned) {
-            this.kostnadspakke = kostnadspakke;
-            this.sumForDenneMaaned = sumForDenneMaaned;
-        }
-
-        public Periodepost getKostnadspakke() {
-            return kostnadspakke;
-        }
-
-        public void setKostnadspakke(Periodepost kostnadspakke) {
-            this.kostnadspakke = kostnadspakke;
-        }
-
-        public Integer getSumForDenneMaaned() {
-            return sumForDenneMaaned;
-        }
-
-        public void setSumForDenneMaaned(Integer sumForDenneMaaned) {
-            this.sumForDenneMaaned = sumForDenneMaaned;
-        }
-
-        public Integer getSumTotalt(){
-            if (kostnadspakke==null) {
-                return 0;
-            } else {
-                return kostnadspakke.getSumRegnskapInteger();
-            }
-        }
-
-        public String getTittel(){
-            if (kostnadspakke==null) {
-                return "";
-            } else {
-                return kostnadspakke.getTittelString();
-            }
-        }
+        super.leggTilRedigeringsfelt(kostnadspakkeTabString, kostnadspakkeGrid);
     }
 
 
@@ -208,8 +131,8 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
         });
 
         HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.add(innLabelSpan, innSpan, new Span(), utLabelSpan, utSpan, new Span(),  resultatLabelSpan, resultatSpan);
-        leggTilRedigeringsfelter(redigerBudsjetttabString,horizontalLayout, new Span("SHIFT-klikk på en rad for å flytte mellom listene."));
+        horizontalLayout.add(innLabelSpan, innSpan, new Span(), utLabelSpan, utSpan, new Span(), resultatLabelSpan, resultatSpan);
+        leggTilRedigeringsfelter(redigerBudsjetttabString, horizontalLayout, new Span("SHIFT-klikk på en rad for å flytte mellom listene."));
         leggTilRedigeringsfelter(redigerBudsjetttabString, tildelteBudsjettposterGrid, foreslaatteBudsjettposterGrid);
 
 
@@ -219,7 +142,7 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
 
     private void tildelEllerFjernBudsjettpost(ItemClickEvent<Post> e) {
         Post budsjettpost = e.getItem();
-        if (budsjettpost.getBudsjettpoststatusEnum()==BudsjettpoststatusEnum.TILDELT) {
+        if (budsjettpost.getBudsjettpoststatusEnum() == BudsjettpoststatusEnum.TILDELT) {
             budsjettpost.setBudsjettpoststatusEnum(BudsjettpoststatusEnum.FORESLAATT);
         } else {
             budsjettpost.setBudsjettpoststatusEnum(BudsjettpoststatusEnum.TILDELT);
@@ -230,20 +153,22 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
         oppdaterRedigerbudsjettTabMedInnhold();
     }
 
-
     private Grid<Post> opprettGeneriskBudsjettpostGrid(BudsjettpoststatusEnum budsjettpoststatusEnum) {
         String kategoriTittelString = budsjettpoststatusEnum == BudsjettpoststatusEnum.TILDELT ? "Tildelte budsjettposter" : "Foreslåtte budsjettposter";
 
         Grid<Post> grid = new Grid<>();
-        grid.addColumn(p -> p.getKategori()!=null? p.getKategori().hentKortnavn() : "").setHeader(kategoriTittelString);
+        grid.addColumn(p -> p.getKategori() != null ? p.getKategori().hentKortnavn() : "").setHeader(kategoriTittelString);
 
         grid.addColumn(Post::getBeskrivelseString).setHeader("Beskrivelse");
-        grid.addColumn(p -> p.getKategori().getKategoriRetning()== KategoriRetning.INN? p.getInnPaaKontoInteger() : p.getUtFraKontoInteger()).setHeader("Sum");
+        grid.addColumn(p -> {
+            if (p.getKategori() != null) {
+                return p.getKategori().getKategoriRetning() == KategoriRetning.INN ? p.getInnPaaKontoInteger() : p.getUtFraKontoInteger();
+            } else {
+                return "";
+            }
+        }).setHeader("Sum");
         return grid;
     }
-
-
-
 
     public MaanedsoversiktRedigeringsomraade() {
     }

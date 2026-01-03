@@ -1,5 +1,6 @@
  package com.hallvardlaerum.periodepost.periodeoversiktpost;
 
+ import com.hallvardlaerum.libs.felter.HelTallMester;
  import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
  import com.hallvardlaerum.periode.Periode;
  import com.hallvardlaerum.periodepost.Periodepost;
@@ -9,13 +10,15 @@
  import com.hallvardlaerum.post.Post;
  import com.hallvardlaerum.post.normalpost.NormalpostService;
  import com.hallvardlaerum.verktoy.Allvitekyklop;
-
  import jakarta.persistence.Tuple;
  import org.springframework.stereotype.Service;
+
+ import java.math.BigDecimal;
  import java.util.ArrayList;
  import java.util.List;
+ import java.util.UUID;
 
-@Service
+ @Service
 public class PeriodeoversiktpostService extends PeriodepostServiceMal implements InitieringsEgnet {
     private boolean erInitiert;
     private NormalpostService normalpostService;
@@ -76,4 +79,37 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
         return periodepostRepository.finnOgOppsummerKostnadspakkerForDatospenn(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
 
     }
+
+
+    public ArrayList<PeriodedelAvKostnadspakkeRad> hentKostnadspakkerForPeriodenMedPeriodensSum(Periode periode) {
+        List<Tuple> tupleList = finnKostnadspakkeUUIDogSummerForPeriode(periode);
+        ArrayList<PeriodedelAvKostnadspakkeRad> periodedelAvKostnadspakkeRadArrayList = new ArrayList<>();
+
+        for (Tuple tuple : tupleList) {
+            String kostnadspakkeUUIDString = tuple.get(0, UUID.class).toString();
+            if (kostnadspakkeUUIDString == null) {
+                break;
+            }
+            Periodepost kostnadspakke = finnEtterUUID(kostnadspakkeUUIDString);
+            if (kostnadspakke != null) {
+                BigDecimal sumInnBigDecimal = tuple.get(1, BigDecimal.class);
+                Integer sumInnInteger = 0;
+                if (sumInnBigDecimal != null) {
+                    sumInnInteger = HelTallMester.konverterBigdecimalTilInteger(sumInnBigDecimal);
+                }
+
+                BigDecimal sumUtBigDecimal = tuple.get(2, BigDecimal.class);
+                Integer sumUtInteger = 0;
+                if (sumUtBigDecimal != null) {
+                    sumUtInteger = HelTallMester.konverterBigdecimalTilInteger(sumUtBigDecimal);
+                }
+
+                periodedelAvKostnadspakkeRadArrayList.add(new PeriodedelAvKostnadspakkeRad(kostnadspakke, sumInnInteger + sumUtInteger));
+            }
+        }
+        return periodedelAvKostnadspakkeRadArrayList;
+    }
+
+
+
 }

@@ -26,9 +26,9 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
     }
 
 
-    public void initPeriodepostServiceMal(RedigeringsomraadeAktig<Periodepost> periodepostRedigeringsomraade,
-                                          PeriodepostTypeEnum periodepostTypeEnum,
-                                          PeriodeServiceMal periodeService) {
+    public void initPeriodepostServiceMal(
+        RedigeringsomraadeAktig<Periodepost> periodepostRedigeringsomraade, PeriodepostTypeEnum periodepostTypeEnum)
+    {
         this.periodepostRepository = Allvitekyklop.hent().getPeriodepostRepository();
         super.initEntitetserviceMal(Periodepost.class, periodepostRepository);
         this.periodepostRedigeringsomraade = periodepostRedigeringsomraade;
@@ -59,7 +59,6 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         periodepostRedigeringsomraade.instansOppdaterEkstraRedigeringsfelter();
 
     }
-
 
     public void oppdaterOgLagreSummerForVanligePeriodeposter(Periodepost periodepost) {
         if (periodepost.getKategori()==null) {

@@ -31,22 +31,14 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
     private Boolean erInitiert = false;
     private PostRepository postRepository;
 
-    public List<Post> hentNormalposterFradatoTilDatoKategori(LocalDate fraDatoLocalDate, LocalDate tiDatoLocalDate, Kategori kategori) {
-        return super.finnPosterFradatoTilDatoPostklasseenumKategori(fraDatoLocalDate,tiDatoLocalDate,PostklasseEnum.NORMALPOST,kategori);
-    }
-
-    public ArrayList<Kategori> hentKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
-        return super.finnKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate,PostklasseEnum.NORMALPOST);
-    }
-
 
     //TODO: Hva brukes denne til?
-
     @Override
     public Post opprettEntitetMedForelder() {
         return opprettEntitet();
         //Skulle det ha vært satt inn en forelder her? Fra hvor???
     }
+
     @Override
     public Post opprettEntitet() {
         Post normalpost = leggTilUUID(new Post());
@@ -175,7 +167,7 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
         }
 
 
-        List<Post> forelderposter = super.hentRepository().findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(
+        List<Post> forelderposter = super.findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(
                 ekstrafeltrad.getPost().getDatoLocalDate(),
                 ekstrafeltrad.getPost().getTekstFraBankenString(),
                 NormalposttypeEnum.UTELATES
@@ -223,23 +215,13 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
     }
 
 
-    @Override
-    @Deprecated
-    /*
-    Hent heller redigeringsområdet fra Allvitekyklop
-     */
-    public RedigeringsomraadeAktig<Post> hentRedigeringsomraadeAktig() {
-        return normalPostRedigeringsomraade;
-    }
-
-
 
     public Stream<Post> finnAlleSomStream(PageRequest springPageRequest) {
-        return super.hentRepository().findAll(springPageRequest).stream();
+        return postRepository.findAll(springPageRequest).stream();
     }
 
     public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
-        return hentRepository().findByKostnadsPakke(kostnadspakke);
+        return postRepository.findByKostnadsPakke(kostnadspakke);
     }
 
 

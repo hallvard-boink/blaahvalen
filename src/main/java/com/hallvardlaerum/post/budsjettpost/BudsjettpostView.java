@@ -121,6 +121,7 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
             initierGridMedNormalSoek();
             hentVindutittel().setText("Budsjettposter");
 
+
             hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
 
             erInitiert = true;

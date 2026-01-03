@@ -54,19 +54,31 @@ public class BudsjettpostFraGamleBlaahvalenCSVImportassistent extends CSVImporta
         budsjettpost.setErRegelmessigBoolean(Boolean.valueOf(hentVerdi("erRegelmessigBoolean")));
 
         budsjettpost.setBudsjettpoststatusEnum(BudsjettpoststatusEnum.hentFraTittel(hentVerdi("budsjettpoststatusEnum")));
-        budsjettpost.setKategori(finnKategoriFraBudsjettpostgruppe(
-                hentVerdi("KategoriNavn"),
-                hentVerdi("BudsjettpostgruppeKortnavn")
-        ));
+        budsjettpost.setKategori(finnKategori(hentVerdi("KategoriNavn")));
 
         budsjettpostService.lagre(budsjettpost);
         return budsjettpost;
+    }
+
+    public Kategori finnKategori(String kategoriNavn) {
+        if (kategoriNavn==null || kategoriNavn.isEmpty()) {
+            return null;
+        }
+        Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(kategoriNavn,"-");
+        if (kategoriOptional.isPresent()) {
+            return kategoriOptional.get();
+        } else {
+            Loggekyklop.hent().loggTilFilINFO("Fant ikke kategori med tittel " + kategoriNavn + " og undertittel '-'");
+            return null;
+        }
+
     }
 
     @Override
     public void ryddOppEtterImport() {
         Loggekyklop.hent().tilbakestillStatus();
         Loggekyklop.hent().lukkLoggfil();
+        Allvitekyklop.hent().getBudsjettpostView().oppdaterSoekeomraadeFinnAlleRader();
     }
 
     private Kategori finnKategoriFraBudsjettpostgruppe(String kategoriTittel, String budsjettpostgruppeTittel) {

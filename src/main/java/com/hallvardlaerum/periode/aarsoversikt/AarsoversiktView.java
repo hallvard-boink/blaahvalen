@@ -5,7 +5,6 @@ import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.PeriodeViewMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -27,8 +26,6 @@ import com.vaadin.flow.spring.annotation.UIScope;
 //@Menu(order=30, title="Årsoversikt")
 public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet {
     private AarsoversiktService aarsoversiktService;
-    private Button oppdaterSummerButton;
-    private Button lagrePDFButton;
     private boolean erInitiert = false;
 
     public AarsoversiktView() {
@@ -44,7 +41,7 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
     }
 
     @Override
-    public void init(){
+    public void init() {
         if (!erInitiert) {
             this.aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
             AarsoversiktRedigeringsomraade aarsoversiktRedigeringsomraade = Allvitekyklop.hent().getAarsoversiktRedigeringsomraade();
@@ -57,7 +54,7 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
                     aarsoversiktService,
                     aarsoversiktRedigeringsomraade);
 
-            leggTilOgTilpassKnapper();
+            super.tilpassKnapperadRedigeringsfelt();
             //verktøymenyen håndteres med overkjøring av opprettSoekeomraade()
 
             erInitiert = true;
@@ -65,7 +62,7 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
     }
 
     @Override
-    protected VerticalLayout opprettSoekeomraade(){
+    protected VerticalLayout opprettSoekeomraade() {
         super.opprettSoekeomraade_leggTilTittel();
         super.opprettSoekeomraade_leggTilVerktoyMeny();
 
@@ -95,7 +92,7 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
                 null).open());
     }
 
-    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem(){
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem() {
         hentVerktoeySubMeny().addItem("Importer årsoversikter fra gamle Blåhvalen", e -> importerAarsoversikterFraGamleBlaahvalenCSV());
     }
 
@@ -105,22 +102,10 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
         csvImportmester.velgImportfilOgKjoerImport(aarsoversiktService);
     }
 
-    private void leggTilOgTilpassKnapper() {
-        oppdaterSummerButton = new Button("Oppdater årsoversikt");
-        oppdaterSummerButton.addClickListener(e -> aarsoversiktService.oppdaterDetaljertPeriodensPeriodeposterOgSummer());
-        oppdaterSummerButton.setEnabled(false);
-        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerButton);
-
-        lagrePDFButton = new Button("Lagre PDF");
-        lagrePDFButton.addClickListener(e -> super.skrivUtPerioderapport());
-        lagrePDFButton.setEnabled(false);
-        hentKnapperadRedigeringsfelt().addToEnd(lagrePDFButton);
-    }
-
     @Override
     public void instansAktiverKnapperadRedigeringsfelt(Boolean aktiverBoolean) {
         super.instansAktiverKnapperadRedigeringsfelt(aktiverBoolean);
-        oppdaterSummerButton.setEnabled(aktiverBoolean);
-        lagrePDFButton.setEnabled(aktiverBoolean);
+        super.oppdaterSummerOgPeriodeposterButton.setEnabled(aktiverBoolean);
+        super.lastNedPDFAnchor.setEnabled(aktiverBoolean);
     }
 }

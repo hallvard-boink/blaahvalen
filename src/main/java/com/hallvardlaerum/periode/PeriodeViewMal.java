@@ -1,10 +1,10 @@
 package com.hallvardlaerum.periode;
 
-import com.hallvardlaerum.libs.database.EntitetserviceAktig;
 import com.hallvardlaerum.libs.database.SearchCriteria;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.DatopresisjonEnum;
 import com.hallvardlaerum.libs.felter.HelTallMester;
+import com.hallvardlaerum.libs.filerogopplasting.Filkyklop;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.ViewmalAktig;
@@ -14,9 +14,11 @@ import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodedelAvKostnadspa
 import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.hallvardlaerum.verktoy.PeriodeRapportMester;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -29,13 +31,15 @@ import java.util.ArrayList;
 
 
 public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeRepository> {
-    private EntitetserviceAktig<Periode, PeriodeRepository> periodeservice;
+    private PeriodeServiceMal periodeservice;
     private PeriodetypeEnum periodetypeEnum;
 
     private DatePicker fraDatoFilterDatePicker;
     private TextField beskrivelseFilterTextField;
     private IntegerField resultatFilterIntegerField;
 
+    protected Anchor lastNedPDFAnchor;
+    protected Button oppdaterSummerOgPeriodeposterButton;
 
     public PeriodeViewMal() {
         super();
@@ -51,7 +55,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
      */
     public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
                                    ViewmalAktig<Periode, ?> viewmalAktig,
-                                   EntitetserviceAktig<Periode,PeriodeRepository> periodeservice,
+                                   PeriodeServiceMal periodeservice,
                                    RedigeringsomraadeAktig<Periode> redigeringsomraade
                                    ) {
 
@@ -74,7 +78,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
      */
     public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
                                    ViewmalAktig<Periode, ?> viewmalAktig,
-                                   EntitetserviceAktig<Periode,PeriodeRepository> periodeservice,
+                                   PeriodeServiceMal periodeservice,
                                    RedigeringsomraadeAktig<Periode> redigeringsomraade,
                                    Double splittPlasseringDouble) {
         this.periodetypeEnum = periodetypeEnum;
@@ -88,6 +92,21 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
     }
 
 
+    protected void tilpassKnapperadRedigeringsfelt() {
+        oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
+        oppdaterSummerOgPeriodeposterButton.addClickListener(e -> periodeservice.oppdaterDetaljertPeriodensPeriodeposterOgSummer());
+        oppdaterSummerOgPeriodeposterButton.setEnabled(false);
+        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerOgPeriodeposterButton);
+
+        PeriodeRapportMester.opprettDefaultFilnavn(); //for å opprette filen
+        lastNedPDFAnchor = Filkyklop.hent().hentNedlastingsButtonAnchor(
+                PeriodeRapportMester.hentFilnavnString(),
+                "Vis PDF",
+                e -> skrivUtPerioderapport()
+        );
+        lastNedPDFAnchor.setEnabled(false);
+        hentKnapperadRedigeringsfelt().addToEnd(lastNedPDFAnchor);
+    }
 
     @Override
     public void instansTilpassNyopprettetEntitet(){

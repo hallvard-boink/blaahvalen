@@ -1,5 +1,6 @@
 package com.hallvardlaerum.periode;
 
+
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
@@ -245,5 +246,19 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         lagre(periode);
         periodeRedigeringsomraade.lesBean();
     }
+
+    protected void slettAllePerioderMedPeriodeposter(PeriodetypeEnum periodetypeEnum) {
+        List<Periode> perioder = hentRepository().findByPeriodetypeEnum(periodetypeEnum);
+        for (Periode periode:perioder) {
+            periodepostService.slettAlle(periode.getPeriodeposterList());
+        }
+        slettAlle(perioder);
+        flush();
+    }
+
+    public void slettAlle(List<Periode> periodeList) {
+        periodeRepository.deleteAll(periodeList);
+    }
+
 
 }

@@ -26,7 +26,6 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
     List<Periodepost> findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum periodepostTypeEnum, Periode periode);
 
 
-
     @NativeQuery(value = "SELECT pp.* " +
             "FROM periodepost pp " +
                 "LEFT JOIN kategori k ON pp.kategori_uuid = k.uuid " +
@@ -39,20 +38,6 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
                 "pp.sum_budsjett_integer DESC;"
     )
     List<Periodepost> finnEtterPeriodeOgKategorinivaa(UUID periodeUUID, Integer kategoriNivaa);
-
-
-    @NativeQuery(value =
-        "SELECT " +
-            "pp.*  " +
-        "FROM " +
-            "periodepost pp " +
-            "LEFT JOIN kategori k ON pp.kategori_uuid = k.uuid " +
-            "LEFT JOIN periode p ON pp.periode_uuid = p.uuid " +
-        "WHERE " +
-            "p.dato_fra_local_date = ?1 " +
-            "AND k.tittel = ?2")
-    List<Periodepost> finnFraPeriodedatostartOgKategoritittel(LocalDate datoFra, String kategoritittel);
-
 
     @NativeQuery(value =
         "SELECT " +
@@ -67,5 +52,5 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
     List<Tuple> finnOgOppsummerKostnadspakkerForDatospenn(LocalDate datoFra, LocalDate datoTil);
 
 
-
+    List<Periodepost> findByPeriodepostTypeEnum(PeriodepostTypeEnum periodepostTypeEnum);
 }

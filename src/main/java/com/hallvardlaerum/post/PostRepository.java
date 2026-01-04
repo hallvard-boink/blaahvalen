@@ -23,14 +23,6 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
         LocalDate datoLocalDate, String tekstFraBankenString, NormalposttypeEnum normalposttypeEnum
     );
 
-    List<Post> findByDatoLocalDateBetweenAndPostklasseEnumAndKategoriOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(
-        LocalDate datoFraOgMedLocalDate, LocalDate datoTilOgMedLocalDate, PostklasseEnum postklasseEnum, Kategori kategori
-    );
-
-    List<Post> findByDatoLocalDateBetweenAndKategoriAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(
-        LocalDate datoFraOgMedLocalDate, LocalDate datoTilOgMedLocalDate, Kategori kategori, BudsjettpoststatusEnum budsjettpoststatusEnum, PostklasseEnum postklasseEnum
-    );
-
 
     List<Post> findByDatoLocalDateAndTekstFraBankenStringAndKategori(
         LocalDate datoLocalDate, String tekstFraBankenString, Kategori kategori
@@ -43,14 +35,7 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 
     List<Post> findByKostnadsPakke(Periodepost kostnadspakke);
 
-    @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer)+sum(p.ut_fra_konto_integer) " +
-            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
-            "WHERE p.dato_local_date >= ?1 AND " +
-            "p.dato_local_date <= ?2 AND " +
-            "p.normalposttype_enum != 2 AND " +
-            "k.uuid = ?3"
-    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
-    List<Tuple> sumPosterFradatoTilDatoKategori(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, UUID kategoriUUID);
+    List<Post> findByPostklasseEnum(PostklasseEnum postklasseEnum);
 
     @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) " +
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +

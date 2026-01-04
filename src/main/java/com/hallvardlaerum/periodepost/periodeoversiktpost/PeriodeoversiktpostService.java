@@ -111,5 +111,8 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
     }
 
 
-
-}
+     public void slettAlleKostnadspakker() {
+         List<Periodepost> kostnadspakker = hentRepository().findByPeriodepostTypeEnum(PeriodepostTypeEnum.PERIODEOVERSIKTPOST);
+         hentRepository().deleteAll(kostnadspakker);
+     }
+ }

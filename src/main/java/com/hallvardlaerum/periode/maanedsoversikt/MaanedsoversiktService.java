@@ -4,7 +4,9 @@ package com.hallvardlaerum.periode.maanedsoversikt;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
-import com.hallvardlaerum.periode.*;
+import com.hallvardlaerum.periode.Periode;
+import com.hallvardlaerum.periode.PeriodeServiceMal;
+import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import org.springframework.stereotype.Service;
@@ -90,4 +92,7 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
 
     }
 
+    public void slettAlleMaanedsoversikter() {
+        super.slettAllePerioderMedPeriodeposter(PeriodetypeEnum.MAANEDSOVERSIKT);
+    }
 }

@@ -62,7 +62,6 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
         }
 
         LocalDate fraLocalDate = LocalDate.of(maanedsOversikt.getDatoFraLocalDate().getYear(),1,1);
-
         List<Periode> aarsoversiktList = super.finnEtterPeriodetypeOgFradato(PeriodetypeEnum.AARSOVERSIKT, fraLocalDate);
         if (aarsoversiktList.isEmpty()) {
             return null;
@@ -72,10 +71,10 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
             }
             return aarsoversiktList.getFirst();
         }
-
-
     }
 
 
-
+    public void slettAlleAarsoversikter() {
+        super.slettAllePerioderMedPeriodeposter(PeriodetypeEnum.AARSOVERSIKT);
+    }
 }

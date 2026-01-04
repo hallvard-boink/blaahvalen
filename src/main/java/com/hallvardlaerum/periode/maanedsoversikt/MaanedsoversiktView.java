@@ -6,6 +6,8 @@ import com.hallvardlaerum.periode.PeriodeViewMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -44,19 +46,58 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
                     Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade(),
                     40D
                     );
-            leggTilOgTilpassKnapper();
-            hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
 
+            tilpassKnapperadRedigeringsfelt();
+            //Har overkjørt super.opprettSoekeomraade() og tilpasser verktøymenyen der.
+            //tilpasseVerktoyMenyPaaSoekefelt();
 
             erInitiert = true;
         }
     }
 
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem() {
+        hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
+
+    }
+
+    @Override
+    protected VerticalLayout opprettSoekeomraade(){
+        super.opprettSoekeomraade_leggTilTittel();
+        super.opprettSoekeomraade_leggTilVerktoyMeny();
+
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettEksporterTilCSVMenuItem();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterFraCSVMenuItem();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleMaanedsoversikterMenuItem();
+
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettSeparator();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_byttOrienteringAvSplitLayoutMenuItem();
+        super.opprettSoekeomraade_leggTilSoekeGrid();
+        return super.opprettSoeomraade_settSammenDetHele();
+    }
+
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleMaanedsoversikterMenuItem() {
+        slettAlleMenuItem = super.verktoeySubMenu.addItem("Slett alle månedsoversikter");
+        slettAlleMenuItem.addClickListener(e -> new ConfirmDialog(
+                "Slette alle månedsoversikter?",
+                "Vil du virkelig slette månedsoversikter med månedsoversiktposter?",
+                "Ja, sett i gang",
+                ee -> {
+                    maanedsoversiktService.slettAlleMaanedsoversikter();
+                    oppdaterSoekeomraadeFinnAlleRader();
+                    oppdaterRedigeringsomraade();
+                },
+                "Nei, er du GAL!",
+                null).open());
+    }
+
+
+
     private void importerCSVFraGamleBlaahvalen() {
         new CSVImportmester(new MaanedsoversiktFraGamleBlaahvalenCSVImportassistent()).velgImportfilOgKjoerImport(maanedsoversiktService);
     }
 
-    private void leggTilOgTilpassKnapper() {
+    private void tilpassKnapperadRedigeringsfelt() {
         oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
         oppdaterSummerOgPeriodeposterButton.addClickListener(e -> maanedsoversiktService.oppdaterDetaljertPeriodensPeriodeposterOgSummer());
         oppdaterSummerOgPeriodeposterButton.setEnabled(false);

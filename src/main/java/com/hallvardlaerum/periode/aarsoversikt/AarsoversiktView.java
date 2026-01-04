@@ -6,6 +6,8 @@ import com.hallvardlaerum.periode.PeriodeViewMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -56,10 +58,45 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
                     aarsoversiktRedigeringsomraade);
 
             leggTilOgTilpassKnapper();
-            hentVerktoeySubMeny().addItem("Importer årsoversikter fra gamle Blåhvalen", e -> importerAarsoversikterFraGamleBlaahvalenCSV());
+            //verktøymenyen håndteres med overkjøring av opprettSoekeomraade()
 
             erInitiert = true;
         }
+    }
+
+    @Override
+    protected VerticalLayout opprettSoekeomraade(){
+        super.opprettSoekeomraade_leggTilTittel();
+        super.opprettSoekeomraade_leggTilVerktoyMeny();
+
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettEksporterTilCSVMenuItem();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterFraCSVMenuItem();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleMaanedsoversikterMenuItem();
+
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettSeparator();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_byttOrienteringAvSplitLayoutMenuItem();
+        super.opprettSoekeomraade_leggTilSoekeGrid();
+        return super.opprettSoeomraade_settSammenDetHele();
+    }
+
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleMaanedsoversikterMenuItem() {
+        slettAlleMenuItem = super.verktoeySubMenu.addItem("Slett alle månedsoversikter");
+        slettAlleMenuItem.addClickListener(e -> new ConfirmDialog(
+                "Slette alle årsoversikter?",
+                "Vil du virkelig slette årsoversikter med årssoversiktposter?",
+                "Ja, sett i gang",
+                ee -> {
+                    aarsoversiktService.slettAlleAarsoversikter();
+                    oppdaterSoekeomraadeFinnAlleRader();
+                    oppdaterRedigeringsomraade();
+                },
+                "Nei, er du GAL!",
+                null).open());
+    }
+
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem(){
+        hentVerktoeySubMeny().addItem("Importer årsoversikter fra gamle Blåhvalen", e -> importerAarsoversikterFraGamleBlaahvalenCSV());
     }
 
     private void importerAarsoversikterFraGamleBlaahvalenCSV() {

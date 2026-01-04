@@ -4,6 +4,7 @@ import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.*;
 import com.hallvardlaerum.periodepost.*;
+import com.hallvardlaerum.skalTilHavaara.HallvardsIntegerSpan;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.ColumnTextAlign;

@@ -10,6 +10,7 @@ import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
+import com.hallvardlaerum.skalTilHavaara.HallvardsIntegerSpan;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.ColumnTextAlign;

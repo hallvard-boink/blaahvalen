@@ -6,7 +6,7 @@ import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
-import com.hallvardlaerum.periodepost.HallvardsIntegerSpan;
+import com.hallvardlaerum.skalTilHavaara.HallvardsIntegerSpan;
 import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodedelAvKostnadspakkeRad;
 import com.hallvardlaerum.post.Post;

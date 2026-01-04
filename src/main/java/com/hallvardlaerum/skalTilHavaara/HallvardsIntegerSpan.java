@@ -1,4 +1,4 @@
-package com.hallvardlaerum.periodepost;
+package com.hallvardlaerum.skalTilHavaara;
 
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.vaadin.flow.component.html.Span;

@@ -80,6 +80,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         kategoriGrid.addColumn(Kategori::getTittel).setHeader("Tittel");
         kategoriGrid.addColumn(Kategori::getUndertittel).setHeader("Undertittel");
         kategoriGrid.setItems(Allvitekyklop.hent().getKategoriService().finnAlle());
+        kategoriGrid.setSizeFull();
 
         leggTilRedigeringsfelt(redigerFastUtgifterTabString,kategoriGrid);
         hentFormLayoutFraTab(redigerFastUtgifterTabString).setSizeFull();

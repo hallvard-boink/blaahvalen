@@ -1,15 +1,21 @@
 package com.hallvardlaerum.periode;
 
+import com.hallvardlaerum.libs.eksportimport.ExcelEksportkyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.*;
-import com.hallvardlaerum.periodepost.*;
+import com.hallvardlaerum.periodepost.Periodepost;
+import com.hallvardlaerum.periodepost.PeriodepostRedigeringsomraadeMal;
+import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
+import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.skalTilHavaara.HallvardsIntegerSpan;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -17,6 +23,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode> implements RedigeringsomraadeAktig<Periode> {
@@ -151,9 +158,9 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
             sumRegnskapUtgifterSpan.settInteger(periode.getSumRegnskapUtgifterInteger());
             sumRegnskapResultatSpan.settInteger(periode.getSumRegnskapResultatInteger());
 
-            sumDifferanseBudsjettRegnskapInntekterSpan.settDifferanseInteger(periode.getSumBudsjettInntektInteger(), periode.getSumRegnskapInntektInteger());
-            sumDifferanseBudsjettRegnskapUtgifterSpan.settDifferanseInteger(periode.getSumBudsjettUtgifterInteger(), periode.getSumRegnskapUtgifterInteger());
-            sumDifferanseBudsjettRegnskapResultatSpan.settDifferanseInteger(periode.getSumBudsjettResultatInteger(), periode.getSumRegnskapResultatInteger());
+            sumDifferanseBudsjettRegnskapInntekterSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapInntekter());
+            sumDifferanseBudsjettRegnskapUtgifterSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapUtgifter());
+            sumDifferanseBudsjettRegnskapResultatSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapResultat());
 
             sumRegnskapInntekterMedOverfoeringerSpan.settInteger(periode.getSumRegnskapInntektMedOverfoeringerInteger());
             sumRegnskapUtgifterMedOverfoeringerSpan.settInteger(periode.getSumRegnskapUtgifterMedOverfoeringerInteger());
@@ -190,8 +197,18 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         Gridkyklop.hent().tilpassKolonnerIFastradGrid(hovedKategorierGrid);
         hovedKategorierGrid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
 
-        leggTilRedigeringsfelter(regnskaptabString, hovedKategorierGrid);
+
+        leggTilRedigeringsfelter(regnskaptabString,new VerticalLayout(opprettTilEksporterGridraderTilExcelButton(), hovedKategorierGrid));
         hentFormLayoutFraTab(regnskaptabString).setSizeFull();
+    }
+
+    private Button opprettTilEksporterGridraderTilExcelButton() {
+        Button eksporerGridraderTilExcelButton = new Button("Eksporter grid til Excel");
+        eksporerGridraderTilExcelButton.addClickListener(e -> {
+            List<Periodepost> rader = hovedKategorierGrid.getListDataView().getItems().toList();
+            ExcelEksportkyklop.hent().eksporterArrayListAvEntiteterSomXLS(new ArrayList<>(rader),"GridInnhold_Periodeposter_" + Datokyklop.hent().hentNaavaerendeTidspunktSomDatoTidSekund() + ".xlsx");
+        });
+        return eksporerGridraderTilExcelButton;
     }
 
     protected ComponentRenderer<Span,Periodepost> opprettSumRegnskapRenderer(){

@@ -177,6 +177,7 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
         String budsjettpostertabString = "Budsjett";
         budsjettposterGrid = opprettStandardPostGrid();
         leggTilRedigeringsfelt(budsjettpostertabString, budsjettposterGrid);
+        hentFormLayoutFraTab(budsjettpostertabString).setSizeFull();
     }
 
     protected void instansOpprettFelter_opprettNormalposterTab() {

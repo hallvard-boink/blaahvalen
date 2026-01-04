@@ -161,7 +161,7 @@ public class PeriodeRapportMester {
     private static VerticalListBuilder opprettOppsummering_inklOverfoeringSummer(Periode periode) {
         return cmp.verticalList()
                 .add(
-                        cmp.text("Med overføringer"),
+                        cmp.text("Med overføringer").setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapInntektMedOverfoeringerInteger())),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapUtgifterMedOverfoeringerInteger())),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapResultatMedOverfoeringerInteger()))
@@ -172,10 +172,10 @@ public class PeriodeRapportMester {
     private static VerticalListBuilder opprettOppsummering_differanseSummer(Periode periode) {
         return cmp.verticalList()
                 .add(
-                        cmp.text("Differanse"),
-                        cmp.text(" "),
-                        cmp.text(" "),
-                        cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumDifferanseResultatBudsjettRegnskap())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT)
+                        cmp.text("Differanse").setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
+                        cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumDifferanseBudsjettRegnskapInntekter())),
+                        cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumDifferanseBudsjettRegnskapUtgifter())),
+                        cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumDifferanseBudsjettRegnskapResultat())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT)
                 )
                 .setStyle(stl.style().setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT));
     }
@@ -183,7 +183,7 @@ public class PeriodeRapportMester {
     private static VerticalListBuilder opprettOppsummering_regnskapSummer(Periode periode) {
         return cmp.verticalList()
                 .add(
-                        cmp.text("Regnskap"),
+                        cmp.text("Regnskap").setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapInntektInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapUtgifterInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapResultatInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT)
@@ -194,7 +194,7 @@ public class PeriodeRapportMester {
     private static VerticalListBuilder opprettOppsummering_budsjettSummer(Periode periode) {
         return cmp.verticalList()
                 .add(
-                        cmp.text("Budsjett"),
+                        cmp.text("Budsjett").setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettInntektInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettUtgifterInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettResultatInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT)

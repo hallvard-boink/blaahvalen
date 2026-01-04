@@ -4,6 +4,7 @@ import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.SearchCriteria;
 import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
+import com.hallvardlaerum.libs.eksportimport.ExcelEksportkyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
@@ -33,6 +34,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Route("normalpost")
 @UIScope
@@ -76,7 +78,9 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
             initierGridMedNormalSoek();
             hentVindutittel().setText("Poster");
             normaldelpostViewMester = new NormaldelpostViewMester(this,  normalPostRedigeringsomraade, postService);
+
             leggTilImporterCSVFraHandelsbankenButton();
+
 
             //Tilpasning av verktøymeny er gjort ved å overkjøre super.opprettSoekeomraade()
 
@@ -85,6 +89,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
             erInitiert = true;
         }
     }
+
 
     @Override
     protected VerticalLayout opprettSoekeomraade() {

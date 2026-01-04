@@ -45,9 +45,6 @@ public class Periode extends AbstraktEntitet {
     private Integer sumRegnskapResultatInteger;
 
     @SkalEksporteres
-    private Integer sumDifferanseResultatBudsjettRegnskap;
-
-    @SkalEksporteres
     private Integer sumRegnskapInntektMedOverfoeringerInteger;
 
     @SkalEksporteres
@@ -160,14 +157,6 @@ public class Periode extends AbstraktEntitet {
         this.sumRegnskapResultatInteger = sumRegnskapResultatInteger;
     }
 
-    public Integer getSumDifferanseResultatBudsjettRegnskap() {
-        return sumDifferanseResultatBudsjettRegnskap;
-    }
-
-    public void setSumDifferanseResultatBudsjettRegnskap(Integer sumDifferanseResultatBudsjettRegnskap) {
-        this.sumDifferanseResultatBudsjettRegnskap = sumDifferanseResultatBudsjettRegnskap;
-    }
-
     public Integer getSumRegnskapInntektMedOverfoeringerInteger() {
         return sumRegnskapInntektMedOverfoeringerInteger;
     }
@@ -191,4 +180,29 @@ public class Periode extends AbstraktEntitet {
     public void setSumRegnskapResultatMedOverfoeringerInteger(Integer sumRegnskapResultatMedOverfoeringerInteger) {
         this.sumRegnskapResultatMedOverfoeringerInteger = sumRegnskapResultatMedOverfoeringerInteger;
     }
+
+    public Integer getSumDifferanseBudsjettRegnskapInntekter(){
+        if (sumBudsjettInntektInteger!=null && sumRegnskapInntektInteger!=null) {
+            return sumBudsjettInntektInteger-sumRegnskapInntektInteger;
+        } else {
+            return null;
+        }
+    }
+
+    public Integer getSumDifferanseBudsjettRegnskapUtgifter(){
+        if (sumBudsjettUtgifterInteger!= null && sumRegnskapUtgifterInteger!=null) {
+            return sumBudsjettUtgifterInteger-sumRegnskapUtgifterInteger;
+        } else {
+            return null;
+        }
+    }
+
+    public Integer getSumDifferanseBudsjettRegnskapResultat(){
+        if (sumBudsjettResultatInteger!=null && sumRegnskapResultatInteger!=null) {
+            return sumBudsjettResultatInteger-sumRegnskapResultatInteger;
+        } else {
+            return null;
+        }
+    }
+
 }

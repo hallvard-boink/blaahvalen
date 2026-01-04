@@ -100,23 +100,6 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
         new CSVImportmester(new MaanedsoversiktFraGamleBlaahvalenCSVImportassistent()).velgImportfilOgKjoerImport(maanedsoversiktService);
     }
 
-//
-//    private void tilpassKnapperadRedigeringsfelt() {
-//        oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
-//        oppdaterSummerOgPeriodeposterButton.addClickListener(e -> maanedsoversiktService.oppdaterDetaljertPeriodensPeriodeposterOgSummer());
-//        oppdaterSummerOgPeriodeposterButton.setEnabled(false);
-//        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerOgPeriodeposterButton);
-//
-//        PeriodeRapportMester.opprettDefaultFilnavn(); //for å opprette filen
-//        lastNedPDFAnchor = Filkyklop.hent().hentNedlastingsButtonAnchor(
-//                PeriodeRapportMester.hentFilnavnString(),
-//                "Vis månedsrapport som PDF",
-//                e -> skrivUtPerioderapport()
-//        );
-//        lastNedPDFAnchor.setEnabled(false);
-//        hentKnapperadRedigeringsfelt().addToEnd(lastNedPDFAnchor);
-//    }
-
 
     @Override
     public void instansAktiverKnapperadRedigeringsfelt(Boolean aktiverBoolean) {

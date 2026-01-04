@@ -85,17 +85,14 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         Periode periode = periodeRedigeringsomraade.getEntitet();
 
         oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(periode, 1);
-        //periode = periodeRedigeringsomraade.getEntitet(); //hvis det å slette periodepost setter den til null
         oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode, 1);
         oppdaterPeriodensPeriodeposterOgSummer_OppdaterHovedperiodepostene(periode);
         oppdaterPeriodensPeriodeposterOgSummer_oppdaterKostnadspakker(periode);
-
         oppdaterLagredeSummer(periode);
         lagre(periode);
         periodeRedigeringsomraade.hentView().oppdaterRedigeringsomraade();
         periodeRedigeringsomraade.hentView().oppdaterSoekeomraadeEtterRedigeringAvEntitet();
-        //periodeRedigeringsomraade.lesBean();
-        //periodeRedigeringsomraade.instansOppdaterEkstraRedigeringsfelter();
+
     }
 
 

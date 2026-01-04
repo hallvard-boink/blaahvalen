@@ -12,14 +12,12 @@ import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 public class NormalpostService extends PostServiceMal implements InitieringsEgnet {
@@ -212,9 +210,6 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
 
 
 
-    public Stream<Post> finnAlleSomStream(PageRequest springPageRequest) {
-        return postRepository.findAll(springPageRequest).stream();
-    }
 
     public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
         return postRepository.findByKostnadsPakke(kostnadspakke);

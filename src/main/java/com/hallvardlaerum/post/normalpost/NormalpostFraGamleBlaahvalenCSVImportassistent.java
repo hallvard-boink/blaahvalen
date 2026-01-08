@@ -168,7 +168,7 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
             return;
         }
 
-        List<Post> forelderposter = normalpostService.findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(
+        List<Post> forelderposter = normalpostService.finnEtterDatoOgTekstfrabankenOgNormalposttypeenum(
                 ekstrafeltrad.getPost().getDatoLocalDate(),
                 ekstrafeltrad.getPost().getTekstFraBankenString(),
                 NormalposttypeEnum.UTELATES
@@ -178,7 +178,7 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
             ekstrafeltrad.getPost().setForelderPostUUID(forelderposter.getFirst().getUuid().toString());
             normalpostService.lagre(ekstrafeltrad.getPost());
         } else {
-            List<Post> forelderposterSkalIkkeKategoriseres = normalpostService.findByDatoLocalDateAndTekstFraBankenStringAndKategori(
+            List<Post> forelderposterSkalIkkeKategoriseres = normalpostService.finnEtterDatoOgTekstfrabankenOgKategori(
                     ekstrafeltrad.getPost().getDatoLocalDate(),
                     ekstrafeltrad.getPost().getTekstFraBankenString(),
                     skalIkkekategoriseresKategori

@@ -45,6 +45,12 @@ public class Periode extends AbstraktEntitet {
     private Integer sumRegnskapResultatInteger;
 
     @SkalEksporteres
+    private Integer sumUkategorisertInnInteger;
+
+    @SkalEksporteres
+    private Integer sumUkategorisertUtInteger;
+
+    @SkalEksporteres
     private Integer sumRegnskapInntektMedOverfoeringerInteger;
 
     @SkalEksporteres
@@ -179,6 +185,22 @@ public class Periode extends AbstraktEntitet {
 
     public void setSumRegnskapResultatMedOverfoeringerInteger(Integer sumRegnskapResultatMedOverfoeringerInteger) {
         this.sumRegnskapResultatMedOverfoeringerInteger = sumRegnskapResultatMedOverfoeringerInteger;
+    }
+
+    public Integer getSumUkategorisertInnInteger() {
+        return sumUkategorisertInnInteger;
+    }
+
+    public void setSumUkategorisertInnInteger(Integer sumUkategorisertInnInteger) {
+        this.sumUkategorisertInnInteger = sumUkategorisertInnInteger;
+    }
+
+    public Integer getSumUkategorisertUtInteger() {
+        return sumUkategorisertUtInteger;
+    }
+
+    public void setSumUkategorisertUtInteger(Integer sumUkategorisertUtInteger) {
+        this.sumUkategorisertUtInteger = sumUkategorisertUtInteger;
     }
 
     public Integer getSumDifferanseBudsjettRegnskapInntekter(){

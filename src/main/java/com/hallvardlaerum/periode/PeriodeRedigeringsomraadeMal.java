@@ -55,6 +55,8 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
     protected HallvardsIntegerSpan sumRegnskapInntekterSpan;
     protected HallvardsIntegerSpan sumRegnskapUtgifterSpan;
     protected HallvardsIntegerSpan sumRegnskapResultatSpan;
+    protected HallvardsIntegerSpan sumUkategorisertInnSpan;
+    protected HallvardsIntegerSpan sumUkategorisertUtSpan;
 
     protected HallvardsIntegerSpan sumDifferanseBudsjettRegnskapInntekterSpan;
     protected HallvardsIntegerSpan sumDifferanseBudsjettRegnskapUtgifterSpan;
@@ -63,6 +65,7 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
     protected HallvardsIntegerSpan sumRegnskapInntekterMedOverfoeringerSpan;
     protected HallvardsIntegerSpan sumRegnskapUtgifterMedOverfoeringerSpan;
     protected HallvardsIntegerSpan sumRegnskapResultatMedOverfoeringerSpan;
+
 
     protected PeriodetittelHorizontalLayout periodetittelHorizontalLayout;
 
@@ -145,6 +148,9 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
             sumDifferanseBudsjettRegnskapUtgifterSpan.settInteger(null);
             sumDifferanseBudsjettRegnskapResultatSpan.settInteger(null);
 
+            sumUkategorisertInnSpan.settInteger(null);
+            sumUkategorisertUtSpan.settInteger(null);
+
             sumRegnskapInntekterMedOverfoeringerSpan.settInteger(null);
             sumRegnskapUtgifterMedOverfoeringerSpan.settInteger(null);
             sumRegnskapResultatMedOverfoeringerSpan.settInteger(null);
@@ -161,6 +167,9 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
             sumDifferanseBudsjettRegnskapInntekterSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapInntekter());
             sumDifferanseBudsjettRegnskapUtgifterSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapUtgifter());
             sumDifferanseBudsjettRegnskapResultatSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapResultat());
+
+            sumUkategorisertInnSpan.settInteger(periode.getSumUkategorisertInnInteger());
+            sumUkategorisertUtSpan.settInteger(periode.getSumUkategorisertUtInteger());
 
             sumRegnskapInntekterMedOverfoeringerSpan.settInteger(periode.getSumRegnskapInntektMedOverfoeringerInteger());
             sumRegnskapUtgifterMedOverfoeringerSpan.settInteger(periode.getSumRegnskapUtgifterMedOverfoeringerInteger());
@@ -227,6 +236,7 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         }
     }
 
+
     protected void instansOpprettFelter_leggTilHovedTab() {
         String hovedtabString = "Hoved";
 
@@ -234,10 +244,11 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         innMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT);
 
         Span utMerkelappSpan = new Span("Ut");
-        utMerkelappSpan.addClassName(LumoUtility.TextAlignment.RIGHT);
+        utMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT);
 
         Span resultatMerkelappSpan = new Span("Resultat");
         resultatMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT);
+
 
         Span regnskapMerkelappSpan = new Span("Regnskap");
         regnskapMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT, LumoUtility.TextColor.TERTIARY);
@@ -247,6 +258,9 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
 
         Span differanseMerkelappSpan = new Span("Differanse");
         differanseMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT, LumoUtility.TextColor.TERTIARY);
+
+        Span ukategorisertMerkelappSpan = new Span("Ukategorisert");
+        ukategorisertMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT, LumoUtility.TextColor.TERTIARY);
 
         Span regnskapMedOverfoeringerMerkelappSpan = new Span("Regnskap med overføringer");
         regnskapMedOverfoeringerMerkelappSpan.addClassNames(LumoUtility.TextAlignment.RIGHT, LumoUtility.TextColor.TERTIARY);
@@ -263,15 +277,18 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         sumDifferanseBudsjettRegnskapUtgifterSpan = new HallvardsIntegerSpan();
         sumDifferanseBudsjettRegnskapResultatSpan = new HallvardsIntegerSpan();
 
+        sumUkategorisertInnSpan = new HallvardsIntegerSpan();
+        sumUkategorisertUtSpan = new HallvardsIntegerSpan();
+
         sumRegnskapInntekterMedOverfoeringerSpan = new HallvardsIntegerSpan();
         sumRegnskapUtgifterMedOverfoeringerSpan = new HallvardsIntegerSpan();
         sumRegnskapResultatMedOverfoeringerSpan = new HallvardsIntegerSpan();
 
         leggTilRedigeringsfelter(hovedtabString, new Span(""));
-        leggTilRedigeringsfelter(hovedtabString, new Span(""), budsjettMerkelappSpan, regnskapMerkelappSpan, differanseMerkelappSpan, regnskapMedOverfoeringerMerkelappSpan);
-        leggTilRedigeringsfelter(hovedtabString, innMerkelappSpan, sumBudsjettInntekterSpan, sumRegnskapInntekterSpan, sumDifferanseBudsjettRegnskapInntekterSpan, sumRegnskapInntekterMedOverfoeringerSpan);
-        leggTilRedigeringsfelter(hovedtabString, utMerkelappSpan, sumBudsjettUtgifterSpan, sumRegnskapUtgifterSpan, sumDifferanseBudsjettRegnskapUtgifterSpan, sumRegnskapUtgifterMedOverfoeringerSpan);
-        leggTilRedigeringsfelter(hovedtabString, resultatMerkelappSpan, sumBudsjettResultatSpan, sumRegnskapResultatSpan, sumDifferanseBudsjettRegnskapResultatSpan, sumRegnskapResultatMedOverfoeringerSpan);
+        leggTilRedigeringsfelter(hovedtabString, new Span(""), budsjettMerkelappSpan, regnskapMerkelappSpan, differanseMerkelappSpan, ukategorisertMerkelappSpan, regnskapMedOverfoeringerMerkelappSpan);
+        leggTilRedigeringsfelter(hovedtabString, innMerkelappSpan, sumBudsjettInntekterSpan, sumRegnskapInntekterSpan, sumDifferanseBudsjettRegnskapInntekterSpan, sumUkategorisertInnSpan, sumRegnskapInntekterMedOverfoeringerSpan);
+        leggTilRedigeringsfelter(hovedtabString, utMerkelappSpan, sumBudsjettUtgifterSpan, sumRegnskapUtgifterSpan, sumDifferanseBudsjettRegnskapUtgifterSpan, sumUkategorisertUtSpan, sumRegnskapUtgifterMedOverfoeringerSpan);
+        leggTilRedigeringsfelter(hovedtabString, resultatMerkelappSpan, sumBudsjettResultatSpan, sumRegnskapResultatSpan, sumDifferanseBudsjettRegnskapResultatSpan, new Span(""), sumRegnskapResultatMedOverfoeringerSpan);
 
         beskrivelseTextArea = leggTilRedigeringsfelt(hovedtabString, new TextArea("Beskrivelse"));
         beskrivelseTextArea.setMinRows(4);

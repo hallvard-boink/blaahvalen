@@ -93,11 +93,12 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
 
 
     protected void tilpassKnapperadRedigeringsfelt() {
-        oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
-        oppdaterSummerOgPeriodeposterButton.addClickListener(e -> periodeservice.oppdaterDetaljertPeriodensPeriodeposterOgSummer());
-        oppdaterSummerOgPeriodeposterButton.setEnabled(false);
-        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerOgPeriodeposterButton);
+        tilpassKnapperadRedigeringsfelt_OppdaterSummerButton();
+        tilpassKnapperadRedigeringsfelt_LastNedPDFRapport();
 
+    }
+
+    private void tilpassKnapperadRedigeringsfelt_LastNedPDFRapport() {
         PeriodeRapportMester.opprettDefaultFilnavn(); //for å opprette filen
         lastNedPDFAnchor = Filkyklop.hent().hentNedlastingsButtonAnchor(
                 PeriodeRapportMester.hentFilnavnString(),
@@ -107,6 +108,14 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         lastNedPDFAnchor.setEnabled(false);
         hentKnapperadRedigeringsfelt().addToEnd(lastNedPDFAnchor);
     }
+
+    private void tilpassKnapperadRedigeringsfelt_OppdaterSummerButton() {
+        oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
+        oppdaterSummerOgPeriodeposterButton.addClickListener(e -> periodeservice.oppdaterPeriodensPeriodeposterOgSummer());
+        oppdaterSummerOgPeriodeposterButton.setEnabled(false);
+        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerOgPeriodeposterButton);
+    }
+
 
     @Override
     public void instansTilpassNyopprettetEntitet(){

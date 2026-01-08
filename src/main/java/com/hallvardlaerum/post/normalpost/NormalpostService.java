@@ -113,77 +113,6 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
         return true;
     }
 
-
-
-    public void importerInnholdIEkstraFeltArrayList(){
-        if (ekstrafeltradArrayList==null || ekstrafeltradArrayList.isEmpty()) {
-            Loggekyklop.hent().loggADVARSEL("EkstrafeltradArrayList er tom, avbryter import av innholdet");
-            return;
-        }
-
-        System.out.println("EkstrafeltradArraylist har " + ekstrafeltradArrayList.size() + " rader.");
-
-        for (Ekstrafeltrad ekstrafeltrad: ekstrafeltradArrayList) {
-            if (ekstrafeltrad.getPost()!=null) {
-                importerForelderpostFraKortnavn(ekstrafeltrad);
-                settSammenEkstraInfo(ekstrafeltrad);
-                lagre(ekstrafeltrad.getPost());
-            }
-        }
-
-    }
-
-    private void settSammenEkstraInfo(Ekstrafeltrad ekstrafeltrad) {
-        StringBuilder sb = new StringBuilder();
-        if (ekstrafeltrad.getEkstraInfoString()!=null && !ekstrafeltrad.getEkstraInfoString().isEmpty()) {
-            sb.append(ekstrafeltrad.getEkstraInfoString()).append("\n");
-        }
-        if (ekstrafeltrad.getValutaString()!=null && !ekstrafeltrad.getValutaString().isEmpty()){
-            sb.append("Valuta: ").append(ekstrafeltrad.getValutaString()).append("\n");
-        }
-        if (ekstrafeltrad.getKursString()!=null && !ekstrafeltrad.getKursString().isEmpty()) {
-            sb.append("Kurs: ").append(ekstrafeltrad.getKursString()).append("\n");
-        }
-        if(ekstrafeltrad.getOriginaltBeloepString()!=null && !ekstrafeltrad.getOriginaltBeloepString().isEmpty()) {
-            sb.append("Originalt beløp: ").append(ekstrafeltrad.getOriginaltBeloepString()).append("\n");
-        }
-        ekstrafeltrad.getPost().setEkstraInfoString(sb.toString());
-    }
-
-    private void importerForelderpostFraKortnavn(Ekstrafeltrad ekstrafeltrad) {
-        if (ekstrafeltrad.getForelderpostkortnavnString()==null || ekstrafeltrad.getForelderpostkortnavnString().isEmpty()) {
-            return;
-        }
-
-        if (ekstrafeltrad.getPost()==null) {
-            Loggekyklop.hent().loggADVARSEL("Post eller forelderpostkortnavnString er tom, avbryter.");
-            return;
-        }
-
-
-        List<Post> forelderposter = super.findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(
-                ekstrafeltrad.getPost().getDatoLocalDate(),
-                ekstrafeltrad.getPost().getTekstFraBankenString(),
-                NormalposttypeEnum.UTELATES
-        );
-
-        if (forelderposter.size()==1) {
-            ekstrafeltrad.getPost().setForelderPostUUID(forelderposter.getFirst().getUuid().toString());
-            lagre(ekstrafeltrad.getPost());
-        } else {
-            String strOpplysninger = "Dato = " + ekstrafeltrad.getPost().getDatoLocalDate() + ", " +
-                    "TekstFraBankenString = " + ekstrafeltrad.getPost().getTekstFraBankenString() + ", " +
-                    "NormalposttypeEnum = UTELATES";
-            if (forelderposter.size()>1) {
-                Loggekyklop.hent().loggADVARSEL("Fant mer enn en post med opplysningene " + strOpplysninger + ", kobler ikke til forelderpost");
-            } else if (forelderposter.isEmpty()) {
-                Loggekyklop.hent().loggADVARSEL("Fant ingen poster med opplysningene " + strOpplysninger + ", kobler ikke til forelderpost");
-            }
-        }
-
-    }
-
-
     private Ekstrafeltrad hentEllerOpprettEkstraFeltrad(Post post){
         if (post==null) {
             return null;
@@ -205,11 +134,7 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
             ekstrafeltradArrayList.add(ekstrafeltrad);
             return ekstrafeltrad;
         }
-
     }
-
-
-
 
     public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
         return postRepository.findByKostnadsPakke(kostnadspakke);
@@ -233,40 +158,20 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
             return post;
         }
 
-        public String getForelderpostkortnavnString() {
-            return forelderpostkortnavnString;
-        }
-
         public void setForelderpostkortnavnString(String forelderpostkortnavnString) {
             this.forelderpostkortnavnString = forelderpostkortnavnString;
-        }
-
-        public String getKursString() {
-            return kursString;
         }
 
         public void setKursString(String kursString) {
             this.kursString = kursString;
         }
 
-        public String getOriginaltBeloepString() {
-            return originaltBeloepString;
-        }
-
         public void setOriginaltBeloepString(String originaltBeloepString) {
             this.originaltBeloepString = originaltBeloepString;
         }
 
-        public String getValutaString() {
-            return valutaString;
-        }
-
         public void setValutaString(String valutaString) {
             this.valutaString = valutaString;
-        }
-
-        public String getEkstraInfoString() {
-            return ekstraInfoString;
         }
 
         public void setEkstraInfoString(String ekstraInfoString) {

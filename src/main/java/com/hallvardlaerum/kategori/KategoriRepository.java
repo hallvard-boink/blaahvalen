@@ -81,7 +81,7 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
                     "FROM " +
                     "post p LEFT JOIN kategori k ON p.kategori_uuid  = k.uuid " +
                     "WHERE " +
-                    "p.dato_local_date >=?1 AND p.dato_local_date <= ?2 " +
+                    "p.dato_local_date >=?1 AND p.dato_local_date <= ?2 AND k.kategori_type != 3 AND p.normalposttype_enum != 2 " +
                     "GROUP BY " +
                     "k.tittel" +
                     ") as kjerne " +
@@ -90,5 +90,6 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
                     "k2.nivaa =0;"
     )
     List<Tuple> hentHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate);
+    // kategori_type = 3: SKAL_IKKE_KATEGORISERES
 
 }

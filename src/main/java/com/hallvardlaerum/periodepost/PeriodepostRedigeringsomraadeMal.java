@@ -86,22 +86,23 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
         List<Post> normalposterList = new ArrayList<>();
         List<Post> budsjettposterList = new ArrayList<>();
 
-        if (periodepost.getPeriode() != null) {
-            normalposterList = normalpostService.finnPosterFraDatoTilDatoPostklasseHovedkategori(
-                    periodepost.getPeriode().getDatoFraLocalDate(),
-                    periodepost.getPeriode().getDatoTilLocalDate(),
-                    PostklasseEnum.NORMALPOST,
-                    periodepost.getKategori()
-            );
-            budsjettposterList = normalpostService.finnPosterFraDatoTilDatoPostklasseHovedkategori(
-                    periodepost.getPeriode().getDatoFraLocalDate(),
-                    periodepost.getPeriode().getDatoTilLocalDate(),
-                    PostklasseEnum.BUDSJETTPOST,
-                    periodepost.getKategori()
-            );
+            if (periodepost.getPeriode() != null) {
+                normalposterList = normalpostService.finnEtterFraDatoTilDatoPostklasseHovedkategori(
+                        periodepost.getPeriode().getDatoFraLocalDate(),
+                        periodepost.getPeriode().getDatoTilLocalDate(),
+                        PostklasseEnum.NORMALPOST,
+                        periodepost.getKategori()
+                );
+                budsjettposterList = normalpostService.finnEtterFraDatoTilDatoPostklasseHovedkategori(
+                        periodepost.getPeriode().getDatoFraLocalDate(),
+                        periodepost.getPeriode().getDatoTilLocalDate(),
+                        PostklasseEnum.BUDSJETTPOST,
+                        periodepost.getKategori()
+                );
+            }
+            normalposterGrid.setItems(normalposterList);
+            budsjettposterGrid.setItems(budsjettposterList);
         }
-        normalposterGrid.setItems(normalposterList);
-        budsjettposterGrid.setItems(budsjettposterList);
     }
 
 

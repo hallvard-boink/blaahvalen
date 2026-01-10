@@ -1,6 +1,7 @@
 package com.hallvardlaerum.periodepost;
 
 import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriRetning;
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
@@ -129,24 +130,36 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         }
     }
 
-    /**
-     * Her regner jeg med at første tuple inneholder uuid for kostnadspakke
-     * @param tuples rådata fra native query
-     * @return Liste med periodeposter
-     */
-    private ArrayList<Periodepost>finnKostnadspakker_konverterFraTuples(List<Tuple> tuples) {
-        ArrayList<Periodepost> kostnadspakker = new ArrayList<>();
-        if (tuples==null) {
-            return kostnadspakker;
+
+    public Periodepost finnEllerOpprettPeriodepostUkategorisert(Periode periode, Kategori kategoriUkategorisert) {
+        if (periode == null || kategoriUkategorisert==null) {
+            Loggekyklop.bruk().loggFEIL("Periode eller kategoriUkategorisert er null, avbryter");
+            return null;
         }
 
-        for (Tuple tuple:tuples) {
-            UUID uuid = tuple.get(0, UUID.class);
-            if (uuid!=null) {
-                Optional<Periodepost> kostnadspakkeOptional = periodepostRepository.findById(uuid);
-                kostnadspakkeOptional.ifPresent(kostnadspakker::add);
+        List<Periodepost> periodepostList = periodepostRepository.findByPeriodeAndKategori(periode, kategoriUkategorisert);
+        Periodepost periodepostUkategorisert;
+        if (periodepostList.isEmpty()) {
+            periodepostUkategorisert = opprettEntitet();
+            periodepostUkategorisert.setKategori(kategoriUkategorisert);
+            periodepostUkategorisert.setPeriode(periode);
+            lagre(periodepostUkategorisert);
+
+        } else {
+            if (periodepostList.size()>1) {
+                Loggekyklop.bruk().loggINFO("Fant for mange periodeposter for periode " + periode.hentBeskrivendeNavn() + " og kategori " + kategoriUkategorisert.hentBeskrivendeNavn());
             }
+            periodepostUkategorisert = periodepostList.getFirst();
         }
-        return kostnadspakker;
+
+        if (periodepostUkategorisert.getKategori().getKategoriRetning()== KategoriRetning.INN) {
+            periodepostUkategorisert.setSumRegnskapInteger(normalpostService.sumInnPeriodeNormalposterUtenkategori(periode));
+        } else if (periodepostUkategorisert.getKategori().getKategoriRetning()==KategoriRetning.UT) {
+            periodepostUkategorisert.setSumRegnskapInteger(normalpostService.sumUtPeriodeNormalposterUtenkategori(periode));
+        } else {
+            Loggekyklop.bruk().loggFEIL("UkategorisertKategori har ikke riktig retning");
+        }
+        return periodepostUkategorisert;
+
     }
 }

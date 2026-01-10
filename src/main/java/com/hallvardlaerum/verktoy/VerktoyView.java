@@ -4,6 +4,7 @@ import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.eksportimport.ExcelEksportkyklop;
 import com.hallvardlaerum.libs.ui.Gridkyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.verktoy.testing.TestDataFabrikk;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -19,7 +20,7 @@ import java.util.List;
 //@Menu(title = "Verktøy", order = 80)
 public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
     private boolean erInitiert = false;
-    private Grid<Kategori> grid;
+    private TestDataFabrikk testDataFabrikk;
 
 
     public VerktoyView() {
@@ -35,8 +36,10 @@ public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
     @Override
     public void init(){
         if (!erInitiert) {
+            testDataFabrikk = new TestDataFabrikk();
+
             leggTilKnapper();
-            leggTilGrid();
+
             setSizeFull();
 
             erInitiert = true;
@@ -44,15 +47,21 @@ public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
     }
 
     private void leggTilKnapper(){
-        Button leggTilButtonIGrid = new Button("Eksporter til excel");
-        leggTilButtonIGrid.addClickListener(e -> eksporterGridTilExcel());
-        add(leggTilButtonIGrid);
+        leggTilKnapper_OpprettTestDataButton();
+        leggTilKnapper_SlettTestDataButton();
+
     }
 
-    private void eksporterGridTilExcel() {
-        List<Kategori> kategoriList = grid.getListDataView().getItems().toList();
-        ExcelEksportkyklop.hent().eksporterArrayListAvEntiteterSomXLS(new ArrayList<>(kategoriList), "KategoriFraGrid.xlsx");
+    private void leggTilKnapper_OpprettTestDataButton() {
+        Button opprettTestdataButton = new Button("Opprett testdata");
+        opprettTestdataButton.addClickListener(e -> testDataFabrikk.produserData(2050));
+        add(opprettTestdataButton);
+    }
 
+    private void leggTilKnapper_SlettTestDataButton() {
+        Button slettTestdataButton = new Button("Slett testdata");
+        slettTestdataButton.addClickListener(e -> testDataFabrikk.slettTestData());
+        add(slettTestdataButton);
     }
 
 

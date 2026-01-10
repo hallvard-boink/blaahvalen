@@ -5,44 +5,58 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 public class HallvardsIntegerSpan extends Span {
-
+    private boolean visNegativeTalliGroent;
+    private boolean visPositiveTalliGroent;
+    private Integer verdiInteger;
 
     public HallvardsIntegerSpan() {
         setClassName(LumoUtility.TextAlignment.RIGHT);
+        visNegativeTalliGroent = false;
+        visPositiveTalliGroent = false;
     }
 
-    public HallvardsIntegerSpan(Builder builder){
-        setClassName(LumoUtility.TextAlignment.RIGHT);
-        settBold(builder.erBold);
-    }
-
-    public void settInteger(Integer nyInteger){
-        if (nyInteger==null) {
+    public void settInteger(Integer nyInteger) {
+        verdiInteger = nyInteger;
+        if (nyInteger == null) {
             setText("-");
-            getStyle().set("color", "black");
         } else {
             String nyTekst = HelTallMester.formaterIntegerSomStortTall(nyInteger);
             setText(nyTekst);
-            if (nyInteger<0) {
-                getStyle().set("color", "red");
+        }
+        oppdaterStil();
+    }
+
+    public void settDifferanseInteger(Integer aInteger, Integer bInteger) {
+        if (aInteger == null) {
+            aInteger = 0;
+        }
+        if (bInteger == null) {
+            bInteger = 0;
+        }
+        settInteger(aInteger - bInteger);
+    }
+
+    private void oppdaterStil(){
+        if (verdiInteger == null) {
+            getStyle().set("color", "black");
+        } else {
+            if (verdiInteger<0) {
+                if (visNegativeTalliGroent) {
+                    getStyle().set("color", "green");
+                } else {
+                    getStyle().set("color", "red");
+                }
             } else {
-                getStyle().set("color", "black");
+                if (visPositiveTalliGroent) {
+                    getStyle().set("color", "green");
+                } else {
+                    getStyle().set("color", "black");
+                }
             }
         }
     }
 
-    public void settDifferanseInteger(Integer aInteger, Integer bInteger){
-        if (aInteger==null) {
-            aInteger = 0;
-        }
-        if (bInteger==null){
-            bInteger = 0;
-        }
-
-        settInteger(aInteger-bInteger);
-    }
-
-    public void settBold(boolean erBold){
+    public void settBold(boolean erBold) {
         if (erBold) {
             addClassName(LumoUtility.FontWeight.BOLD);
         } else {
@@ -50,20 +64,13 @@ public class HallvardsIntegerSpan extends Span {
         }
     }
 
-
-    public static class Builder{
-        private boolean erBold;
-
-        public Builder settErBold(boolean erBold){
-            this.erBold = erBold;
-            return this;
-        }
-
-        public HallvardsIntegerSpan build(){
-            return new HallvardsIntegerSpan(this);
-        }
+    public void visNegativeTalliGroent(Boolean visGroent){
+        visNegativeTalliGroent = visGroent;
     }
 
+    public void visPositiveTalliGroent(Boolean visGroent) {
+        visPositiveTalliGroent = visGroent;
+    }
 
 
 }

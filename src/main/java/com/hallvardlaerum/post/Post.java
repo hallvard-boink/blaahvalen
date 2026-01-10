@@ -90,6 +90,8 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     // === Getters and Setters ===
 
 
+
+
     public Periodepost getKostnadsPakke() {
         return kostnadsPakke;
     }

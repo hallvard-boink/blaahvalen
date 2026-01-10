@@ -34,7 +34,7 @@ public class MaanedsoversiktpostService extends PeriodepostServiceMal implements
     }
 
     public void slettAlleMaanedsoversiktposter() {
-        List<Periodepost> maanedsoversiktposter = hentRepository().findByPeriodepostTypeEnum(PeriodepostTypeEnum.AARSOVERSIKTPOST);
+        List<Periodepost> maanedsoversiktposter = hentRepository().findByPeriodepostTypeEnum(PeriodepostTypeEnum.MAANEDSOVERSIKTPOST);
         hentRepository().deleteAll(maanedsoversiktposter);
     }
 }

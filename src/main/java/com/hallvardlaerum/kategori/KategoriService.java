@@ -174,4 +174,20 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         return kategoriRepository.findByTittelAndErOppsummerendeUnderkategori(kategoriString, true);
     }
 
+    public Kategori finnEllerOppretKategoriUKATEGORISERT(KategoriRetning kategoriRetning) {
+        List<Kategori> kategoriList = kategoriRepository.findByKategoriTypeAndKategoriRetning(KategoriType.UKATEGORISERT, kategoriRetning);
+        if (kategoriList.isEmpty()) {
+            Kategori kategoriUkategorisert = opprettEntitet();
+            kategoriUkategorisert.setTittel("[Ukategorisert " + kategoriRetning.getTittel() + "]");
+            kategoriUkategorisert.setKategoriType(KategoriType.UKATEGORISERT);
+            kategoriUkategorisert.setKategoriRetning(kategoriRetning);
+            lagre(kategoriUkategorisert);
+            return kategoriUkategorisert;
+        } else {
+            if (kategoriList.size()>1) {
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en kategori med kategoritype UKATEGORISERT og retning " + kategoriRetning + ". Rydd opp i kategoriene");
+            }
+            return kategoriList.getFirst();
+        }
+    }
 }

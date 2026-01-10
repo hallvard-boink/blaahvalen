@@ -81,7 +81,7 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
 
     private void opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleBudsdjettposterMenuItem(){
         slettAlleMenuItem = verktoeySubMenu.addItem("Slett alle budsjettposter");
-        slettAlleMenuItem.addClickListener(e ->budsjettpostService.slettAllePosterAvSammePostklasseEnum());
+        slettAlleMenuItem.addClickListener(e ->budsjettpostService.slettAllePosterAvDennePostklasseEnum());
     }
 
 

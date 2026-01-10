@@ -5,7 +5,9 @@ import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.EntitetAktig;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
+import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostRepository;
@@ -141,6 +143,35 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
 
     public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
         return postRepository.findByKostnadsPakke(kostnadspakke);
+    }
+
+    public Integer sumInnPeriodeNormalposterUtenkategori(Periode periode) {
+        if (periode==null) {
+            return null;
+        }
+
+        return postRepository.sumInnFraDatoTilDatoNormalposterUtenKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+
+    }
+
+    public Integer sumUtPeriodeNormalposterUtenkategori(Periode periode) {
+        if (periode==null) {
+            return null;
+        }
+
+        return postRepository.sumUtFraDatoTilDatoNormalposterUtenKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+    }
+
+    public Integer sumInnEllerUtFradatoTildatoKategoritittel(LocalDate fraDato, LocalDate tilDato, String kategoritittel) {
+        Tuple tuple = postRepository.sumNormalPosterFradatoTilDatoKategoritittel(fraDato, tilDato, kategoritittel);
+        if (tuple==null) {
+            return 0;
+        }
+
+        Integer innInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class), true);
+        Integer utInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class), true);
+
+        return innInteger + utInteger;
     }
 
 

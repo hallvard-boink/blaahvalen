@@ -4,7 +4,6 @@ import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.SearchCriteria;
 import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
-import com.hallvardlaerum.libs.eksportimport.ExcelEksportkyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
@@ -34,7 +33,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Route("normalpost")
 @UIScope
@@ -118,7 +116,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
                         "Vil du virkelig slette månedsoversikter med månedsoversiktposter?",
                         "Ja, sett i gang",
                         ee -> {
-                            postService.slettAllePosterAvSammePostklasseEnum();
+                            postService.slettAllePosterAvDennePostklasseEnum();
                             oppdaterSoekeomraadeFinnAlleRader();
                             oppdaterRedigeringsomraade();
                         },

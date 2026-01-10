@@ -28,6 +28,7 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
 
     List<Kategori> findByErOppsummerendeUnderkategoriOrderByTittelAscUndertittelAsc(boolean erOppsummerende);
 
+    List<Kategori> findByKategoriTypeAndKategoriRetning(KategoriType kategoriType, KategoriRetning kategoriRetning);
 
 
     @NativeQuery(

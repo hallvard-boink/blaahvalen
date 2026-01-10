@@ -2,6 +2,7 @@ package com.hallvardlaerum.periode;
 
 
 import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriRetning;
 import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
@@ -88,14 +89,16 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         Periode periode = periodeRedigeringsomraade.getEntitet();
 
         oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(periode, 1);
-        oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode, 1);
+
+        periode = periodeRedigeringsomraade.getEntitet();
+        oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode, 0);
+        oppdaterPeriodensPeriodeposterOgSummer_LeggTilOgOppdaterManglerKategori(periode);
         oppdaterPeriodensPeriodeposterOgSummer_OppdaterHovedperiodepostene(periode);
         oppdaterPeriodensPeriodeposterOgSummer_oppdaterKostnadspakker(periode);
         oppdaterLagredeSummer(periode);
         lagre(periode);
         periodeRedigeringsomraade.hentView().oppdaterRedigeringsomraade();
         periodeRedigeringsomraade.hentView().oppdaterSoekeomraadeEtterRedigeringAvEntitet();
-
     }
 
 
@@ -104,6 +107,16 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         for (Periodepost periodepost : periodepostArrayList) {
             periodepostService.oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
         }
+    }
+
+    private void oppdaterPeriodensPeriodeposterOgSummer_LeggTilOgOppdaterManglerKategori(Periode periode) {
+        Kategori kategoriUkategorisertInn = kategoriService.finnEllerOppretKategoriUKATEGORISERT(KategoriRetning.INN);
+        Periodepost periodepostUkategorisertInn = periodepostService.finnEllerOpprettPeriodepostUkategorisert(periode, kategoriUkategorisertInn);
+        periodepostService.lagre(periodepostUkategorisertInn);
+
+        Kategori kategoriUkategorisertUt = kategoriService.finnEllerOppretKategoriUKATEGORISERT(KategoriRetning.UT);
+        Periodepost periodepostUkategorisertUt = periodepostService.finnEllerOpprettPeriodepostUkategorisert(periode, kategoriUkategorisertUt);
+        periodepostService.lagre(periodepostUkategorisertUt);
     }
 
 

@@ -82,7 +82,7 @@ public class MaanedsoversiktpostView extends PeriodepostViewMal implements Initi
                     oppdaterRedigeringsomraade();
                 },
                 "Nei, er du GAL!",
-                null).open());
+                ee -> {}).open());
     }
 
 

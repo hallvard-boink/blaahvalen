@@ -47,11 +47,11 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     public void instansOpprettFelter(){
         //super.instansOpprettFelter();
         instansOpprettFelter_leggTilHovedTab();
-        instansOpprettFelter_leggTilHovedkategorierTab();
+        instansOpprettFelter_leggTilKategorierTab();
         instansOpprettFelter_leggTilBudsjettTab_FasteUtgifter();
         instansOpprettFelter_leggTilKostnadspakkerTab();
         instansOpprettFelter_leggTilEkstraTab();
-
+        super.testing_leggTilSjekkSummerButton();
     }
 
 

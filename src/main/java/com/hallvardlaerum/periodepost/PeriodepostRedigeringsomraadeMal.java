@@ -79,12 +79,19 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
         Periodepost periodepost = hentEntitet();
-        sumBudsjettSpan.settInteger(periodepost.getSumBudsjettInteger());
-        sumRegnskapSpan.settInteger(periodepost.getSumRegnskapInteger());
-        sumDifferanseSpan.settDifferanseInteger(periodepost.getSumBudsjettInteger(), periodepost.getSumRegnskapInteger());
+        if (periodepost==null) {
+            sumBudsjettSpan.settInteger(0);
+            sumRegnskapSpan.settInteger(0);
+            sumDifferanseSpan.settInteger(0);
+            normalposterGrid.setItems(new ArrayList<>());
+            budsjettposterGrid.setItems(new ArrayList<>());
+        } else {
+            sumBudsjettSpan.settInteger(periodepost.getSumBudsjettInteger());
+            sumRegnskapSpan.settInteger(periodepost.getSumRegnskapInteger());
+            sumDifferanseSpan.settDifferanseInteger(periodepost.getSumBudsjettInteger(), periodepost.getSumRegnskapInteger());
 
-        List<Post> normalposterList = new ArrayList<>();
-        List<Post> budsjettposterList = new ArrayList<>();
+            List<Post> normalposterList = new ArrayList<>();
+            List<Post> budsjettposterList = new ArrayList<>();
 
             if (periodepost.getPeriode() != null) {
                 normalposterList = normalpostService.finnEtterFraDatoTilDatoPostklasseHovedkategori(

@@ -37,16 +37,6 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 
     List<Post> findByPostklasseEnum(PostklasseEnum postklasseEnum);
 
-    @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) " +
-            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
-            "WHERE p.dato_local_date >= ?1 AND " +
-            "p.dato_local_date <= ?2 AND " +
-            "(p.normalposttype_enum IS NULL OR p.normalposttype_enum != 2) AND " +
-            "k.nivaa = 1 AND " +
-            "k.tittel = ?3 " +
-            "GROUP BY p.postklasse_enum "
-    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
-    List<Tuple> sumPosterFradatoTilDatoKategoritittel(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, String kategoritittel);
 
     @NativeQuery(
             "SELECT " +
@@ -71,10 +61,13 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
     )
     List<Post> finnEtterFraDatoTilDatoOgKategoritittel(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, String kategoriTittel);
 
-    @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) FROM post p " +
-            "WHERE p.dato_local_date >= ?1 AND " +
-            "p.dato_local_date <= ?2 AND " +
-            "p.postklasse_enum = 0 " +
+    List<Post> findByDatoLocalDateBetweenAndPostklasseEnum(LocalDate fraLocalDate, LocalDate tilLocalDate, PostklasseEnum postklasseEnum);
+
+
+    @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) " +
+            "FROM post p " +
+            "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
+            "p.postklasse_enum = 0 AND p.kategori_uuid IS NOT NULL " +
             "AND p.normalposttype_enum != 2"
     )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
     Integer sumInnFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);

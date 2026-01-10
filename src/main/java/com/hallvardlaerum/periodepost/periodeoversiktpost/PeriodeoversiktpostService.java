@@ -80,7 +80,18 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
 
     }
 
+     /**
+      * Denne brukes av AarsoversiktRedigeringsomraade sin kostnadspakketab
+      * @param periode periode
+      * @return liste av periodepost
+      */
+    public List<Periodepost> hentKostnadspakkerForPerioden(Periode periode) {
+        return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.PERIODEOVERSIKTPOST, periode);
+    }
 
+    /**
+     * Denne brukes av MaanedsoversiktRedigeringsomraade sin KostnadspakkeTab
+     */
     public ArrayList<PeriodedelAvKostnadspakkeRad> hentKostnadspakkerForPeriodenMedPeriodensSum(Periode periode) {
         List<Tuple> tupleList = finnKostnadspakkeUUIDogSummerForPeriode(periode);
         ArrayList<PeriodedelAvKostnadspakkeRad> periodedelAvKostnadspakkeRadArrayList = new ArrayList<>();

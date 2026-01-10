@@ -3,23 +3,23 @@ package com.hallvardlaerum.periodepost;
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
-import com.hallvardlaerum.post.PostklasseEnum;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import jakarta.persistence.Tuple;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, PeriodepostRepository> {
     private PeriodepostRepository periodepostRepository;
     private RedigeringsomraadeAktig<Periodepost> periodepostRedigeringsomraade;
     private PeriodepostTypeEnum periodepostTypeEnum;
     private NormalpostService normalpostService;
+    private BudsjettpostService budsjettpostService;
 
     public PeriodepostServiceMal() {
 
@@ -35,6 +35,7 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         this.periodepostTypeEnum = periodepostTypeEnum;
 
         normalpostService = Allvitekyklop.hent().getNormalpostService();
+        budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
     }
 
     public void slettAlle(List<Periodepost> periodepostList) {
@@ -64,58 +65,17 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         if (periodepost.getKategori()==null) {
             return;
         }
-        List<Tuple> tuples = normalpostService.sumPosterFradatoTilDatoKategoritittel(
-                periodepost.getPeriode().getDatoFraLocalDate(),
-                periodepost.getPeriode().getDatoTilLocalDate(),
-                periodepost.getKategori().getTittel());
+        LocalDate fraLocalDate = periodepost.getPeriode().getDatoFraLocalDate();
+        LocalDate tilLocalDate = periodepost.getForelder().getDatoTilLocalDate();
+        String kategoriTittel = periodepost.getKategori().getTittel();
 
-        if (tuples==null) {
-            periodepost.setSumBudsjettInteger(0);
-            periodepost.setSumRegnskapInteger(0);
+        periodepost.setSumRegnskapInteger(normalpostService.sumInnEllerUtFradatoTildatoKategoritittel(fraLocalDate, tilLocalDate, kategoriTittel));
+        periodepost.setSumBudsjettInteger(budsjettpostService.sumInnEllerUtFradatoTildatoKategoritittel(fraLocalDate, tilLocalDate, kategoriTittel));
 
-        } else {
-            if (tuples.size()>2) {
-                Loggekyklop.bruk().loggADVARSEL("Fant mer enn 2 tuple ved oppsummering av periodepost. Dette skal ikke skje, men fortsetter likevel.");
-            }
-
-            for (Tuple tuple:tuples) {
-                oppdaterOgLagreSummerForVanligePeriodeposter_oppdaterSummer_tuple(periodepost,tuple);
-            }
-
-        }
         lagre(periodepost);
     }
 
-    private void oppdaterOgLagreSummerForVanligePeriodeposter_oppdaterSummer_tuple(Periodepost periodepost, Tuple tuple) {
-        Byte postklasseenumByte = tuple.get(0, Byte.class);
-        BigDecimal sumBigDecimalInn = tuple.get(1, BigDecimal.class);
-        BigDecimal sumBigDecimalUt = tuple.get(2, BigDecimal.class);
-        if (postklasseenumByte==null && sumBigDecimalInn == null && sumBigDecimalUt == null) {
-            return;
-        }
 
-        PostklasseEnum postklasseEnum = PostklasseEnum.konverterFraByte(postklasseenumByte);
-        if (postklasseEnum==null) {
-            Loggekyklop.hent().loggFEIL("Klarte ikke finne postklasseEnum fra tuple i oppdaterSummer_tuple" +
-                    "Bytekode er " + postklasseenumByte + ", mens postklasseEnum er null ");
-            return;
-        }
-
-        Integer sumInnInteger = HelTallMester.konverterBigdecimalTilInteger(sumBigDecimalInn);
-        if (sumInnInteger==null) {
-            sumInnInteger = 0;
-        }
-        Integer sumUtInteger = HelTallMester.konverterBigdecimalTilInteger(sumBigDecimalUt);
-        if (sumUtInteger==null) {
-            sumUtInteger = 0;
-        }
-
-        if (postklasseEnum==PostklasseEnum.NORMALPOST) {
-            periodepost.setSumRegnskapInteger(sumInnInteger + sumUtInteger);
-        } else if (postklasseEnum == PostklasseEnum.BUDSJETTPOST) {
-            periodepost.setSumBudsjettInteger(sumInnInteger + sumUtInteger);
-        }
-    }
 
 
     public String presenterPeriodeposterMenIkkeVisPeriode(List<Periodepost> periodepostList) {
@@ -158,15 +118,14 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         }
 
         if (periode.getPeriodetypeEnum()== PeriodetypeEnum.AARSOVERSIKT) {
-            return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.PERIODEOVERSIKTPOST, periode);
+            return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.AARSOVERSIKTPOST, periode);
 
-        } else if (periode.getPeriodetypeEnum()==PeriodetypeEnum.MAANEDSOVERSIKT) {
-            List<Tuple> tuples = periodepostRepository.finnOgOppsummerKostnadspakkerForDatospenn(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-            return finnKostnadspakker_konverterFraTuples(tuples);
+        } else if (periode.getPeriodetypeEnum()== PeriodetypeEnum.MAANEDSOVERSIKT) {
+            return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.AARSOVERSIKTPOST, periode);
 
         } else {
-            List<Tuple> tuples = periodepostRepository.finnOgOppsummerKostnadspakkerForDatospenn(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-            return finnKostnadspakker_konverterFraTuples(tuples);
+            Loggekyklop.bruk().loggFEIL("Hverken Årsoversikt eller Månedsoversikt");
+            return new ArrayList<>();
         }
     }
 

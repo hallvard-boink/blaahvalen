@@ -95,7 +95,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     }
 
     private void oppdaterKostnadspakkerTab() {
-        kostnadspakkerGrid.setItems(Allvitekyklop.hent().getPeriodeoversiktpostService().finnEtterPeriode(hentEntitet()));
+        kostnadspakkerGrid.setItems(Allvitekyklop.hent().getPeriodeoversiktpostService().hentKostnadspakkerForPerioden(hentEntitet()));
     }
 
 

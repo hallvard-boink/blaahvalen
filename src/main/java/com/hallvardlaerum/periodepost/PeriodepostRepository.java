@@ -23,7 +23,14 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
 
     List<Periodepost> findByPeriodepostTypeEnumOrderByTittelStringDesc(PeriodepostTypeEnum periodepostTypeEnum);
 
+    /**
+     * Periodeposter har ikke egne datofelter, så de MÅ være koblet på en periode
+     * @param periodepostTypeEnum Periodeposttype, f.eks. maanedsoversiktpost
+     * @param periode Periode
+     * @return liste med periodepost
+     */
     List<Periodepost> findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum periodepostTypeEnum, Periode periode);
+
 
 
     @NativeQuery(value = "SELECT pp.* " +

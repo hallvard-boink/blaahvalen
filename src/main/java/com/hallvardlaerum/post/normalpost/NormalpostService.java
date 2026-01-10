@@ -12,9 +12,12 @@ import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
+import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

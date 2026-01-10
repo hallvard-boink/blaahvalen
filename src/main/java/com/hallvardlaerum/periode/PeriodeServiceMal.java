@@ -155,7 +155,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
     public void oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(Periode periode, Integer kategoriNivaa) {
         List<Kategori> kategoriListHarPoster;
         if (kategoriNivaa == 0) {
-            List<Tuple> tuples = kategoriService.hentHovedKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+            List<Tuple> tuples = kategoriService.finnHovedKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
             kategoriListHarPoster = new ArrayList<>();
             for (Tuple tuple : tuples) {
                 String uuidString = tuple.get(0, UUID.class).toString();
@@ -168,7 +168,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
             }
 
         } else {
-            kategoriListHarPoster = kategoriService.hentKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+            kategoriListHarPoster = kategoriService.finnKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
         }
 
         for (Kategori kategori : kategoriListHarPoster) {

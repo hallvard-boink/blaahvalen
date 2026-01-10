@@ -2,82 +2,31 @@ package com.hallvardlaerum.kategori;
 
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.felter.DesimalMester;
-import com.hallvardlaerum.libs.felter.HelTallMester;
-import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
-import com.hallvardlaerum.periode.Periode;
-import com.hallvardlaerum.periode.KategoriBudsjettAntallposterSumInnUt;
-import com.hallvardlaerum.post.PostklasseEnum;
-import com.hallvardlaerum.post.budsjettpost.BudsjettpoststatusEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class KategoriService extends EntitetserviceMal<Kategori, KategoriRepository> implements InitieringsEgnet {
     private KategoriRepository kategoriRepository;
-    private KategoriRedigeringsomraade kategoriRedigeringsomraade;
     private boolean erInitiert = false;
 
 
     public KategoriService() {
     }
 
-    public ArrayList<Kategori> finnKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate, PostklasseEnum postklasseEnum) {
-        List<Tuple> tupleList = hentKategorierDetFinnesPosterForFraDatoTilDatoPostklasse(fraLocalDate, tilLocalDate, postklasseEnum);
-        ArrayList<Kategori> kategoriList = new ArrayList<>();
-        if (tupleList.isEmpty()) {
-            return kategoriList;
-        }
-
-        for (Tuple tuple : tupleList) {
-            UUID uuid = tuple.get(0, UUID.class);
-            if (uuid != null) {
-                Kategori kategori = finnEtterUUID(uuid.toString());
-                if (kategori == null) {
-                    Loggekyklop.hent().loggFEIL("Fant ikke kategorien med uuid " + uuid.toString());
-                } else {
-                    kategoriList.add(kategori);
-                }
-            }
-        }
-        return kategoriList;
+    public List<Kategori> finnKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
+        return kategoriRepository.finnKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate);
     }
 
-    public List<Tuple> hentKategorierDetFinnesPosterForFraDatoTilDatoPostklasse(LocalDate fraLocalDate, LocalDate tilLocalDate, PostklasseEnum postklasseEnum) {
-        return kategoriRepository.hentKategorierDetFinnesPosterForFraDatoTilDatoPostklasse(fraLocalDate, tilLocalDate, postklasseEnum);
-    }
-
-    public List<KategoriBudsjettAntallposterSumInnUt> byggKategoriMedBudsjettpostList(Periode periode, BudsjettpoststatusEnum budsjettpoststatusEnum) {
-        List<Tuple> tuples = kategoriRepository.byggKategoriMedBudsjettpostList(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), budsjettpoststatusEnum.ordinal());
-        ArrayList<KategoriBudsjettAntallposterSumInnUt> kategoriBudsjettAntallposterSumInnUtArrayList = new ArrayList<>();
-        for (Tuple tuple : tuples) {
-
-            String kategoriUUIDString = tuple.get(0, UUID.class).toString();
-            Integer antallInteger = HelTallMester.konverterLongTilInteger(tuple.get(1, Long.class));
-            Integer innPaaKontoInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(2, BigDecimal.class));
-            Integer utFraKontoInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(3, BigDecimal.class));
-            KategoriBudsjettAntallposterSumInnUt kategoriBudsjettAntallposterSumInnUt = new KategoriBudsjettAntallposterSumInnUt(kategoriUUIDString, antallInteger, innPaaKontoInteger, utFraKontoInteger);
-            kategoriBudsjettAntallposterSumInnUtArrayList.add(kategoriBudsjettAntallposterSumInnUt);
-        }
-        return kategoriBudsjettAntallposterSumInnUtArrayList;
-    }
-
-    public List<Kategori> hentKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
-        return kategoriRepository.hentKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate);
-    }
-
-    public List<Tuple> hentHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
-        return kategoriRepository.hentHovedKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate);
+    public List<Tuple> finnHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
+        return kategoriRepository.finnHovedKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate);
     }
 
     public List<Kategori> finnAlleHovedkategorier() {
@@ -96,13 +45,6 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         return kategoriRepository.findByTittelAndNivaaOrderByUndertittel(hovedtittel, 1);
     }
 
-    public List<Kategori> finnEtterTittelOgEkskludertKategoriType(String tittel, KategoriType kategoriTypeSomEkskluderes) {
-        return kategoriRepository.finnEtterTittelOgEkskludertKategoriType(tittel,kategoriTypeSomEkskluderes);
-    }
-
-    public List<Kategori> finnEtterEkskludertKategoriType(KategoriType kategoriTypeSomEkskluderes) {
-        return kategoriRepository.finnEtterEkskludertKategoriType(kategoriTypeSomEkskluderes);
-    }
 
     @Override
     public boolean erInitiert() {
@@ -112,7 +54,6 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     public void init() {
         if (!erInitiert) {
             super.initEntitetserviceMal(Kategori.class, Allvitekyklop.hent().getKategoriRepository());
-            this.kategoriRedigeringsomraade = Allvitekyklop.hent().getKategoriRedigeringsomraade();
             kategoriRepository = Allvitekyklop.hent().getKategoriRepository();
             erInitiert = true;
         }
@@ -150,16 +91,6 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
 
     }
 
-    public void oppdaterNivaaAlleKategorier() {
-        List<Kategori> kategoriList = hentRepository().findAll();
-        for (Kategori kategori : kategoriList) {
-            if (kategori.getUndertittel() == null || kategori.getUndertittel().isEmpty()) {
-                kategori.setNivaa(1);
-            } else {
-                kategori.setNivaa(2);
-            }
-        }
-    }
 
     public Kategori finnEtterUndertittel(String undertittel) {
         if (undertittel == null || undertittel.isEmpty()) {

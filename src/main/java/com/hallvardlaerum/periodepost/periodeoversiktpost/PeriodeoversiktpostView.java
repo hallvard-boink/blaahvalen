@@ -88,7 +88,8 @@ public class PeriodeoversiktpostView extends PeriodepostViewMal implements Initi
 
     private void oppdaterSummer() {
         Periodepost kostnadspakke = Allvitekyklop.hent().getPeriodeoversiktpostView().hentEntitet();
-        periodeoversiktpostService.oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
+        periodeoversiktpostService.oppdaterOgLagreSummerForValgteVanligePeriodepost();
+        //periodeoversiktpostService.oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
         Allvitekyklop.hent().getPeriodeoversiktpostView().oppdaterRedigeringsomraade();
         Allvitekyklop.hent().getPeriodeoversiktpostView().oppdaterSoekeomraadeFinnAlleRader();
     }

@@ -92,9 +92,7 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post, 
 
     // == OPPSUMMER INNHOLD I POSTER ===
 
-    public List<Tuple> sumPosterFradatoTilDatoKategoritittel(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, String kategoritittel) {
-        return postRepository.sumPosterFradatoTilDatoKategoritittel(fraOgMedLocalDate,tilOgMedLocalDate,kategoritittel);
-    }
+
 
     public Integer sumInnFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate) {
         return postRepository.sumInnFradatoTilDatoNormalposterMedOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);

@@ -1,6 +1,7 @@
 package com.hallvardlaerum.post.budsjettpost;
 
 import com.hallvardlaerum.kategori.KategoriService;
+import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
@@ -9,8 +10,11 @@ import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
+import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -26,6 +30,20 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
     }
 
 
+    public Integer sumInnEllerUtFradatoTildatoKategoritittel(LocalDate fraDato, LocalDate tilDato, String kategoritittel) {
+        Tuple tuple = postRepository.sumBudsjettPosterFradatoTilDatoKategoritittel(fraDato, tilDato, kategoritittel);
+        if (tuple==null) {
+            return 0;
+        }
+
+        Integer innInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class), true);
+        Integer utInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class), true);
+
+        return innInteger + utInteger;
+    }
+
+
+     // === Standardmetoder ===
     public BudsjettpostService() {
     }
 

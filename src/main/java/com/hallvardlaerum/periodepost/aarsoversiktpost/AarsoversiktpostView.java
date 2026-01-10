@@ -91,7 +91,7 @@ public class AarsoversiktpostView extends PeriodepostViewMal implements Initieri
                     oppdaterRedigeringsomraade();
                 },
                 "Nei, er du GAL!",
-                null).open());
+                ee -> {}).open());
     }
 
     private void importCSVFraGamleBlaahvalen() {

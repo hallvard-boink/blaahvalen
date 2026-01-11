@@ -11,7 +11,6 @@ import com.hallvardlaerum.verktoy.Allvitekyklop;
 import jakarta.persistence.Tuple;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -52,15 +51,8 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post, 
     }
 
 
-    public List<Post> finnEtterFradatoOgTilDatoOgKategoriOgNivaa(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, Kategori kategori, Integer kategoriNivaa) {
-        if (kategoriNivaa == 1) { //detaljert
-            return postRepository.findByDatoLocalDateBetweenAndKategori(datoFraLocalDate, datoTilLocalDate, kategori);
-        } else if (kategoriNivaa == 0) { //hovedkategorier
-            return postRepository.finnEtterFraDatoTilDatoOgKategoritittel(datoFraLocalDate, datoTilLocalDate, kategori.getTittel());
-        } else {
-            return new ArrayList<>();
-        }
-
+    public List<Post> finnEtterFradatoOgTilDatoOgHovedkategori(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, Kategori kategori) {
+        return postRepository.finnEtterFraDatoTilDatoOgKategoritittel(datoFraLocalDate, datoTilLocalDate, kategori.getTittel());
     }
 
     public List<Post> finnEtterFraDatoTilDatoPostklasseHovedkategori(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, PostklasseEnum postklasseEnum, Kategori kategori) {
@@ -102,11 +94,11 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post, 
         return postRepository.sumInnFradatoTilDatoNormalposterUtenOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
     }
 
-    public Integer sumInnFradatoTildatoNormalposterUkategorisert(Periode periode) {
+    public Integer sumInnNormalposterEtterPeriodeOgUkategorisert(Periode periode) {
         return postRepository.sumInnFraDatoTilDatoNormalposterUtenKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
     }
 
-    public Integer sumUtFradatoTildatoNormalposterUkategorisert(Periode periode) {
+    public Integer sumUtNormalposterEtterPeriodeOgUkategorisert(Periode periode) {
         return postRepository.sumUtFraDatoTilDatoNormalposterUtenKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
     }
 

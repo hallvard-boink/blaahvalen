@@ -42,7 +42,14 @@ public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
     private void leggTilKnapper(){
         leggTilKnapper_OpprettTestDataButton();
         leggTilKnapper_SlettTestDataButton();
+        leggTilKnapper_KorrigerDataButton();
 
+    }
+
+    private void leggTilKnapper_KorrigerDataButton() {
+        Button korrigerDataButton = new Button("Korriger data");
+        korrigerDataButton.addClickListener(e -> DataDoktor.reparerNormalposterSomSkulleVaertUtelatt());
+        add(korrigerDataButton);
     }
 
     private void leggTilKnapper_OpprettTestDataButton() {
@@ -56,6 +63,8 @@ public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
         slettTestdataButton.addClickListener(e -> testDataFabrikk.slettTestData());
         add(slettTestdataButton);
     }
+
+
 
 
 }

@@ -4,7 +4,6 @@ import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,11 +20,7 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     public KategoriService() {
     }
 
-    public List<Kategori> finnKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
-        return kategoriRepository.finnKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate);
-    }
-
-    public List<Tuple> finnHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
+    public List<Kategori> finnHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate) {
         return kategoriRepository.finnHovedKategorierDetFinnesPosterForFraDatoTilDato(fraLocalDate,tilLocalDate);
     }
 
@@ -105,20 +100,29 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         return kategoriRepository.findByTittelAndErOppsummerendeUnderkategori(kategoriString, true);
     }
 
-    public Kategori finnEllerOppretKategoriUKATEGORISERT(KategoriRetning kategoriRetning) {
+    public Kategori finnEllerKategoriUKATEGORISERT(KategoriRetning kategoriRetning) {
         List<Kategori> kategoriList = kategoriRepository.findByKategoriTypeAndKategoriRetning(KategoriType.UKATEGORISERT, kategoriRetning);
         if (kategoriList.isEmpty()) {
-            Kategori kategoriUkategorisert = opprettEntitet();
+            return null;
+        } else {
+            if (kategoriList.size()>1) {
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en kategori med kategoritype UKATEGORISERT og retning " + kategoriRetning + ". Rydd opp i kategoriene");
+            }
+            return kategoriList.getFirst();
+        }
+    }
+
+    public Kategori finnEllerOpprettKategoriUKATEGORISERT(KategoriRetning kategoriRetning) {
+        Kategori kategoriUkategorisert = finnEllerKategoriUKATEGORISERT(kategoriRetning);
+        if (kategoriUkategorisert==null) {
+            kategoriUkategorisert = opprettEntitet();
             kategoriUkategorisert.setTittel("[Ukategorisert " + kategoriRetning.getTittel() + "]");
             kategoriUkategorisert.setKategoriType(KategoriType.UKATEGORISERT);
             kategoriUkategorisert.setKategoriRetning(kategoriRetning);
             lagre(kategoriUkategorisert);
             return kategoriUkategorisert;
         } else {
-            if (kategoriList.size()>1) {
-                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en kategori med kategoritype UKATEGORISERT og retning " + kategoriRetning + ". Rydd opp i kategoriene");
-            }
-            return kategoriList.getFirst();
+            return kategoriUkategorisert;
         }
     }
 }

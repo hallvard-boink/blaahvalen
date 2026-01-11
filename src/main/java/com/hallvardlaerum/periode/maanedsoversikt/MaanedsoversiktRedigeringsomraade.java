@@ -6,6 +6,7 @@ import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeRedigeringsomraadeMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
+import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.skalTilHavaara.HallvardsIntegerSpan;
 import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodedelAvKostnadspakkeRad;
@@ -161,8 +162,8 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
             budsjettpost.setBudsjettpoststatusEnum(BudsjettpoststatusEnum.TILDELT);
         }
         budsjettpostService.lagre(budsjettpost);
-
-        Allvitekyklop.hent().getMaanedsoversiktService().oppdaterOverordnetPeriodensPeriodeposterOgSummer();
+        Periodepost maanedsoversiktpost = Allvitekyklop.hent().getMaanedsoversiktpostService().finnStandardFraPeriodeOgKategori(hentEntitet(), budsjettpost.getKategori());
+        Allvitekyklop.hent().getMaanedsoversiktService().oppdaterSummerEtterTildelingAvBudsjettpost(maanedsoversiktpost);
         oppdaterRedigerbudsjettTabMedInnhold();
     }
 

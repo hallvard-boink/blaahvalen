@@ -4,8 +4,8 @@ package com.hallvardlaerum.periode;
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriRetning;
 import com.hallvardlaerum.kategori.KategoriService;
+import com.hallvardlaerum.kategori.KategoriType;
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
-import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periodepost.Periodepost;
@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeRepository> {
     private PeriodeRepository periodeRepository;
@@ -75,25 +74,25 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
     /**
      * Denne brukes hver gang en budsjettpost tildeles, og må gå raskt
      */
-    public void oppdaterOverordnetPeriodensPeriodeposterOgSummer() {
-        Periode periode = periodeRedigeringsomraade.getEntitet();
-        oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(periode, 0);
-        oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode, 0);
+    public void oppdaterSummerEtterTildelingAvBudsjettpost(Periodepost periodepost) {
 
-        oppdaterLagredeSummer(periode);
+        periodepostService.oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
+        oppdaterLagredeSummer(periodeRedigeringsomraade.getEntitet());
         periodeRedigeringsomraade.lesBean();
         periodeRedigeringsomraade.instansOppdaterEkstraRedigeringsfelter();
     }
 
-    public void oppdaterPeriodensPeriodeposterOgSummer() {
-        Periode periode = periodeRedigeringsomraade.getEntitet();
+    /**
+     * Dette er hovedprosedyren for å oppdatere periodepostene og deres summer
+     * Periodepostene bygges opp per kategori fra budsjettposter og normalposter.
+     * Det skal også opprettes periodepost om det bare finnes budsjettposter som ikke er tildelt
+     */
+    public void oppdaterPeriodensPeriodeposterOgSummer(Periode periode) {
 
-        oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(periode, 1);
-
-        periode = periodeRedigeringsomraade.getEntitet();
-        oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(periode, 0);
-        oppdaterPeriodensPeriodeposterOgSummer_LeggTilOgOppdaterManglerKategori(periode);
-        oppdaterPeriodensPeriodeposterOgSummer_OppdaterHovedperiodepostene(periode);
+        oppdaterPeriodensPeriodeposterOgSummer_SlettDeHeltUtenPoster(periode);
+        oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglendeOgOppdaterSummerForDen(periode);
+        oppdaterPeriodensPeriodeposterOgSummer_LeggTilOgOppdaterEllerFjernUkategorisert(periode);
+        oppdaterPeriodensPeriodeposterOgSummer_OppdaterHovedperiodeposteneUnntattUkategorisert(periode);
         oppdaterPeriodensPeriodeposterOgSummer_oppdaterKostnadspakker(periode);
         oppdaterLagredeSummer(periode);
         lagre(periode);
@@ -101,22 +100,43 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         periodeRedigeringsomraade.hentView().oppdaterSoekeomraadeEtterRedigeringAvEntitet();
     }
 
+    public void oppdaterPeriodensPeriodeposterOgSummer() {
+        oppdaterPeriodensPeriodeposterOgSummer(periodeRedigeringsomraade.getEntitet());
+    }
 
-    private void oppdaterPeriodensPeriodeposterOgSummer_OppdaterHovedperiodepostene(Periode periode) {
+    private void oppdaterPeriodensPeriodeposterOgSummer_OppdaterHovedperiodeposteneUnntattUkategorisert(Periode periode) {
         List<Periodepost> periodepostArrayList = periodepostService.finnHovedperiodeposter(periode);
         for (Periodepost periodepost : periodepostArrayList) {
-            periodepostService.oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
+            if (periodepost.getKategori().getKategoriType()!= KategoriType.UKATEGORISERT) {
+                periodepostService.oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
+            }
         }
     }
 
-    private void oppdaterPeriodensPeriodeposterOgSummer_LeggTilOgOppdaterManglerKategori(Periode periode) {
-        Kategori kategoriUkategorisertInn = kategoriService.finnEllerOppretKategoriUKATEGORISERT(KategoriRetning.INN);
-        Periodepost periodepostUkategorisertInn = periodepostService.finnEllerOpprettPeriodepostUkategorisert(periode, kategoriUkategorisertInn);
-        periodepostService.lagre(periodepostUkategorisertInn);
+    /**
+     * Hvis det finnes ukategoriserte poster, skal det legges til en periodepost for det. Hvis ikke, skal den fjernes.
+     * Periodepostene oppdateres her, fordi de har en avvikende måte å samle inn poster på.
+     * @param periode aktuelle periode
+     */
+    private void oppdaterPeriodensPeriodeposterOgSummer_LeggTilOgOppdaterEllerFjernUkategorisert(Periode periode) {
+        Kategori ukategorisertInnKategori = kategoriService.finnEllerOpprettKategoriUKATEGORISERT(KategoriRetning.INN);
+        Integer sumUkategorisertInnInteger = postService.sumInnNormalposterEtterPeriodeOgUkategorisert(periode);
+        if (sumUkategorisertInnInteger!=null && sumUkategorisertInnInteger>0) {
+            Periodepost ukategorisertInnPeriodepost = periodepostService.finnEllerOpprettOgOppdaterPeriodepostUkategorisert(periode, ukategorisertInnKategori);
+            periodepostService.lagre(ukategorisertInnPeriodepost);
+        } else {
+            periodepostService.slettUkategorisertForPeriode(periode, KategoriRetning.INN);
+        }
 
-        Kategori kategoriUkategorisertUt = kategoriService.finnEllerOppretKategoriUKATEGORISERT(KategoriRetning.UT);
-        Periodepost periodepostUkategorisertUt = periodepostService.finnEllerOpprettPeriodepostUkategorisert(periode, kategoriUkategorisertUt);
-        periodepostService.lagre(periodepostUkategorisertUt);
+        Kategori ukategorisertUtKategori = kategoriService.finnEllerOpprettKategoriUKATEGORISERT(KategoriRetning.UT);
+        Integer sumUkategorisertUtInteger = postService.sumInnNormalposterEtterPeriodeOgUkategorisert(periode);
+        if (sumUkategorisertUtInteger!=null && sumUkategorisertUtInteger>0) {
+            Periodepost ukategorisertUtPeriodepost = periodepostService.finnEllerOpprettOgOppdaterPeriodepostUkategorisert(periode, ukategorisertUtKategori);
+            periodepostService.lagre(ukategorisertUtPeriodepost);
+        } else {
+            periodepostService.slettUkategorisertForPeriode(periode, KategoriRetning.UT);
+        }
+
     }
 
 
@@ -128,53 +148,40 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         }
     }
 
-    public void oppdaterPeriodensPeriodeposterOgSummer_SlettDeUtenPosterOgOppdaterDeMed(Periode periode, Integer kategoriNivaa) {
+    /**
+     * Sletter periodeposter som ikke lenger er aktuelle
+     *
+     * @param periode perioden som skal oppdateres
+     * kategoriNivaa Nivå 0 = hovedkategorier, (Nivå 1 = kategorier bruk i poster
+     */
+    public void oppdaterPeriodensPeriodeposterOgSummer_SlettDeHeltUtenPoster(Periode periode) {
         if (periode == null) {
             return;
         }
-
-        ArrayList<Periodepost> periodeposterSomSkalSlettesArrayList = new ArrayList<>();
-        List<Periodepost> periodepostList = periodepostService.hentRepository().finnEtterPeriodeOgKategorinivaa(periode.getUuid(), kategoriNivaa);
-
         PostServiceMal postService = Allvitekyklop.hent().getNormalpostService();
+        ArrayList<Periodepost> periodeposterSomSkalSlettesArrayList = new ArrayList<>();
 
+        List<Periodepost> periodepostList = periodepostService.hentRepository().finnEtterPeriodeOgKategorinivaa(periode.getUuid(), 0); // Vi bruker bare nivå 0 på standard periodeposter. Nivå 1 er for kostnadspakker
         for (Periodepost periodepost : periodepostList) {
-            List<Post> postList = postService.finnEtterFradatoOgTilDatoOgKategoriOgNivaa(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), periodepost.getKategori(), kategoriNivaa);
+            List<Post> postList = postService.finnEtterFradatoOgTilDatoOgHovedkategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), periodepost.getKategori());
             if (postList.isEmpty()) {
                 periodeposterSomSkalSlettesArrayList.add(periodepost);
-            } else {
-                periodepostService.oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
             }
         }
 
+        // Be om bekreftelse før de overflødige slettes.
         if (!periodeposterSomSkalSlettesArrayList.isEmpty()) {
             hentBekreftSlettePeriodeposterDialog(periodeposterSomSkalSlettesArrayList).open();
         }
     }
 
-    public void oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglende(Periode periode, Integer kategoriNivaa) {
-        List<Kategori> kategoriListHarPoster;
-        if (kategoriNivaa == 0) {
-            List<Tuple> tuples = kategoriService.finnHovedKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-            kategoriListHarPoster = new ArrayList<>();
-            for (Tuple tuple : tuples) {
-                String uuidString = tuple.get(0, UUID.class).toString();
-                Kategori kategori = kategoriService.finnEtterUUID(uuidString);
-                if (kategori == null) {
-                    Loggekyklop.bruk().loggINFO("Fant ikke kategorien " + tuple.get(1, String.class));
-                } else {
-                    kategoriListHarPoster.add(kategori);
-                }
-            }
-
-        } else {
-            kategoriListHarPoster = kategoriService.finnKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-        }
+    public void oppdaterPeriodensPeriodeposterOgSummer_LeggTilManglendeOgOppdaterSummerForDen(Periode periode) {
+        List<Kategori> kategoriListHarPoster = kategoriService.finnHovedKategorierDetFinnesPosterForFraDatoTilDato(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
 
         for (Kategori kategori : kategoriListHarPoster) {
-            List<Periodepost> periodepostList = periodepostService.finnFraPeriodeOgKategori(periode, kategori);
-            if (periodepostList.isEmpty()) {
-                Periodepost periodepost = periodepostService.opprettEntitet();
+            Periodepost periodepost  = periodepostService.finnStandardFraPeriodeOgKategori(periode, kategori);
+            if (periodepost==null) {
+                periodepost = periodepostService.opprettEntitet();
                 periodepost.setPeriode(periode);
                 periodepost.setKategori(kategori);
                 periodepost.setPeriodepostTypeEnum(periodetypeEnum.getPeriodepostTypeEnum());
@@ -219,8 +226,8 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
     }
 
     private void oppdaterLagredeSummer_Ukategorisert(Periode periode) {
-        periode.setSumUkategorisertInnInteger(postService.sumInnFradatoTildatoNormalposterUkategorisert(periode));
-        periode.setSumUkategorisertUtInteger(postService.sumUtFradatoTildatoNormalposterUkategorisert(periode));
+        periode.setSumUkategorisertInnInteger(postService.sumInnNormalposterEtterPeriodeOgUkategorisert(periode));
+        periode.setSumUkategorisertUtInteger(postService.sumUtNormalposterEtterPeriodeOgUkategorisert(periode));
     }
 
     private void oppdaterLagredeSummer_Budsjett(Periode periode) {

@@ -18,17 +18,13 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
         JpaSpecificationExecutor<Post>,
         RepositoryTillegg<Post> {
 
+// =================
+// === ENKLE SØK ===
+// =================
 
-    List<Post> findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(
-        LocalDate datoLocalDate, String tekstFraBankenString, NormalposttypeEnum normalposttypeEnum
-    );
+    List<Post> findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(LocalDate datoLocalDate, String tekstFraBankenString, NormalposttypeEnum normalposttypeEnum);
 
-
-    List<Post> findByDatoLocalDateAndTekstFraBankenStringAndKategori(
-        LocalDate datoLocalDate, String tekstFraBankenString, Kategori kategori
-    );
-
-    List<Post> findByDatoLocalDateBetweenAndKategori(LocalDate fraLocalDate, LocalDate tilLocalDate, Kategori kategori);
+    List<Post> findByDatoLocalDateAndTekstFraBankenStringAndKategori(LocalDate datoLocalDate, String tekstFraBankenString, Kategori kategori);
 
     List<Post> findByDatoLocalDateBetweenAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(
             LocalDate fraLocalDate, LocalDate tilLocalDate, BudsjettpoststatusEnum budsjettpoststatusEnum, PostklasseEnum postklasseEnum);
@@ -37,6 +33,12 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 
     List<Post> findByPostklasseEnum(PostklasseEnum postklasseEnum);
 
+    List<Post> findByDatoLocalDateBetweenAndPostklasseEnum(LocalDate fraLocalDate, LocalDate tilLocalDate, PostklasseEnum postklasseEnum);
+
+
+// =====================
+// === KOMPLEKSE SØK ===
+// =====================
 
     @NativeQuery(
             "SELECT " +
@@ -48,36 +50,65 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
                     "AND p.postklasse_enum = ?3 " +
                     "AND k.tittel = ?4"
     )
-    List<Post> finnEtterFraDatoTilDatoOgPostklasseOgKategoritittel(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, PostklasseEnum postklasseEnum,  String kategoriTittel);
+    List<Post> finnEtterFraDatoTilDatoOgPostklasseOgKategoritittel(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, PostklasseEnum postklasseEnum, String kategoriTittel);
 
+    /**
+     * Finn poster i et dataspenn som er kategorisert med en gruppe kategorier (ut fra "hovedtittel")
+     * Brukes bl.a. til å sjekke om det finnes normalposter eller budsjettposter for en hovedkategori, eller om den kan slettes
+     * <br/>
+     * @param datoFraLocalDate fra og med dato
+     * @param datoTilLocalDate til og med dato
+     * @param kategoriTittel "hovedtittel" (heter bare tittel)
+     * @return Liste med aktuelle poster
+     */
     @NativeQuery(
-            "SELECT " +
-                    "p.* " +
-                    "FROM " +
-                    "post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
-                    "WHERE " +
-                    "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 " +
-                    "AND k.tittel = ?3"
+            "SELECT p.* " +
+            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
+            "WHERE " +
+                "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 " +
+                "AND k.tittel = ?3"
     )
     List<Post> finnEtterFraDatoTilDatoOgKategoritittel(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, String kategoriTittel);
 
-    List<Post> findByDatoLocalDateBetweenAndPostklasseEnum(LocalDate fraLocalDate, LocalDate tilLocalDate, PostklasseEnum postklasseEnum);
 
+    /**
+     * Finner poster som skulle vært utelatt fra alle utregninger, men blir likevel tatt med
+     * Poster som har en  kategori med type 4 [Skal ikke kategoriseres] er typisk original til delposter
+     * Disse skal ikke tas med i utregninger, fordi de er erstattet med delposter.
+     *
+     * @return liste av poster hvor normalposttype skal settes til 2 [Utelates]
+     */
+    @NativeQuery(value = "SELECT p* " +
+            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
+            "WHERE " +
+            "p.postklasse_enum = 0 AND " +
+            "k.kategori_type = 4 AND p.normalposttype_enum !=2 "
+    )
+    List<Post> finnPosterSomSkalKorrigeres_FeilNormalposttypeSelvOmKategoriErType4SkalIkkekategoriseres();
+
+// =================================
+// === Utregning av en og en sum ===
+// =================================
+    // Disse er enklere å håndtere enn søk som returnerer Tuple, fordi klassen er gitt før kjøring
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) " +
             "FROM post p " +
             "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
             "p.postklasse_enum = 0 AND p.kategori_uuid IS NOT NULL " +
             "AND p.normalposttype_enum != 2"
-    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
+    )
+        //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
     Integer sumInnFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+
 
     @NativeQuery(value = "SELECT sum(p.ut_fra_konto_integer) FROM post p " +
             "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
             "p.postklasse_enum = 0 AND p.kategori_uuid IS NOT NULL AND " +
             "p.normalposttype_enum != 2"
-    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
+    )
+        //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
     Integer sumUtFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) " +
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
@@ -85,8 +116,10 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "p.postklasse_enum = 0 AND " +
             "p.normalposttype_enum != 2 AND " +
             "k.kategori_type != 2"
-    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, Kategoritype 2 = Overføring
+    )
+        //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, Kategoritype 2 = Overføring
     Integer sumInnFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+
 
     @NativeQuery(value = "SELECT sum(p.ut_fra_konto_integer) " +
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
@@ -95,8 +128,10 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "p.postklasse_enum = 0 AND " +
             "p.normalposttype_enum != 2 AND " +
             "k.kategori_type != 2"
-    )  //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, , Kategoritype 2 = Overføring
+    )
+        //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, , Kategoritype 2 = Overføring
     Integer sumUtFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) FROM post p " +
             "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
@@ -107,37 +142,32 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) " +
             "FROM post p WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
-            "p.postklasse_enum = 0 AND p.kategori_uuid IS NULL")
+            "p.postklasse_enum = 0 AND p.normalposttype_enum!= 2 AND p.kategori_uuid IS NULL")
     Integer sumInnFraDatoTilDatoNormalposterUtenKategori(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate);
+
 
     @NativeQuery(value = "SELECT sum(p.ut_fra_konto_integer) " +
             "FROM post p WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
-            "p.postklasse_enum = 0 AND p.kategori_uuid IS NULL")
+            "p.postklasse_enum = 0 AND p.normalposttype_enum!= 2 AND p.kategori_uuid IS NULL")
     Integer sumUtFraDatoTilDatoNormalposterUtenKategori(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate);
 
-    @Deprecated
-    //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, Budsjettpoststatus != 0, dvs foreslått
-    @NativeQuery(value = "SELECT p.postklasse_enum, sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) " +
-            "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
-            "WHERE p.dato_local_date >= ?1 AND " +
-            "p.dato_local_date <= ?2 AND " +
-            "p.normalposttype_enum != 2 AND p.budsjettpoststatus_enum != 0 AND " +
-            "k.nivaa = 1 AND " +
-            "k.tittel = ?3 " +
-            "GROUP BY p.postklasse_enum "
-    )
-    List<Tuple> sumPosterFradatoTilDatoKategoritittel(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, String kategoritittel);
+
+// ==========================================
+// === Utregning av flere summer samtidig ===
+// ==========================================
+    // Disse søkene returnerer en enkelt Tuple (som er et sett av verdier), eller en av liste av dem.
 
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) " +
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
             "WHERE " +
-                "p.postklasse_enum = 0 AND " +
-                "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
-                "p.normalposttype_enum != 2 AND " +
-                "k.tittel = ?3 "
+            "p.postklasse_enum = 0 AND " +
+            "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
+            "p.normalposttype_enum != 2 AND " +
+            "k.tittel = ?3 "
     )
     Tuple sumNormalPosterFradatoTilDatoKategoritittel(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, String kategoritittel);
+
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) " +
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
@@ -150,4 +180,7 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
     Tuple sumBudsjettPosterFradatoTilDatoKategoritittel(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, String kategoritittel);
 
 }
+
+
+
 

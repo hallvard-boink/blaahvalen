@@ -44,8 +44,20 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         periodepostRepository.flush();
     }
 
-    public List<Periodepost> finnFraPeriodeOgKategori(Periode periode, Kategori kategori) {
-        return periodepostRepository.findByPeriodeAndKategori(periode, kategori);
+    public Periodepost finnStandardFraPeriodeOgKategori(Periode periode, Kategori kategori) {
+        if (kategori.getNivaa()!=0) {
+            kategori = Allvitekyklop.hent().getKategoriService().finnHovedKategoriEtterTittel(kategori.getTittel());
+        }
+
+        List<Periodepost> periodeposter = periodepostRepository.findByPeriodeAndKategori(periode, kategori);
+        if (periodeposter.isEmpty()) {
+            return null;
+        } else {
+            if (periodeposter.size()>1) {
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en standard periodepost i perioden " + periode.hentBeskrivendeNavn() + " med kategorien " + kategori.hentBeskrivendeNavn());
+            }
+            return periodeposter.getFirst();
+        }
     }
 
     @Override
@@ -87,11 +99,12 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
             sb.append("\n");
             for (int i = 0; i<periodepostList.size(); i++) {
                 Periodepost periodepost = periodepostList.get(i);
-                String kategori = "(kategori ikke satt)";
+                String kategoriString = "(kategori ikke satt)";
                 if (periodepost.getKategori()!=null) {
-                    kategori = periodepost.getKategori().getTittel();
+                    kategoriString = periodepost.getKategori().getTittel();
                 }
-                sb.append(kategori).append(" ");
+                sb.append(kategoriString).append(" ");
+
                 if (periodepost.getSumBudsjettInteger()==null) {
                     sb.append("budsjett: null ");
                 } else {
@@ -113,7 +126,7 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         return periodepostRepository.finnEtterPeriodeOgKategorinivaa(entitet.getUuid(), 0);
     }
 
-    public List<Periodepost> finnEtterPeriode(Periode periode) {
+    public List<Periodepost> finnAlleTyperEtterPeriode(Periode periode) {
         if (periode==null) {
             return new ArrayList<>();
         }
@@ -131,25 +144,14 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
     }
 
 
-    public Periodepost finnEllerOpprettPeriodepostUkategorisert(Periode periode, Kategori kategoriUkategorisert) {
-        if (periode == null || kategoriUkategorisert==null) {
-            Loggekyklop.bruk().loggFEIL("Periode eller kategoriUkategorisert er null, avbryter");
-            return null;
-        }
+    public Periodepost finnEllerOpprettOgOppdaterPeriodepostUkategorisert(Periode periode, Kategori kategoriUkategorisert) {
 
-        List<Periodepost> periodepostList = periodepostRepository.findByPeriodeAndKategori(periode, kategoriUkategorisert);
-        Periodepost periodepostUkategorisert;
-        if (periodepostList.isEmpty()) {
+        Periodepost periodepostUkategorisert = finnPeriodepostUkategorisert(periode, kategoriUkategorisert);
+        if (periodepostUkategorisert==null) {
             periodepostUkategorisert = opprettEntitet();
             periodepostUkategorisert.setKategori(kategoriUkategorisert);
             periodepostUkategorisert.setPeriode(periode);
             lagre(periodepostUkategorisert);
-
-        } else {
-            if (periodepostList.size()>1) {
-                Loggekyklop.bruk().loggINFO("Fant for mange periodeposter for periode " + periode.hentBeskrivendeNavn() + " og kategori " + kategoriUkategorisert.hentBeskrivendeNavn());
-            }
-            periodepostUkategorisert = periodepostList.getFirst();
         }
 
         if (periodepostUkategorisert.getKategori().getKategoriRetning()== KategoriRetning.INN) {
@@ -160,6 +162,37 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
             Loggekyklop.bruk().loggFEIL("UkategorisertKategori har ikke riktig retning");
         }
         return periodepostUkategorisert;
+
+    }
+
+    public Periodepost finnPeriodepostUkategorisert(Periode periode, Kategori kategoriUkategorisert){
+        if (periode == null || kategoriUkategorisert==null) {
+            Loggekyklop.bruk().loggFEIL("Periode eller kategoriUkategorisert er null, avbryter");
+            return null;
+        }
+
+        List<Periodepost> periodepostList = periodepostRepository.findByPeriodeAndKategori(periode, kategoriUkategorisert);
+        if (periodepostList.isEmpty()) {
+            return null;
+        } else {
+            if (periodepostList.size()>1) {
+                Loggekyklop.bruk().loggINFO("Fant for mange periodeposter for periode " + periode.hentBeskrivendeNavn() + " og kategori " + kategoriUkategorisert.hentBeskrivendeNavn());
+            }
+            return periodepostList.getFirst();
+        }
+    }
+
+
+    public void slettUkategorisertForPeriode(Periode periode, KategoriRetning kategoriRetning) {
+        if (periode==null || kategoriRetning == null) {
+            return;
+        }
+
+        Kategori ukategorisertKategori = Allvitekyklop.hent().getKategoriService().finnEllerOpprettKategoriUKATEGORISERT(kategoriRetning);
+        Periodepost ukategorisertPeriodepost = finnEllerOpprettOgOppdaterPeriodepostUkategorisert(periode, ukategorisertKategori);
+        if (ukategorisertPeriodepost!=null) {
+            slett(ukategorisertPeriodepost);
+        }
 
     }
 }

@@ -9,7 +9,7 @@ import com.hallvardlaerum.periodepost.PeriodepostRedigeringsomraadeMal;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
 import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.skalTilHavaara.HallvardsIntegerSpan;
-import com.hallvardlaerum.verktoy.testing.PeriodeSumTester;
+import com.hallvardlaerum.verktoy.testing.PeriodeTester;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -192,7 +192,7 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
 
     protected void testing_leggTilSjekkSummerButton() {
         Button sjekkSummerButton = new Button("Sjekk summer");
-        sjekkSummerButton.addClickListener(e -> new PeriodeSumTester(hentEntitet()));
+        sjekkSummerButton.addClickListener(e -> new PeriodeTester(hentEntitet()));
         leggTilRedigeringsfelter(hovedtabString, sjekkSummerButton);
     }
 

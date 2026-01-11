@@ -248,10 +248,10 @@ public class TestDataFabrikk {
 
     private void slettPeriodeoversiktposter() {
         Periode aarsoversikt = aarsoversiktService.finnAarsoversiktFraAarString(aarstall.toString());
-        List<Periodepost> periodeposter = aarsoversiktpostService.finnEtterPeriode(aarsoversikt);
+        List<Periodepost> periodeposter = aarsoversiktpostService.finnAlleTyperEtterPeriode(aarsoversikt);
         aarsoversiktpostService.slettAlle(periodeposter);
 
-        periodeposter = maanedsoversiktpostService.finnEtterPeriode(aarsoversikt);
+        periodeposter = maanedsoversiktpostService.finnAlleTyperEtterPeriode(aarsoversikt);
         maanedsoversiktpostService.slettAlle(periodeposter);
 
     }

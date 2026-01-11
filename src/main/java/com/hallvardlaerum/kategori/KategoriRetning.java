@@ -5,7 +5,7 @@ import com.hallvardlaerum.libs.database.EnumAktig;
 public enum KategoriRetning implements EnumAktig {
     INN ("Inn","Inntekter, lønn og salg av ting"),
     UT("Ut","Utgifter, kostnader, alt sånn"),
-    UKJENT("Ukjent","Vet ikke om det er inntekter eller utgifter. Veeeldig rart!");
+    UKJENT("Ukjent","Vet ikke om det er inntekter eller utgifter. Brukes på Ukategorisert eller Skal ikke kategoriseres");
 
     private String tittel;
     private String beskrivelse;

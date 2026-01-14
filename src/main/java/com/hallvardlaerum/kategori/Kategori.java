@@ -57,6 +57,9 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
     @ManyToOne(targetEntity = Kategori.class, cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private Kategori hovedKategori;
 
+    @ManyToOne(targetEntity = Kategori.class, cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    private Kategori motsattKategori;
+
     @Override
     public ArrayList<Post> hentBarn() {
         return new ArrayList<>(poster);
@@ -94,6 +97,14 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
 
     // === Getters and setters ====
 
+
+    public Kategori getMotsattKategori() {
+        return motsattKategori;
+    }
+
+    public void setMotsattKategori(Kategori motsattKategori) {
+        this.motsattKategori = motsattKategori;
+    }
 
     public Boolean getErOppsummerendeUnderkategori() {
         return erOppsummerendeUnderkategori;

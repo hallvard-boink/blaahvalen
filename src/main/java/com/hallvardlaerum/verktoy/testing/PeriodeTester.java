@@ -23,8 +23,7 @@ public class PeriodeTester {
         this.periode = periodeFaktisk;
         Loggekyklop.bruk().forberedTilImportloggTilFil();
 
-        boolean gikkBra = true;
-        gikkBra = sjekk_sumPeriodeposter_vs_totalSum() && gikkBra;
+        boolean gikkBra = sjekk_sumPeriodeposter_vs_totalSum();
         gikkBra = sjekk_sumMaanedsoversikter_vs_Aarsoversikt() && gikkBra;
 
         if (gikkBra) {
@@ -55,8 +54,8 @@ public class PeriodeTester {
     }
 
     private boolean sammenlignSummerMedPeriode(Periode testAarsoversikt) {
-        boolean gikkBra = true;
-        gikkBra = sammenlignSum("Budsjett Inn", periode.getSumBudsjettInntektInteger(), testAarsoversikt.getSumBudsjettInntektInteger()) && gikkBra;
+
+        boolean gikkBra = sammenlignSum("Budsjett Inn", periode.getSumBudsjettInntektInteger(), testAarsoversikt.getSumBudsjettInntektInteger());
         gikkBra = sammenlignSum("Budsjett Ut", periode.getSumBudsjettUtgifterInteger(), testAarsoversikt.getSumBudsjettUtgifterInteger()) && gikkBra;
         gikkBra = sammenlignSum("Regnskap Inn", periode.getSumRegnskapInntektInteger(), testAarsoversikt.getSumRegnskapInntektInteger()) && gikkBra;
         gikkBra = sammenlignSum("Regnskap Ut", periode.getSumRegnskapUtgifterInteger(), testAarsoversikt.getSumRegnskapUtgifterInteger()) && gikkBra;
@@ -90,11 +89,7 @@ public class PeriodeTester {
     }
 
     private Integer nulltil0 (Integer tall){
-        if (tall==null) {
-            return 0;
-        } else {
-            return tall;
-        }
+        return Objects.requireNonNullElse(tall, 0);
     }
 
 
@@ -108,8 +103,6 @@ public class PeriodeTester {
         int sumRegnskapUt = 0;
         int sumRegnskapInklOverfoeringerInn = 0;
         int sumRegnskapInklOverfoeringerUt = 0;
-        int sumUkategorisertInn = 0;
-        int sumUkategorisertUt = 0;
 
         for (Periodepost periodepost : periodeposter) {
             if (periodepost.getKategori() != null) {
@@ -119,21 +112,21 @@ public class PeriodeTester {
                 } else {
                     if (k.getKategoriType() == KategoriType.OVERFOERING) {
                         if (k.getKategoriRetning() == KategoriRetning.INN) {
-                            sumRegnskapInklOverfoeringerInn += periodepost.getSumRegnskapInteger();
+                            sumRegnskapInklOverfoeringerInn = sumRegnskapInklOverfoeringerInn + periodepost.getSumRegnskapInteger();
                         } else if (k.getKategoriRetning() == KategoriRetning.UT) {
-                            sumRegnskapInklOverfoeringerUt += periodepost.getSumRegnskapInteger();
+                            sumRegnskapInklOverfoeringerUt = sumRegnskapInklOverfoeringerUt + periodepost.getSumRegnskapInteger();
                         } else {
                             Loggekyklop.bruk().loggINFO("Kategoriens retning er tom eller feil " + periodepost.hentBeskrivendeNavn());
                         }
                     } else if (k.getKategoriType() != KategoriType.UKATEGORISERT) {
                         if (k.getKategoriRetning() == KategoriRetning.INN) {
-                            sumBudsjettInn += periodepost.getSumBudsjettInteger() == null ? 0 : periodepost.getSumBudsjettInteger();
-                            sumRegnskapInn += periodepost.getSumRegnskapInteger() == null ? 0 : periodepost.getSumRegnskapInteger();
+                            sumBudsjettInn = sumBudsjettInn + (periodepost.getSumBudsjettInteger() == null ? 0 : periodepost.getSumBudsjettInteger());
+                            sumRegnskapInn = sumRegnskapInn + (periodepost.getSumRegnskapInteger() == null ? 0 : periodepost.getSumRegnskapInteger());
                         } else if (k.getKategoriRetning() == KategoriRetning.UT) {
-                            sumBudsjettUt += periodepost.getSumBudsjettInteger() == null ? 0 : periodepost.getSumBudsjettInteger();
-                            sumRegnskapUt += periodepost.getSumRegnskapInteger() == null ? 0 : periodepost.getSumRegnskapInteger();
+                            sumBudsjettUt = sumBudsjettUt + (periodepost.getSumBudsjettInteger() == null ? 0 : periodepost.getSumBudsjettInteger());
+                            sumRegnskapUt = sumRegnskapUt + (periodepost.getSumRegnskapInteger() == null ? 0 : periodepost.getSumRegnskapInteger());
                         } else {
-                            Loggekyklop.bruk().loggINFO("Kategoriens retning er tom eller feil " + periodepost.hentBeskrivendeNavn());
+                            Loggekyklop.bruk().loggINFO("Kategoriens retning er tom eller feil " + periodepost.hentBeskrivendeNavn() + " har kategori " + k.hentBeskrivendeNavn());
                         }
                     }
                 }
@@ -143,8 +136,8 @@ public class PeriodeTester {
         }
 
 
-        sumRegnskapInklOverfoeringerInn += sumRegnskapInn;
-        sumRegnskapInklOverfoeringerUt += sumRegnskapUt;
+        sumRegnskapInklOverfoeringerInn =  sumRegnskapInklOverfoeringerInn + sumRegnskapInn;
+        sumRegnskapInklOverfoeringerUt = sumRegnskapInklOverfoeringerUt + sumRegnskapUt;
 
         int antallFeil = 0;
         antallFeil += returner1HvisDeIkkeErLike("sumBudsjettInntekt", periode.getSumBudsjettInntektInteger(), sumBudsjettInn);

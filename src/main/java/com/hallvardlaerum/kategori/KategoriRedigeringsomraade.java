@@ -28,6 +28,8 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
     private Checkbox erOppsummerendeUnderkategoriCheckbox;
     private Checkbox erAktivCheckbox;
     private ComboBox<Kategori> hovedKategoriComboBox;
+    private ComboBox<Kategori> motsattKategoriComboBox;
+    private IntegerField nivaaIntegerField;
 
 
     private boolean erInitiert = false;
@@ -92,9 +94,17 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
         hovedKategoriComboBox.setItems(Allvitekyklop.hent().getKategoriService().finnAlleHovedkategorier());
         hovedKategoriComboBox.setItemLabelGenerator(Kategori::getTittel);
 
-        leggTilRedigeringsfelter(hovedtabString, kategoriRetningComboBox, kategoriTypeComboBox);
+        motsattKategoriComboBox = new ComboBox<>("Motsatt kategori");
+        motsattKategoriComboBox.setItems(Allvitekyklop.hent().getKategoriService().finnAlle());
+        motsattKategoriComboBox.setItemLabelGenerator(Kategori::hentBeskrivendeNavn);
 
-        leggTilRedigeringsfelter(ekstratabString, rekkefoelgeIntegerField, hovedKategoriComboBox);
+        nivaaIntegerField = new IntegerField("Nivå");
+        nivaaIntegerField.setTooltipText("Denne kan være 0 (for periodeposter) eller 1 (for poster)");
+
+
+        leggTilRedigeringsfelter(hovedtabString, kategoriRetningComboBox, kategoriTypeComboBox, nivaaIntegerField);
+
+        leggTilRedigeringsfelter(ekstratabString, rekkefoelgeIntegerField, hovedKategoriComboBox, motsattKategoriComboBox);
         leggTilDatofeltTidOpprettetOgRedigert(ekstratabString);
 
         settFokusKomponent(tittelTextField);
@@ -115,6 +125,9 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
         binder.bind(kategoriTypeComboBox, Kategori::getKategoriType, Kategori::setKategoriType);
         binder.bind(rekkefoelgeIntegerField, Kategori::getRekkefoelge, Kategori::setRekkefoelge);
         binder.bind(erAktivCheckbox, Kategori::getErAktiv, Kategori::setErAktiv);
+        binder.bind(hovedKategoriComboBox, Kategori::getHovedKategori, Kategori::setHovedKategori);
+        binder.bind(motsattKategoriComboBox, Kategori::getMotsattKategori, Kategori::setMotsattKategori);
+        binder.bind(nivaaIntegerField, Kategori::getNivaa, Kategori::setNivaa);
 
     }
 }

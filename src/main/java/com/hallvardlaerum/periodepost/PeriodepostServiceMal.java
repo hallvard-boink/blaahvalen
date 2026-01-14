@@ -193,6 +193,7 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         if (ukategorisertPeriodepost!=null) {
             slett(ukategorisertPeriodepost);
         }
-
     }
+
+
 }

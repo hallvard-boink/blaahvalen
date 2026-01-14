@@ -9,6 +9,8 @@ import com.hallvardlaerum.periode.PeriodeServiceMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,6 +21,10 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
     private AarsoversiktService aarsoversiktService;
     private boolean erInitiert = false;
     private MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
 
 
     public Periode finnMaanedsoversiktFraAarMnd(String aarMnd){
@@ -94,5 +100,13 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
 
     public void slettAlleMaanedsoversikter() {
         super.slettAllePerioderMedPeriodeposter(PeriodetypeEnum.MAANEDSOVERSIKT);
+    }
+
+    public EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 }

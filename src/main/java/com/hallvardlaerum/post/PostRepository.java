@@ -91,23 +91,25 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 // =================================
     // Disse er enklere å håndtere enn søk som returnerer Tuple, fordi klassen er gitt før kjøring
 
+
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) " +
-            "FROM post p " +
+            "FROM post p JOIN kategori k ON p.kategori_uuid = k.uuid " +
             "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
-            "p.postklasse_enum = 0 AND p.kategori_uuid IS NOT NULL " +
-            "AND p.normalposttype_enum != 2"
-    )
-        //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
-    Integer sumInnFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+            "p.postklasse_enum = 0 AND " +
+            "p.normalposttype_enum != 2 AND " +
+            "k.kategori_type != 4")
+    Integer sumInnFradatoTilDatoKategoriserteNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+    //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
 
 
-    @NativeQuery(value = "SELECT sum(p.ut_fra_konto_integer) FROM post p " +
+    @NativeQuery(value = "SELECT sum(p.ut_fra_konto_integer) " +
+            "FROM post p JOIN kategori k ON p.kategori_uuid = k.uuid " +
             "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
-            "p.postklasse_enum = 0 AND p.kategori_uuid IS NOT NULL AND " +
-            "p.normalposttype_enum != 2"
-    )
-        //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
-    Integer sumUtFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+            "p.postklasse_enum = 0 AND " +
+            "p.normalposttype_enum != 2 AND " +
+            "k.kategori_type != 4")
+    Integer sumUtFradatoTilDatoKategoriserteNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+    //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates
 
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) " +
@@ -115,10 +117,9 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
             "p.postklasse_enum = 0 AND " +
             "p.normalposttype_enum != 2 AND " +
-            "k.kategori_type != 2"
-    )
-        //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, Kategoritype 2 = Overføring
-    Integer sumInnFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+            "k.kategori_type != 2 AND k.kategori_type != 4")
+    Integer sumInnFradatoTilDatoKategoriserteNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+    //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, Kategoritype 2 = Overføring
 
 
     @NativeQuery(value = "SELECT sum(p.ut_fra_konto_integer) " +
@@ -127,16 +128,14 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "p.dato_local_date <= ?2 AND " +
             "p.postklasse_enum = 0 AND " +
             "p.normalposttype_enum != 2 AND " +
-            "k.kategori_type != 2"
-    )
-        //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, , Kategoritype 2 = Overføring
-    Integer sumUtFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+            "k.kategori_type != 2 AND k.kategori_type != 4")
+    Integer sumUtFradatoTilDatoKategoriserteNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate);
+    //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, , Kategoritype 2 = Overføring
 
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) FROM post p " +
             "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
-            "p.postklasse_enum = 1 AND p.budsjettpoststatus_enum = 1"
-    )
+            "p.postklasse_enum = 1 AND p.budsjettpoststatus_enum = 1")
     List<Tuple> sumInnUtFradatoTilDatoTildelteBudsjettposter(LocalDate fraDato, LocalDate tilDato);
 
 

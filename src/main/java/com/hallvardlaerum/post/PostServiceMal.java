@@ -87,11 +87,11 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post, 
 
 
     public Integer sumInnFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate) {
-        return postRepository.sumInnFradatoTilDatoNormalposterMedOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
+        return postRepository.sumInnFradatoTilDatoKategoriserteNormalposterMedOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
     }
 
     public Integer sumInnFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate) {
-        return postRepository.sumInnFradatoTilDatoNormalposterUtenOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
+        return postRepository.sumInnFradatoTilDatoKategoriserteNormalposterUtenOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
     }
 
     public Integer sumInnNormalposterEtterPeriodeOgUkategorisert(Periode periode) {
@@ -107,10 +107,10 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post, 
     }
 
     public Integer sumUtFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate) {
-        return postRepository.sumUtFradatoTilDatoNormalposterMedOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
+        return postRepository.sumUtFradatoTilDatoKategoriserteNormalposterMedOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
     }
 
     public Integer sumUtFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate) {
-        return postRepository.sumUtFradatoTilDatoNormalposterUtenOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
+        return postRepository.sumUtFradatoTilDatoKategoriserteNormalposterUtenOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
     }
 }

@@ -18,7 +18,7 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
 
     List<Kategori> findByTittelAndNivaaOrderByUndertittel(String tittel, Integer nivaa);
 
-    List<Kategori> findByNivaaOrderByTittelAscUndertittelAsc(int nivaa);
+    List<Kategori> findByNivaaOrderByErAktivDescTittelAscUndertittelAsc(int nivaa);
 
     Kategori findByUndertittelAndNivaa(String undertittel, int nivaa);
 

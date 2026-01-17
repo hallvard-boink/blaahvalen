@@ -1,7 +1,9 @@
 package com.hallvardlaerum.periode.maanedsoversikt;
 
 import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
+import com.hallvardlaerum.libs.ui.RedigerEntitetDialog;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeViewMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -17,6 +19,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEgnet {
     private MaanedsoversiktService maanedsoversiktService;
     private boolean erInitiert = false;
+    private RedigerEntitetDialog<Periode, Periode> redigerMaanedsoversiktDialog;
 
     public MaanedsoversiktView() {
         super();
@@ -33,7 +36,6 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
     public void init(){
         if (!erInitiert) {
             Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade().settView(this);
-            Allvitekyklop.hent().getMaanedsoversiktpostRedigeringsomraadeTilDialog().settView(this);
 
             maanedsoversiktService = Allvitekyklop.hent().getMaanedsoversiktService();
             super.initPeriodeViewMal(
@@ -47,6 +49,17 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
             super.tilpassKnapperadRedigeringsfelt();
             //Har overkjørt super.opprettSoekeomraade() og tilpasser verktøymenyen der.
 
+            MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraadeTilDialog = new MaanedsoversiktRedigeringsomraade();
+            maanedsoversiktRedigeringsomraadeTilDialog.init();
+            redigerMaanedsoversiktDialog = new RedigerEntitetDialog<>(
+                    Allvitekyklop.hent().getMaanedsoversiktService(),
+                    Allvitekyklop.hent().getMaanedsoversiktService(),
+                    "Redigere månedsoversikt",
+                    "",
+                    maanedsoversiktRedigeringsomraadeTilDialog,
+                    Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade()
+            );
+            super.hentGrid().addItemDoubleClickListener(e -> redigerMaanedsoversiktDialog.vis(e.getItem()));
 
             erInitiert = true;
         }

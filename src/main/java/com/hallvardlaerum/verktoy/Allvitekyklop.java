@@ -15,12 +15,12 @@ import com.hallvardlaerum.periodepost.PeriodepostRepository;
 import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostRedigeringsomraade;
 import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostService;
 import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostView;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostView;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostRedigeringsomraade;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeView;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeRedigeringsomraade;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostRedigeringsomraade;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostService;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostView;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeService;
 import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
@@ -55,7 +55,6 @@ public class Allvitekyklop {
 
     private MaanedsoversiktpostService maanedsoversiktpostService;
     private MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraade;
-    private MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraadeTilDialog;
     private MaanedsoversiktpostView maanedsoversiktpostView;
 
     private AarsoversiktService aarsoversiktService;
@@ -64,14 +63,14 @@ public class Allvitekyklop {
 
     private AarsoversiktpostService aarsoversiktpostService;
     private AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade;
-    private AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog;
     private AarsoversiktpostView aarsoversiktpostView;
 
-    private PeriodeoversiktpostRedigeringsomraade periodeoversiktpostRedigeringsomraade;
-    private PeriodeoversiktpostService periodeoversiktpostService;
-    private PeriodeoversiktpostView periodeoversiktpostView;
+    private KostnadspakkeService kostnadspakkeService;
+    private KostnadspakkeRedigeringsomraade kostnadspakkeRedigeringsomraade;
+    private KostnadspakkeView kostnadspakkeView;
 
     private VerktoyView verktoyView;
+
 
     /**
      * Obs! Initiering av Views gjøres når de opprettes av Spring boot.
@@ -81,55 +80,66 @@ public class Allvitekyklop {
 
 
         kategoriService.init();
-        kategoriRedigeringsomraade.init();
-
         aarsoversiktService.init();
-        aarsoversiktRedigeringsomraade.init();
-
         maanedsoversiktService.init();
+        aarsoversiktpostService.initier();
+        maanedsoversiktpostService.init();
+        kostnadspakkeService.init();  //periodeoversiktpost
+        budsjettpostService.init();
+        normalpostService.init();
+
+        maanedsoversiktpostRedigeringsomraade.init();
+
+        kategoriRedigeringsomraade.init();
+        aarsoversiktRedigeringsomraade.init();
         maanedsoversiktRedigeringsomraade.init();
 
-        aarsoversiktpostService.initier();
         aarsoversiktpostRedigeringsomraade.init();
-        aarsoversiktpostRedigeringsomraadeTilDialog.init();
-
-        maanedsoversiktpostService.init();
-        maanedsoversiktpostRedigeringsomraade.init();
-        maanedsoversiktpostRedigeringsomraadeTilDialog.init();
-
-        budsjettpostService.init();
+        kostnadspakkeRedigeringsomraade.init();  //periodeoversiktpost
         budsjettpostRedigeringsomraade.init();
-
-        periodeoversiktpostService.init();
-        periodeoversiktpostRedigeringsomraade.init();
-
-        normalpostService.init();
         normalpostRedigeringsomraade.init();
+
+
+        //aarsoversiktpostRedigeringsomraadeTilDialogFraAarsoversiktView.init();
+        //maanedsoversiktpostRedigeringsomraadeTilDialogFraMaanedsoversiktView.init();
+        //budsjettpostRedigeringsomraadeTilDialogFraMaanedsoversiktView.init();
+        //kostnadspakkeRedigeringsomraadeTilDialogFraAarsoversiktView.init();
+        //normalpostRedigeringsomraadeTilDialogFraMaanedsoversiktpostView.init();
+
     }
 
 
-    public PeriodeoversiktpostRedigeringsomraade getPeriodeoversiktpostRedigeringsomraade() {
-        return periodeoversiktpostRedigeringsomraade;
+
+    public KostnadspakkeView getKostnadspakkeView() {
+        return kostnadspakkeView;
     }
 
-    public void setPeriodeoversiktpostRedigeringsomraade(PeriodeoversiktpostRedigeringsomraade periodeoversiktpostRedigeringsomraade) {
-        this.periodeoversiktpostRedigeringsomraade = periodeoversiktpostRedigeringsomraade;
+    public void setKostnadspakkeView(KostnadspakkeView kostnadspakkeView) {
+        this.kostnadspakkeView = kostnadspakkeView;
     }
 
-    public PeriodeoversiktpostService getPeriodeoversiktpostService() {
-        return periodeoversiktpostService;
+    public KostnadspakkeRedigeringsomraade getKostnadspakkeRedigeringsomraade() {
+        return kostnadspakkeRedigeringsomraade;
     }
 
-    public void setPeriodeoversiktpostService(PeriodeoversiktpostService periodeoversiktpostService) {
-        this.periodeoversiktpostService = periodeoversiktpostService;
+    public void setKostnadspakkeRedigeringsomraade(KostnadspakkeRedigeringsomraade kostnadspakkeRedigeringsomraade) {
+        this.kostnadspakkeRedigeringsomraade = kostnadspakkeRedigeringsomraade;
     }
 
-    public PeriodeoversiktpostView getPeriodeoversiktpostView() {
-        return periodeoversiktpostView;
+    public KostnadspakkeService getKostnadspakkeService() {
+        return kostnadspakkeService;
     }
 
-    public void setPeriodeoversiktpostView(PeriodeoversiktpostView periodeoversiktpostView) {
-        this.periodeoversiktpostView = periodeoversiktpostView;
+    public void setKostnadspakkeService(KostnadspakkeService kostnadspakkeService) {
+        this.kostnadspakkeService = kostnadspakkeService;
+    }
+
+    public KostnadspakkeView getPeriodeoversiktpostView() {
+        return kostnadspakkeView;
+    }
+
+    public void setPeriodeoversiktpostView(KostnadspakkeView kostnadspakkeView) {
+        this.kostnadspakkeView = kostnadspakkeView;
     }
 
     public KategoriRepository getKategoriRepository() {
@@ -252,13 +262,6 @@ public class Allvitekyklop {
         this.maanedsoversiktpostRedigeringsomraade = maanedsoversiktpostRedigeringsomraade;
     }
 
-    public MaanedsoversiktpostRedigeringsomraade getMaanedsoversiktpostRedigeringsomraadeTilDialog() {
-        return maanedsoversiktpostRedigeringsomraadeTilDialog;
-    }
-
-    public void setMaanedsoversiktpostRedigeringsomraadeTilDialog(MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraadeTilDialog) {
-        this.maanedsoversiktpostRedigeringsomraadeTilDialog = maanedsoversiktpostRedigeringsomraadeTilDialog;
-    }
 
     public MaanedsoversiktpostView getMaanedsoversiktpostView() {
         return maanedsoversiktpostView;
@@ -328,13 +331,6 @@ public class Allvitekyklop {
         this.aarsoversiktpostRedigeringsomraade = aarsoversiktpostRedigeringsomraade;
     }
 
-    public AarsoversiktpostRedigeringsomraade getAarsoversiktpostRedigeringsomraadeTilDialog() {
-        return aarsoversiktpostRedigeringsomraadeTilDialog;
-    }
-
-    public void setAarsoversiktpostRedigeringsomraadeTilDialog(AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog) {
-        this.aarsoversiktpostRedigeringsomraadeTilDialog = aarsoversiktpostRedigeringsomraadeTilDialog;
-    }
 
     public AarsoversiktpostView getAarsoversiktpostView() {
         return aarsoversiktpostView;
@@ -353,275 +349,7 @@ public class Allvitekyklop {
     }
 
 
-    /*
-    public VerktoyView getVerktoyView() {
-        if (!verktoyView.erInitiert()) {
-            verktoyView.init();
-        }
-        return verktoyView;
-    }
 
-
-    public KategoriRepository getKategoriRepository() {
-        return kategoriRepository;
-    }
-
-    public void setKategoriRepository(KategoriRepository kategoriRepository) {
-        this.kategoriRepository = kategoriRepository;
-    }
-
-    public KategoriService getKategoriService() {
-        if (!kategoriService.erInitiert()) {
-            kategoriService.init();
-        }
-        return kategoriService;
-    }
-
-    public void setKategoriService(KategoriService kategoriService) {
-        this.kategoriService = kategoriService;
-    }
-
-    public KategoriRedigeringsomraade getKategoriRedigeringsomraade() {
-        if (!kategoriRedigeringsomraade.erInitiert()) {
-            kategoriRedigeringsomraade.init();
-        }
-        return kategoriRedigeringsomraade;
-    }
-
-    public void setKategoriRedigeringsomraade(KategoriRedigeringsomraade kategoriRedigeringsomraade) {
-        this.kategoriRedigeringsomraade = kategoriRedigeringsomraade;
-    }
-
-    public KategoriView getKategoriView() {
-        if (!kategoriView.erInitiert()) {
-            kategoriView.init();
-        }
-        return kategoriView;
-    }
-
-    public void setKategoriView(KategoriView kategoriView) {
-        this.kategoriView = kategoriView;
-    }
-
-    public PostRepository getPostRepository() {
-        return postRepository;
-    }
-
-    public void setPostRepository(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
-
-    public PostService getPostService() {
-        if (!postService.erInitiert()) {
-            postService.init();
-        }
-
-        return postService;
-    }
-
-    public void setPostService(PostService postService) {
-        this.postService = postService;
-    }
-
-    public NormalpostRedigeringsomraade getNormalpostRedigeringsomraade() {
-        if (!normalpostRedigeringsomraade.erInitiert()) {
-            normalpostRedigeringsomraade.init();
-        }
-        return normalpostRedigeringsomraade;
-    }
-
-    public void setNormalpostRedigeringsomraade(NormalpostRedigeringsomraade normalpostRedigeringsomraade) {
-        this.normalpostRedigeringsomraade = normalpostRedigeringsomraade;
-    }
-
-    public NormalpostView getNormalpostView() {
-        if (!normalpostView.erInitiert()) {
-            normalpostView.init();
-        }
-        return normalpostView;
-    }
-
-    public void setNormalpostView(NormalpostView normalpostView) {
-        this.normalpostView = normalpostView;
-    }
-
-    public PeriodeRepository getPeriodeRepository() {
-        return periodeRepository;
-    }
-
-    public void setPeriodeRepository(PeriodeRepository periodeRepository) {
-        this.periodeRepository = periodeRepository;
-    }
-
-    public PeriodepostRepository getPeriodepostRepository() {
-        return periodepostRepository;
-    }
-
-    public void setPeriodepostRepository(PeriodepostRepository periodepostRepository) {
-        this.periodepostRepository = periodepostRepository;
-    }
-
-    public MaanedsoversiktService getMaanedsoversiktService() {
-        if (!maanedsoversiktService.erInitiert()) {
-            maanedsoversiktService.init();
-        }
-        return maanedsoversiktService;
-    }
-
-    public void setMaanedsoversiktService(MaanedsoversiktService maanedsoversiktService) {
-        this.maanedsoversiktService = maanedsoversiktService;
-    }
-
-    public MaanedsoversiktRedigeringsomraade getMaanedsoversiktRedigeringsomraade() {
-        if (!maanedsoversiktRedigeringsomraade.erInitiert()) {
-            maanedsoversiktRedigeringsomraade.init();
-        }
-        return maanedsoversiktRedigeringsomraade;
-    }
-
-    public void setMaanedsoversiktRedigeringsomraade(MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade) {
-        this.maanedsoversiktRedigeringsomraade = maanedsoversiktRedigeringsomraade;
-    }
-
-    public MaanedsoversiktView getMaanedsoversiktView() {
-        if (!maanedsoversiktView.erInitiert()) {
-            maanedsoversiktView.init();
-        }
-        return maanedsoversiktView;
-    }
-
-    public void setMaanedsoversiktView(MaanedsoversiktView maanedsoversiktView) {
-        this.maanedsoversiktView = maanedsoversiktView;
-    }
-
-    public MaanedsoversiktpostService getMaanedsoversiktpostService() {
-        if (!maanedsoversiktpostService.erInitiert()) {
-            maanedsoversiktpostService.init();
-        }
-        return maanedsoversiktpostService;
-    }
-
-    public void setMaanedsoversiktpostService(MaanedsoversiktpostService maanedsoversiktpostService) {
-        this.maanedsoversiktpostService = maanedsoversiktpostService;
-    }
-
-    public MaanedsoversiktpostRedigeringsomraade getMaanedsoversiktpostRedigeringsomraade() {
-        if (!maanedsoversiktpostRedigeringsomraade.erInitiert()) {
-            maanedsoversiktRedigeringsomraade.init();
-        }
-        return maanedsoversiktpostRedigeringsomraade;
-    }
-
-    public void setMaanedsoversiktpostRedigeringsomraade(MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraade) {
-        this.maanedsoversiktpostRedigeringsomraade = maanedsoversiktpostRedigeringsomraade;
-    }
-
-    public MaanedsoversiktpostRedigeringsomraade getMaanedsoversiktpostRedigeringsomraadeTilDialog() {
-        if (!maanedsoversiktpostRedigeringsomraadeTilDialog.erInitiert()) {
-            maanedsoversiktpostRedigeringsomraadeTilDialog.init();
-        }
-        return maanedsoversiktpostRedigeringsomraadeTilDialog;
-    }
-
-    public void setMaanedsoversiktpostRedigeringsomraadeTilDialog(MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraadeTilDialog) {
-        this.maanedsoversiktpostRedigeringsomraadeTilDialog = maanedsoversiktpostRedigeringsomraadeTilDialog;
-    }
-
-    public MaanedsoversiktpostView getMaanedsoversiktpostView() {
-        if (!maanedsoversiktpostView.erInitiert()) {
-            maanedsoversiktpostView.init();
-        }
-        return maanedsoversiktpostView;
-    }
-
-    public void setMaanedsoversiktpostView(MaanedsoversiktpostView maanedsoversiktpostView) {
-        this.maanedsoversiktpostView = maanedsoversiktpostView;
-    }
-
-    public AarsoversiktService getAarsoversiktService() {
-        if (!aarsoversiktService.erInitiert()) {
-            aarsoversiktService.init();
-        }
-
-        return aarsoversiktService;
-    }
-
-    public void setAarsoversiktService(AarsoversiktService aarsoversiktService) {
-        this.aarsoversiktService = aarsoversiktService;
-    }
-
-    public AarsoversiktRedigeringsomraade getAarsoversiktRedigeringsomraade() {
-        if (!aarsoversiktRedigeringsomraade.erInitiert()) {
-            aarsoversiktRedigeringsomraade.init();
-        }
-        return aarsoversiktRedigeringsomraade;
-    }
-
-    public void setAarsoversiktRedigeringsomraade(AarsoversiktRedigeringsomraade aarsoversiktRedigeringsomraade) {
-        this.aarsoversiktRedigeringsomraade = aarsoversiktRedigeringsomraade;
-    }
-
-    public AarsoversiktView getAarsoversiktView() {
-
-        if (!aarsoversiktView.erInitiert()) {
-            aarsoversiktView.init();
-        }
-        return aarsoversiktView;
-    }
-
-    public void setAarsoversiktView(AarsoversiktView aarsoversiktView) {
-        this.aarsoversiktView = aarsoversiktView;
-    }
-
-    public AarsoversiktpostService getAarsoversiktpostService() {
-        if (!aarsoversiktpostService.erInitiert()) {
-            aarsoversiktpostService.init();
-        }
-        return aarsoversiktpostService;
-    }
-
-    public void setAarsoversiktpostService(AarsoversiktpostService aarsoversiktpostService) {
-        this.aarsoversiktpostService = aarsoversiktpostService;
-    }
-
-    public AarsoversiktpostRedigeringsomraade getAarsoversiktpostRedigeringsomraade() {
-        if (!aarsoversiktpostRedigeringsomraade.erInitiert()) {
-            aarsoversiktpostRedigeringsomraade.init();
-        }
-        return aarsoversiktpostRedigeringsomraade;
-    }
-
-    public void setAarsoversiktpostRedigeringsomraade(AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade) {
-        this.aarsoversiktpostRedigeringsomraade = aarsoversiktpostRedigeringsomraade;
-    }
-
-    public AarsoversiktpostRedigeringsomraade getAarsoversiktpostRedigeringsomraadeTilDialog() {
-        if (!aarsoversiktpostRedigeringsomraadeTilDialog.erInitiert()) {
-            aarsoversiktpostRedigeringsomraadeTilDialog.init();
-        }
-        return aarsoversiktpostRedigeringsomraadeTilDialog;
-    }
-
-    public void setAarsoversiktpostRedigeringsomraadeTilDialog(AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog) {
-        this.aarsoversiktpostRedigeringsomraadeTilDialog = aarsoversiktpostRedigeringsomraadeTilDialog;
-    }
-
-    public AarsoversiktpostView getAarsoversiktpostView() {
-        if (!aarsoversiktpostView.erInitiert()) {
-            aarsoversiktpostView.init();
-        }
-        return aarsoversiktpostView;
-    }
-
-    public void setAarsoversiktpostView(AarsoversiktpostView aarsoversiktpostView) {
-        this.aarsoversiktpostView = aarsoversiktpostView;
-    }
-
-    public void setVerktoyView(VerktoyView verktoyView) {
-        this.verktoyView = verktoyView;
-    }
-
-*/
 
     public static Allvitekyklop hent(){
         if (allvitekyklop == null) {
@@ -637,6 +365,8 @@ public class Allvitekyklop {
 
 
     public void setBudsjettpostView(BudsjettpostView budsjettpostView) {
-
+        this.budsjettpostView = budsjettpostView;
     }
+
+
 }

@@ -46,7 +46,6 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
             this.aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
             AarsoversiktRedigeringsomraade aarsoversiktRedigeringsomraade = Allvitekyklop.hent().getAarsoversiktRedigeringsomraade();
             aarsoversiktRedigeringsomraade.settView(this);
-            Allvitekyklop.hent().getAarsoversiktpostRedigeringsomraadeTilDialog().settView(this);
 
             this.aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
             super.initPeriodeViewMal(PeriodetypeEnum.AARSOVERSIKT,

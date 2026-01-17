@@ -2,6 +2,7 @@ package com.hallvardlaerum.periodepost;
 
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriService;
+import com.hallvardlaerum.libs.ui.RedigerEntitetDialog;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
 import com.hallvardlaerum.periode.Periode;
@@ -9,6 +10,8 @@ import com.hallvardlaerum.periode.PeriodeServiceMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostklasseEnum;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
+import com.hallvardlaerum.post.normalpost.NormalpostRedigeringsomraade;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.skalTilHavaara.HallvardsIntegerSpan;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -28,9 +31,11 @@ import java.util.List;
 public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Periodepost> implements RedigeringsomraadeAktig<Periodepost> {
     protected PeriodepostTypeEnum periodepostTypeEnum;
     protected PeriodetypeEnum periodetypeEnum;
-    private KategoriService kategoriService;
-    private PeriodeServiceMal periodeServiceMal;
-    private NormalpostService normalpostService;
+    protected KategoriService kategoriService;
+    protected PeriodeServiceMal periodeServiceMal;
+    protected NormalpostService normalpostService;
+    protected RedigerEntitetDialog<Post,Periodepost> normalPostRedigerEntitetDialog;
+    protected RedigerEntitetDialog<Post,Periodepost> budsjettPostRedigerEntitetDialog;
 
     // === TABS OG GRIDS ===
     protected final String ekstratabString = "Ekstra";

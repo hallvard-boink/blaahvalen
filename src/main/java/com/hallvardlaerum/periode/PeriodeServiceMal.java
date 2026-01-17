@@ -11,7 +11,7 @@ import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -31,7 +31,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
     private PostServiceMal postService;
     private PeriodepostServiceMal periodepostService;
     private KategoriService kategoriService;
-    private PeriodeoversiktpostService periodeoversiktpostService;
+    private KostnadspakkeService kostnadspakkeService;
 
     public PeriodeServiceMal() {
     }
@@ -47,7 +47,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
 
         this.periodeRepository = Allvitekyklop.hent().getPeriodeRepository();
         this.kategoriService = Allvitekyklop.hent().getKategoriService();
-        this.periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
+        this.kostnadspakkeService = Allvitekyklop.hent().getKostnadspakkeService();
 
         super.initEntitetserviceMal(Periode.class, periodeRepository);
     }
@@ -143,10 +143,10 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
 
 
     public void oppdaterPeriodensPeriodeposterOgSummer_oppdaterKostnadspakker(Periode periode) {
-        List<Periodepost> kostnadspakkeList = periodeoversiktpostService.hentKostnadspakkerForPerioden(periode);
+        List<Periodepost> kostnadspakkeList = kostnadspakkeService.hentKostnadspakkerForPerioden(periode);
         for (Periodepost kostnadspakke : kostnadspakkeList) {
-            periodeoversiktpostService.oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
-            periodeoversiktpostService.lagre(kostnadspakke);
+            kostnadspakkeService.oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
+            kostnadspakkeService.lagre(kostnadspakke);
         }
     }
 

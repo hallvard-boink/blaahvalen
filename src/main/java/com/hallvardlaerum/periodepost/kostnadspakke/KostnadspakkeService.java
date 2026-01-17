@@ -1,4 +1,4 @@
- package com.hallvardlaerum.periodepost.periodeoversiktpost;
+ package com.hallvardlaerum.periodepost.kostnadspakke;
 
  import com.hallvardlaerum.libs.felter.HelTallMester;
  import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
@@ -19,7 +19,7 @@
  import java.util.UUID;
 
  @Service
-public class PeriodeoversiktpostService extends PeriodepostServiceMal implements InitieringsEgnet {
+public class KostnadspakkeService extends PeriodepostServiceMal implements InitieringsEgnet {
     private boolean erInitiert;
     private NormalpostService normalpostService;
     private PeriodepostRepository periodepostRepository;
@@ -28,17 +28,17 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
     public void init() {
         if (!erInitiert) {
             super.initPeriodepostServiceMal(
-                Allvitekyklop.hent().getPeriodeoversiktpostRedigeringsomraade(),
+                Allvitekyklop.hent().getKostnadspakkeRedigeringsomraade(),
                 PeriodepostTypeEnum.PERIODEOVERSIKTPOST
             );
             normalpostService = Allvitekyklop.hent().getNormalpostService();
-            periodepostRepository = super.hentRepository();
+            periodepostRepository = Allvitekyklop.hent().getPeriodepostRepository();
             erInitiert = true;
         }
     }
 
 
-    public PeriodeoversiktpostService() {
+    public KostnadspakkeService() {
         super();
     }
 

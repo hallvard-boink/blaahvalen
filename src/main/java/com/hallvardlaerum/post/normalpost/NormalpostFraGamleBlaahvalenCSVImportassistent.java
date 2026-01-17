@@ -8,7 +8,7 @@ import com.hallvardlaerum.libs.eksportimport.CSVImportassistentMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.periodepost.Periodepost;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -25,13 +25,13 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
     private ArrayList<Ekstrafeltrad> ekstrafeltradArrayList;
     private KategoriService kategoriService;
     private Kategori skalIkkekategoriseresKategori;
-    private PeriodeoversiktpostService periodeoversiktpostService;
+    private KostnadspakkeService kostnadspakkeService;
 
     public NormalpostFraGamleBlaahvalenCSVImportassistent() {
         this.normalpostService = Allvitekyklop.hent().getNormalpostService();
         this.normalpostView = Allvitekyklop.hent().getNormalpostView();
         this.kategoriService = Allvitekyklop.hent().getKategoriService();
-        this.periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
+        this.kostnadspakkeService = Allvitekyklop.hent().getKostnadspakkeService();
     }
 
     @Override
@@ -85,7 +85,7 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
             return;
         }
 
-        Periodepost kostnadspakke = periodeoversiktpostService.finnEtterTittel(kostnadspakketittelString);
+        Periodepost kostnadspakke = kostnadspakkeService.finnEtterTittel(kostnadspakketittelString);
         if (kostnadspakke==null) {
             Loggekyklop.bruk().loggADVARSEL("Fant ikke kostnadspakke med tittel " + kostnadspakketittelString);
         } else {

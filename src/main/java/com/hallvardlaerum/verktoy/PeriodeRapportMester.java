@@ -9,7 +9,7 @@ import com.hallvardlaerum.libs.filerogopplasting.StandardmappeEnum;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periodepost.Periodepost;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodedelAvKostnadspakkeRad;
+import com.hallvardlaerum.periodepost.kostnadspakke.PeriodedelAvKostnadspakkeRad;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.builder.column.Columns;
 import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;

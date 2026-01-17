@@ -141,6 +141,23 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
         }
     }
 
+    public Post finnEtterDatoOgTekstfrabankenOgBeskrivelseNormalposttypeenum(LocalDate dato, String tekstFraBankenString, String beskrivelseString) {
+        if (dato==null || tekstFraBankenString==null) {
+            return null;
+        }
+
+        List<Post> poster = postRepository.findByDatoLocalDateAndTekstFraBankenStringAndBeskrivelseString(dato, tekstFraBankenString,beskrivelseString);
+        if (poster.isEmpty()) {
+            Loggekyklop.bruk().loggADVARSEL("Fant ikke post for dato:" + dato + ", tekstfrabanken:" + tekstFraBankenString + ", beskrivelseString:" + beskrivelseString + ". Avbryter");
+            return null;
+        } else if (poster.size()>1) {
+            Loggekyklop.bruk().loggADVARSEL("Fant mer enn en post for dato:" + dato + ", tekstfrabanken:" + tekstFraBankenString + ", beskrivelseString:" + beskrivelseString + ". Avbryter");
+            return null;
+        } else {
+            return poster.getFirst();
+        }
+    }
+
     public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
         return postRepository.findByKostnadsPakke(kostnadspakke);
     }

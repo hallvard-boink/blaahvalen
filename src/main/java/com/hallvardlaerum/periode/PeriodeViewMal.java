@@ -10,8 +10,8 @@ import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.ViewmalAktig;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodedelAvKostnadspakkeRad;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
+import com.hallvardlaerum.periodepost.kostnadspakke.PeriodedelAvKostnadspakkeRad;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.hallvardlaerum.verktoy.PeriodeRapportMester;
 import com.vaadin.flow.component.button.Button;
@@ -213,7 +213,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         PeriodepostServiceMal periodepostService = Allvitekyklop.hent().getMaanedsoversiktpostService(); //virker for Aarsoversikt også
         ArrayList<Periodepost> periodeposterArrayList = new ArrayList<>(periodepostService.finnHovedperiodeposter(periode));
 
-        PeriodeoversiktpostService kostnadspakkeservice = Allvitekyklop.hent().getPeriodeoversiktpostService();
+        KostnadspakkeService kostnadspakkeservice = Allvitekyklop.hent().getKostnadspakkeService();
         ArrayList<PeriodedelAvKostnadspakkeRad> periodedelAvKostnadspakkeRadArrayList = kostnadspakkeservice.hentKostnadspakkerForPeriodenMedPeriodensSum(periode);
 
         new PeriodeRapportMester().lagrePeriodeSomPDF(periode, periodeposterArrayList, periodedelAvKostnadspakkeRadArrayList);

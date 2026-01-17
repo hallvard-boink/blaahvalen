@@ -1,4 +1,4 @@
-package com.hallvardlaerum.periodepost.periodeoversiktpost;
+package com.hallvardlaerum.periodepost.kostnadspakke;
 
 import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
@@ -18,9 +18,9 @@ import com.vaadin.flow.spring.annotation.UIScope;
  */
 @Route("periodeoversiktpost")
 @UIScope
-public class PeriodeoversiktpostView extends PeriodepostViewMal implements InitieringsEgnet {
+public class KostnadspakkeView extends PeriodepostViewMal implements InitieringsEgnet {
     private boolean erInitiert;
-    private PeriodeoversiktpostService periodeoversiktpostService;
+    private KostnadspakkeService kostnadspakkeService;
 
     @Override
     public void init() {
@@ -29,11 +29,11 @@ public class PeriodeoversiktpostView extends PeriodepostViewMal implements Initi
                 PeriodepostTypeEnum.PERIODEOVERSIKTPOST,
                 this,
                 PeriodetypeEnum.AARSOVERSIKT,
-                Allvitekyklop.hent().getPeriodeoversiktpostRedigeringsomraade(),
-                Allvitekyklop.hent().getPeriodeoversiktpostService(),
+                Allvitekyklop.hent().getKostnadspakkeRedigeringsomraade(),
+                Allvitekyklop.hent().getKostnadspakkeService(),
                 Allvitekyklop.hent().getAarsoversiktService()
             );
-            periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
+            kostnadspakkeService = Allvitekyklop.hent().getKostnadspakkeService();
 
             super.hentVindutittel().setText("Kostnadspakker");
             hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blaahvalen", e->importerCSVFraGamleBlaahvalen());
@@ -72,7 +72,7 @@ public class PeriodeoversiktpostView extends PeriodepostViewMal implements Initi
                 "Vil du virkelig slette alle kostnadspakkene i databasen?",
                 "Ja, sett i gang",
                 ee -> {
-                    periodeoversiktpostService.slettAlleKostnadspakker();
+                    kostnadspakkeService.slettAlleKostnadspakker();
                     oppdaterSoekeomraadeFinnAlleRader();
                     oppdaterRedigeringsomraade();
                 },
@@ -88,7 +88,7 @@ public class PeriodeoversiktpostView extends PeriodepostViewMal implements Initi
 
     private void oppdaterSummer() {
         Periodepost kostnadspakke = Allvitekyklop.hent().getPeriodeoversiktpostView().hentEntitet();
-        periodeoversiktpostService.oppdaterOgLagreSummerForValgteVanligePeriodepost();
+        kostnadspakkeService.oppdaterOgLagreSummerForValgteVanligePeriodepost();
         //periodeoversiktpostService.oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
         Allvitekyklop.hent().getPeriodeoversiktpostView().oppdaterRedigeringsomraade();
         Allvitekyklop.hent().getPeriodeoversiktpostView().oppdaterSoekeomraadeFinnAlleRader();
@@ -96,13 +96,13 @@ public class PeriodeoversiktpostView extends PeriodepostViewMal implements Initi
 
 
     private void importerCSVFraGamleBlaahvalen() {
-        new CSVImportmester(new PeriodeoversiktpostFraGamleBlaahvalenCSVImportassistent()).velgImportfilOgKjoerImport(
-                Allvitekyklop.hent().getPeriodeoversiktpostService()
+        new CSVImportmester(new KostnadspakkeFraGamleBlaahvalenCSVImportassistent()).velgImportfilOgKjoerImport(
+                Allvitekyklop.hent().getKostnadspakkeService()
         );
     }
 
 
-    public PeriodeoversiktpostView() {
+    public KostnadspakkeView() {
         super();
         Allvitekyklop.hent().setPeriodeoversiktpostView(this);
         init();

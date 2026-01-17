@@ -8,7 +8,7 @@ import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periodepost.Periodepost;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
@@ -40,7 +40,7 @@ import java.util.ArrayList;
 public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> implements InitieringsEgnet {
     private Grid<Post> grid;
     private PostServiceMal postService;
-    private PeriodeoversiktpostService periodeoversiktpostService;
+    private KostnadspakkeService kostnadspakkeService;
     private NormalpostRedigeringsomraade normalPostRedigeringsomraade;
     private boolean erInitiert = false;
 
@@ -68,7 +68,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
         if (!erInitiert) {
             this.postService = Allvitekyklop.hent().getNormalpostService();
             this.kategoriService = Allvitekyklop.hent().getKategoriService();
-            this.periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
+            this.kostnadspakkeService = Allvitekyklop.hent().getKostnadspakkeService();
             this.normalPostRedigeringsomraade = Allvitekyklop.hent().getNormalpostRedigeringsomraade();
             this.normalPostRedigeringsomraade.settView(this);
 
@@ -300,7 +300,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
         normalposttypeFilterCombobox.setItemLabelGenerator(NormalposttypeEnum::getTittel);
 
         kostnadspakkeFilterComboBox = leggTilFilterfelt(8, new ComboBox<>(),"Velg");
-        kostnadspakkeFilterComboBox.setItems(periodeoversiktpostService.finnAlleKostnadspakker());
+        kostnadspakkeFilterComboBox.setItems(kostnadspakkeService.finnAlleKostnadspakker());
         kostnadspakkeFilterComboBox.setItemLabelGenerator(Periodepost::getTittelString);
 
     }

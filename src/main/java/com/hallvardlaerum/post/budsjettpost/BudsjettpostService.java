@@ -1,8 +1,8 @@
 package com.hallvardlaerum.post.budsjettpost;
 
+import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.felter.HelTallMester;
-import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.post.Post;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -77,4 +78,12 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
         return budsjettpost;
     }
 
+    public List<Post> finnEtterPeriodeOgKategori(Periode periode, Kategori kategori) {
+        if (periode == null || kategori == null) {
+            return new ArrayList<>();
+        }
+        return postRepository.findByDatoLocalDateBetweenAndKategoriUuidAndPostklasseEnumOrderByDatoLocalDateAsc(
+                periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), kategori.getUuid(), PostklasseEnum.BUDSJETTPOST);
+
+    }
 }

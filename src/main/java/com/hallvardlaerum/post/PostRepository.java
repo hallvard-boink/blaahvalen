@@ -35,6 +35,7 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 
     List<Post> findByDatoLocalDateBetweenAndPostklasseEnum(LocalDate fraLocalDate, LocalDate tilLocalDate, PostklasseEnum postklasseEnum);
 
+    List<Post> findByDatoLocalDateBetweenAndKategoriUuidAndPostklasseEnumOrderByDatoLocalDateAsc(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, UUID uuid, PostklasseEnum postklasseEnum);
 
 // =====================
 // === KOMPLEKSE SØK ===
@@ -90,7 +91,6 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 // === Utregning av en og en sum ===
 // =================================
     // Disse er enklere å håndtere enn søk som returnerer Tuple, fordi klassen er gitt før kjøring
-
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) " +
             "FROM post p JOIN kategori k ON p.kategori_uuid = k.uuid " +
@@ -178,6 +178,8 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
     )
     Tuple sumBudsjettPosterFradatoTilDatoKategoritittel(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate, String kategoritittel);
 
+
+    List<Post> findByDatoLocalDateAndTekstFraBankenStringAndBeskrivelseString(LocalDate dato, String tekstFraBankenString, String beskrivelseString);
 }
 
 

@@ -1,24 +1,31 @@
-package com.hallvardlaerum.periodepost.periodeoversiktpost;
+package com.hallvardlaerum.periodepost.kostnadspakke;
 
+import com.hallvardlaerum.libs.ui.RedigerEntitetDialog;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostRedigeringsomraadeMal;
 import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.post.Post;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
+import com.hallvardlaerum.post.normalpost.NormalpostRedigeringsomraade;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.spring.annotation.UIScope;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @UIScope
-public class PeriodeoversiktpostRedigeringsomraade extends PeriodepostRedigeringsomraadeMal implements InitieringsEgnet {
+public class KostnadspakkeRedigeringsomraade extends PeriodepostRedigeringsomraadeMal implements InitieringsEgnet {
     private boolean erInitiert = false;
+    private RedigerEntitetDialog<Post,Periodepost> normalpostRedigerEntitetDialog;
 
 
     @Override
@@ -38,10 +45,11 @@ public class PeriodeoversiktpostRedigeringsomraade extends PeriodepostRedigering
     public void instansOppdaterEkstraRedigeringsfelter() {
         Periodepost periodepost = hentEntitet();
         sumRegnskapSpan.settInteger(periodepost.getSumRegnskapInteger());
-        List<Post> normalposterList = new ArrayList<>();
-        normalposterList = Allvitekyklop.hent().getNormalpostService().finnPosterIKostnadspakken(periodepost);
+        List<Post> normalposterList = Allvitekyklop.hent().getNormalpostService().finnPosterIKostnadspakken(periodepost);
         normalposterGrid.setItems(normalposterList);
     }
+
+
 
     @Override
     public void instansOpprettFelter() {
@@ -50,7 +58,26 @@ public class PeriodeoversiktpostRedigeringsomraade extends PeriodepostRedigering
         super.instansOpprettFelter_opprettNormalposterTab();
         instansOpprettFelter_opprettEkstraTab_Kostnadspakke();
 
+        instansOpprettFelter_leggTilDialoger();
+
         settFokusKomponent(tittelTextField);
+
+    }
+
+    private void instansOpprettFelter_leggTilDialoger() {
+        NormalpostRedigeringsomraade normalpostRedigeringsomraadeTilDialog = new NormalpostRedigeringsomraade();
+        normalpostRedigeringsomraadeTilDialog.init();
+        normalpostRedigerEntitetDialog = new RedigerEntitetDialog<>(
+                Allvitekyklop.hent().getNormalpostService(),
+                Allvitekyklop.hent().getKostnadspakkeService(),
+                "Redigere normalpost",
+                "",
+                normalpostRedigeringsomraadeTilDialog,
+                this
+        );
+        super.normalposterGrid.addItemDoubleClickListener(e -> normalpostRedigerEntitetDialog.vis(e.getItem()));
+
+
 
     }
 
@@ -80,7 +107,7 @@ public class PeriodeoversiktpostRedigeringsomraade extends PeriodepostRedigering
 
     }
 
-    public PeriodeoversiktpostRedigeringsomraade() {
+    public KostnadspakkeRedigeringsomraade() {
         super();
     }
 

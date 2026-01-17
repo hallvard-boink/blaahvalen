@@ -39,8 +39,10 @@ public class AarsoversiktpostView extends PeriodepostViewMal implements Initieri
             this.aarsoversiktpostService = Allvitekyklop.hent().getAarsoversiktpostService();
             AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade = Allvitekyklop.hent().getAarsoversiktpostRedigeringsomraade();
             aarsoversiktpostRedigeringsomraade.settView(this);
-            AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog = Allvitekyklop.hent().getAarsoversiktpostRedigeringsomraadeTilDialog();
-            aarsoversiktpostRedigeringsomraadeTilDialog.settView(this);
+
+
+            AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog = new AarsoversiktpostRedigeringsomraade();
+            aarsoversiktpostRedigeringsomraadeTilDialog.init();
 
             super.initierPeriodepostViewMal(
                     PeriodepostTypeEnum.AARSOVERSIKTPOST,

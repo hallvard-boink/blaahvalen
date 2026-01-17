@@ -8,7 +8,7 @@ import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
 
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periodepost.Periodepost;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeService;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.button.Button;
@@ -22,15 +22,18 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.spring.annotation.UIScope;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
 @Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @UIScope
 public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> implements RedigeringsomraadeAktig<Post>, InitieringsEgnet {
     private boolean erInitiert = false;
-    private PeriodeoversiktpostService periodeoversiktpostService;
+    private KostnadspakkeService kostnadspakkeService;
 
 
     private String hovedtabString= "Hoved";
@@ -61,7 +64,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         if (!erInitiert) {
             super.initRedigeringsomraadeMal();
             this.kategoriService = Allvitekyklop.hent().getKategoriService();
-            periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
+            kostnadspakkeService = Allvitekyklop.hent().getKostnadspakkeService();
             kostnadspakkeMester = new KostnadspakkeMester();
 
             instansOpprettFelter();
@@ -87,7 +90,9 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
     @Override
     public void aktiver(Boolean blnAktiver) {
         super.aktiver(blnAktiver);
-        Allvitekyklop.hent().getNormalpostView().aktiverDelpostknapperHvisAktuelt(blnAktiver);
+        if (Allvitekyklop.hent().getNormalpostView()!=null) {
+            Allvitekyklop.hent().getNormalpostView().aktiverDelpostknapperHvisAktuelt(blnAktiver);
+        }
     }
 
     @Override
@@ -172,7 +177,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
                 return p.getTittelString();
             }
         });
-        kostnadspakkeComboBox.setItems(periodeoversiktpostService.finnAlleKostnadspakker());
+        kostnadspakkeComboBox.setItems(kostnadspakkeService.finnAlleKostnadspakker());
         kostnadspakkeComboBox.addValueChangeListener(event -> {
             if (event != null && hentEntitet() != null && event.isFromClient() && event.getValue()!=null) {
                 Kategori kostnadspakkensKategori =event.getValue().getKategori();

@@ -96,13 +96,10 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
             periodetittelHorizontalLayout = leggTilAndrefelterOver(new PeriodetittelHorizontalLayout(periodetypeEnum));
             instansByggOppBinder();
 
-            this.periodepostRedigeringsomraadeTilDialog.initierPeriodepostRedigeringsomraadeMal(this.periodepostTypeEnum,
-                    this.periodeService,
-                    this.periodetypeEnum);
 
             this.periodepostRedigerEntitetDialog = new RedigerEntitetDialog<>(this.periodepostService,
                     this.periodeService,
-                    "Rediger periodepost",
+                    "Rediger " + periodepostTypeEnum.getTittel() + " fra " + periodetypeEnum.getTittel(),
                     "",
                     this.periodepostRedigeringsomraadeTilDialog,
                     this
@@ -206,7 +203,7 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
                 .setTextAlign(ColumnTextAlign.END).setRenderer(opprettSumRegnskapRenderer());
         kategorierGrid.addColumn(Periodepost::getBeskrivelseString).setHeader("Beskrivelse");
         kategorierGrid.setSizeFull();
-        kategorierGrid.addItemDoubleClickListener(e -> periodepostRedigerEntitetDialog.vis(e.getItem()));
+        kategorierGrid.addItemDoubleClickListener(e -> periodepostRedigerEntitetDialog.vis(e.getItem(), "Rediger periodepost for kategorien " + e.getItem().getKategori().getTittel(),null));
 
         Gridkyklop.hent().tilpassKolonnerIFastradGrid(kategorierGrid);
         kategorierGrid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
@@ -338,16 +335,6 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         binder.bind(datoFraDatePicker, Periode::getDatoFraLocalDate, Periode::setDatoFraLocalDate);
         binder.bind(datoTilDatePicker, Periode::getDatoTilLocalDate, Periode::setDatoTilLocalDate);
         binder.bind(beskrivelseTextArea, Periode::getBeskrivelseString, Periode::setBeskrivelseString);
-//        binder.bind(sumBudsjettInntekterSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettInntektInteger()), null);
-//        binder.bind(sumBudsjettUtgifterSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettUtgifterInteger()), null);
-//        binder.bind(sumRegnskapInntekterSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapInntektInteger()), null);
-//        binder.bind(sumRegnskapUtgifterSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapUtgifterInteger()), null);
-//        binder.bind(sumBudsjettResultatSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettResultatInteger()), null);
-//        binder.bind(sumRegnskapResultatSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapResultatInteger()), null);
-        //binder.bind(sumDifferanseResultatBudsjettUtgifterTextField, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumDifferanseResultatBudsjettRegnskap()), null);
-//        binder.bind(sumRegnskapInntekterMedOverfoeringerSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapInntektMedOverfoeringerInteger()), null);
-//        binder.bind(sumRegnskapUtgifterMedOverfoeringerSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapUtgifterMedOverfoeringerInteger()), null);
-//        binder.bind(sumRegnskapResultatMedOverfoeringerSpan, periode -> HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapResultatMedOverfoeringerInteger()), null);
     }
 
 

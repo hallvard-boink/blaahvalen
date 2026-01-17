@@ -1,6 +1,7 @@
 package com.hallvardlaerum.periode.aarsoversikt;
 
 import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriMedSumOgAntall;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigerEntitetDialog;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
@@ -13,11 +14,15 @@ import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostRedigerin
 import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeRedigeringsomraade;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <h1>Årsoversikt: Faste utgifter</h1>
@@ -47,9 +52,25 @@ import org.springframework.stereotype.Component;
 public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal implements InitieringsEgnet {
     private boolean erInitiert = false;
     private Grid<Periodepost> kostnadspakkerGrid;
+    private Grid<KategoriMedSumOgAntall> kategoriMedSumOgAntallGrid;
     private Grid<Post> budsjettposterGrid;
     private RedigerEntitetDialog<Periodepost, Periode> kostnadspakkeRedigerEntitetDialog;
     private RedigerEntitetDialog<Post, Periode> budsjettRedigerEntitetDialog;
+
+    public AarsoversiktRedigeringsomraade() {
+        super();
+    }
+
+    @Override
+    public void instansOppdaterEkstraRedigeringsfelter(){
+        super.instansOppdaterEkstraRedigeringsfelter();
+        oppdaterFasteUtgifterTab_KategoriGrid();
+        oppdaterKostnadspakkerTab();
+    }
+
+    private void oppdaterFasteUtgifterTab_KategoriGrid(){
+        kategoriMedSumOgAntallGrid.setItems(finnKategorierMedSumOgAntall());
+    }
 
     @Override
     public void instansOpprettFelter(){
@@ -62,6 +83,60 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         super.testing_leggTilSjekkSummerButton();
     }
 
+
+    private void instansOpprettFelter_leggTilBudsjettTab_FasteUtgifter() {
+        String redigerFastUtgifterTabString = "Faste utgifter";
+
+        kategoriMedSumOgAntallGrid = new Grid<>();
+        kategoriMedSumOgAntallGrid.addColumn(KategoriMedSumOgAntall::getTittel).setHeader("Tittel");
+        kategoriMedSumOgAntallGrid.addColumn(KategoriMedSumOgAntall::getUndertittel).setHeader("Undertittel");
+        kategoriMedSumOgAntallGrid.addColumn(KategoriMedSumOgAntall::getSumInteger).setHeader("Sum");
+        kategoriMedSumOgAntallGrid.addColumn(KategoriMedSumOgAntall::getAntallInteger).setHeader("Antall");
+
+        //kategoriGrid.setItems(finnKategorierMedSumOgAntall());
+        kategoriMedSumOgAntallGrid.addSelectionListener(e -> {
+            if (e.getFirstSelectedItem().isPresent()) {
+                oppdaterBudsjettpostgrid(e.getFirstSelectedItem().get().getKategori());
+            }
+        });
+        kategoriMedSumOgAntallGrid.setSizeFull();
+
+        budsjettposterGrid = new Grid<>();
+        budsjettposterGrid.addColumn(Post::getDatoLocalDate).setHeader("Dato");
+        budsjettposterGrid.addColumn(Post::getBeskrivelseString).setHeader("Beskrivelse");
+        budsjettposterGrid.addColumn(Post::getInnPaaKontoInteger).setHeader("Inn");
+        budsjettposterGrid.addColumn(Post::getUtFraKontoInteger).setHeader("Ut");
+        budsjettposterGrid.setSizeFull();
+
+        BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraadeTilDialog = new BudsjettpostRedigeringsomraade();
+        budsjettpostRedigeringsomraadeTilDialog.init();
+
+        budsjettRedigerEntitetDialog = new RedigerEntitetDialog<>(
+                Allvitekyklop.hent().getBudsjettpostService(),
+                Allvitekyklop.hent().getAarsoversiktService(),
+                "Rediger fast utgift",
+                "",
+                budsjettpostRedigeringsomraadeTilDialog,
+                this
+        );
+        budsjettposterGrid.addItemDoubleClickListener(e -> budsjettRedigerEntitetDialog.vis(e.getItem()));
+
+        leggTilRedigeringsfelter(redigerFastUtgifterTabString, kategoriMedSumOgAntallGrid,budsjettposterGrid);
+
+        hentFormLayoutFraTab(redigerFastUtgifterTabString).setSizeFull();
+    }
+
+    private ArrayList<KategoriMedSumOgAntall> finnKategorierMedSumOgAntall(){
+        BudsjettpostService budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
+        Periode aarsoversikt = hentEntitet();
+
+        List<Kategori> kategorier = Allvitekyklop.hent().getKategoriService().finnAlleUnderkategorier();
+        ArrayList<KategoriMedSumOgAntall> kategoriMedSumOgAntallArrayList = new ArrayList<>();
+        for (Kategori kategori:kategorier) {
+            kategoriMedSumOgAntallArrayList.add(budsjettpostService.opprettKategoriMedSumOgAntallBudsjettposter(aarsoversikt.getDatoFraLocalDate(), aarsoversikt.getDatoTilLocalDate(), kategori));
+        }
+        return kategoriMedSumOgAntallArrayList;
+    }
 
     private void instansOpprettFelter_leggTilKostnadspakkerTab() {
         String kostnadspakketabString = "Kostnadspakker";
@@ -91,43 +166,6 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         hentFormLayoutFraTab(kostnadspakketabString).setSizeFull();
     }
 
-
-    private void instansOpprettFelter_leggTilBudsjettTab_FasteUtgifter() {
-        String redigerFastUtgifterTabString = "Faste utgifter";
-
-        Grid<Kategori> kategoriGrid = new Grid<>();
-        kategoriGrid.addColumn(Kategori::getTittel).setHeader("Tittel");
-        kategoriGrid.addColumn(Kategori::getUndertittel).setHeader("Undertittel");
-        kategoriGrid.setItems(Allvitekyklop.hent().getKategoriService().finnAlleUnderkategorier());
-        kategoriGrid.addSelectionListener(e -> oppdaterBudsjettpostgrid(e.getAllSelectedItems().stream().toList().getFirst()));
-        kategoriGrid.setSizeFull();
-
-        budsjettposterGrid = new Grid<>();
-        budsjettposterGrid.addColumn(Post::getDatoLocalDate).setHeader("Dato");
-        budsjettposterGrid.addColumn(Post::getBeskrivelseString).setHeader("Beskrivelse");
-        budsjettposterGrid.addColumn(Post::getInnPaaKontoInteger).setHeader("Inn");
-        budsjettposterGrid.addColumn(Post::getUtFraKontoInteger).setHeader("Ut");
-        budsjettposterGrid.setSizeFull();
-
-        BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraadeTilDialog = new BudsjettpostRedigeringsomraade();
-        budsjettpostRedigeringsomraadeTilDialog.init();
-
-        budsjettRedigerEntitetDialog = new RedigerEntitetDialog<>(
-                Allvitekyklop.hent().getBudsjettpostService(),
-                Allvitekyklop.hent().getAarsoversiktService(),
-                "Rediger fast utgift",
-                "",
-                budsjettpostRedigeringsomraadeTilDialog,
-                this
-        );
-        budsjettposterGrid.addItemDoubleClickListener(e -> budsjettRedigerEntitetDialog.vis(e.getItem()));
-
-        leggTilRedigeringsfelter(redigerFastUtgifterTabString,kategoriGrid,budsjettposterGrid);
-
-        hentFormLayoutFraTab(redigerFastUtgifterTabString).setSizeFull();
-
-    }
-
     private void oppdaterBudsjettpostgrid(Kategori kategori) {
         if (kategori==null) {
             return;
@@ -137,25 +175,8 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
 
     }
 
-
-    @Override
-    public void instansOppdaterEkstraRedigeringsfelter(){
-        super.instansOppdaterEkstraRedigeringsfelter();
-        oppdaterKostnadspakkerTab();
-    }
-
     private void oppdaterKostnadspakkerTab() {
         kostnadspakkerGrid.setItems(Allvitekyklop.hent().getKostnadspakkeService().hentKostnadspakkerForPerioden(hentEntitet()));
-    }
-
-
-    public AarsoversiktRedigeringsomraade() {
-        super();
-    }
-
-    @Override
-    public boolean erInitiert() {
-        return erInitiert;
     }
 
     @Override
@@ -174,4 +195,11 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
             erInitiert=true;
         }
     }
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+
 }

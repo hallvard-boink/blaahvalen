@@ -180,6 +180,16 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 
 
     List<Post> findByDatoLocalDateAndTekstFraBankenStringAndBeskrivelseString(LocalDate dato, String tekstFraBankenString, String beskrivelseString);
+
+
+    @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer), count(p.uuid) " +
+        "FROM post p " +
+        "WHERE " +
+        "p.postklasse_enum = 1 AND " +
+        "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
+        "p.kategori_uuid = ?3"
+    )
+    Tuple sumInnOgUtOgAntallFradatoTildatoKategori(LocalDate fraDatoLocalDate, LocalDate tilDatoLocalDate, UUID kategori_uuid);
 }
 
 

@@ -25,7 +25,7 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     }
 
     public List<Kategori> finnAlleHovedkategorier() {
-        return kategoriRepository.findByNivaaOrderByTittelAscUndertittelAsc(0);
+        return kategoriRepository.findByNivaaOrderByErAktivDescTittelAscUndertittelAsc(0);
     }
 
     public List<Kategori> finnAlleOppsummerendeUnderkategorier() {
@@ -33,7 +33,7 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     }
 
     public List<Kategori> finnAlleUnderkategorier() {
-        return kategoriRepository.findByNivaaOrderByTittelAscUndertittelAsc(1);
+        return kategoriRepository.findByNivaaOrderByErAktivDescTittelAscUndertittelAsc(1);
     }
 
     public List<Kategori> finnUnderkategorier(String hovedtittel) {
@@ -100,7 +100,7 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         return kategoriRepository.findByTittelAndErOppsummerendeUnderkategori(kategoriString, true);
     }
 
-    public Kategori finnEllerKategoriUKATEGORISERT(KategoriRetning kategoriRetning) {
+    public Kategori finnUKATEGORISERT(KategoriRetning kategoriRetning) {
         List<Kategori> kategoriList = kategoriRepository.findByKategoriTypeAndKategoriRetning(KategoriType.UKATEGORISERT, kategoriRetning);
         if (kategoriList.isEmpty()) {
             return null;
@@ -113,7 +113,7 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     }
 
     public Kategori finnEllerOpprettKategoriUKATEGORISERT(KategoriRetning kategoriRetning) {
-        Kategori kategoriUkategorisert = finnEllerKategoriUKATEGORISERT(kategoriRetning);
+        Kategori kategoriUkategorisert = finnUKATEGORISERT(kategoriRetning);
         if (kategoriUkategorisert==null) {
             kategoriUkategorisert = opprettEntitet();
             kategoriUkategorisert.setTittel("[Ukategorisert " + kategoriRetning.getTittel() + "]");

@@ -1,7 +1,7 @@
 package com.hallvardlaerum.post.budsjettpost;
 
 import com.hallvardlaerum.kategori.Kategori;
-import com.hallvardlaerum.kategori.KategoriService;
+import com.hallvardlaerum.kategori.KategoriMedSumOgAntall;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
@@ -21,19 +21,17 @@ import java.util.List;
 @Service
 public class BudsjettpostService extends PostServiceMal implements InitieringsEgnet {
     private boolean erInitiert = false;
-    private KategoriService kategoriService;
     private PostRepository postRepository;
 
 
-
     public List<Post> finnFraPeriodeOgBudsjettstatus(Periode periode, BudsjettpoststatusEnum budsjettpoststatusEnum) {
-        return postRepository.findByDatoLocalDateBetweenAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(),budsjettpoststatusEnum, PostklasseEnum.BUDSJETTPOST);
+        return postRepository.findByDatoLocalDateBetweenAndBudsjettpoststatusEnumAndPostklasseEnumOrderByInnPaaKontoIntegerDescUtFraKontoIntegerDesc(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), budsjettpoststatusEnum, PostklasseEnum.BUDSJETTPOST);
     }
 
 
     public Integer sumInnEllerUtFradatoTildatoKategoritittel(LocalDate fraDato, LocalDate tilDato, String kategoritittel) {
         Tuple tuple = postRepository.sumBudsjettPosterFradatoTilDatoKategoritittel(fraDato, tilDato, kategoritittel);
-        if (tuple==null) {
+        if (tuple == null) {
             return 0;
         }
 
@@ -44,7 +42,7 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
     }
 
 
-     // === Standardmetoder ===
+    // === Standardmetoder ===
     public BudsjettpostService() {
     }
 
@@ -54,7 +52,6 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
         if (!erInitiert) {
             super.initPostServiceMal(PostklasseEnum.BUDSJETTPOST);
 
-            kategoriService = Allvitekyklop.hent().getKategoriService();
             postRepository = Allvitekyklop.hent().getPostRepository();
 
             erInitiert = true;
@@ -84,6 +81,19 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
         }
         return postRepository.findByDatoLocalDateBetweenAndKategoriUuidAndPostklasseEnumOrderByDatoLocalDateAsc(
                 periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), kategori.getUuid(), PostklasseEnum.BUDSJETTPOST);
+
+    }
+
+    public KategoriMedSumOgAntall opprettKategoriMedSumOgAntallBudsjettposter(LocalDate fraDatoLocalDate, LocalDate tilDatoLocalDate, Kategori kategori) {
+        Tuple tuple = postRepository.sumInnOgUtOgAntallFradatoTildatoKategori(fraDatoLocalDate, tilDatoLocalDate, kategori.getUuid());
+        KategoriMedSumOgAntall kategoriMedSumOgAntall = new KategoriMedSumOgAntall(kategori);
+        Integer sumInnInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class), true);
+        Integer sumUtInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class), true);
+
+        kategoriMedSumOgAntall.setSumInteger(sumInnInteger + sumUtInteger);
+        kategoriMedSumOgAntall.setAntallInteger(HelTallMester.konverterLongTilInteger(tuple.get(2, Long.class)));
+
+        return kategoriMedSumOgAntall;
 
     }
 }

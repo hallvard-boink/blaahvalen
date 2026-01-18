@@ -24,6 +24,7 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -69,6 +70,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     private RedigerEntitetDialog<Periodepost, Periode> kostnadspakkeRedigerEntitetDialog;
     private RedigerEntitetDialog<Post, Periode> budsjettpostRedigerEntitetDialog;
     private BudsjettpostService budsjettpostService;
+
 
     public AarsoversiktRedigeringsomraade() {
         super();
@@ -296,7 +298,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         return dato;
     }
 
-
+    private List<Post> draggedItemsList;
     private void instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostGrid() {
         budsjettpostGrid = new Grid<>();
         budsjettpostGrid.addColumn(Post::getDatoLocalDate).setHeader("Dato");
@@ -310,7 +312,16 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         budsjettpostGrid.setSizeFull();
         Gridkyklop.hent().tilpassKolonnerIFastradGrid(budsjettpostGrid);
 
+        budsjettpostGrid.setRowsDraggable(true);
+        budsjettpostGrid.addDragStartListener(e -> {
+            draggedItemsList = e.getDraggedItems();
+            kategoriMedSumOgAntallGrid.setDropMode(GridDropMode.ON_TOP);
+        });
 
+        budsjettpostGrid.addDragEndListener(e -> {
+           draggedItemsList=null;
+           budsjettpostGrid.setDropMode(null);
+        });
         instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostGrid_opprettOgKobleRedigeringsdialog();
     }
 
@@ -373,9 +384,39 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
                 oppdaterBudsjettpostgrid(e.getFirstSelectedItem().get().getKategori());
             }
         });
+
+        // drag and drop
+        kategoriMedSumOgAntallGrid.setRowsDraggable(true);
+
+        kategoriMedSumOgAntallGrid.addDropListener(e -> {
+            if (e.getDropTargetItem().isPresent()) {
+                oppdaterBudsjettposterMedNyKategori(e.getDropTargetItem().get().getKategori(), draggedItemsList);
+            }
+        });
+
+        kategoriMedSumOgAntallGrid.addDragEndListener(e -> {
+           draggedItemsList=null;
+           kategoriMedSumOgAntallGrid.setDropMode(null);
+        });
+
+
+
         kategoriMedSumOgAntallGrid.setSizeFull();
     }
 
+
+    private void oppdaterBudsjettposterMedNyKategori(Kategori nyKategori, List<Post> budsjettposter){
+        if (nyKategori==null || budsjettposter==null) {
+            return;
+        }
+
+        for (Post budsjettpost:budsjettposter) {
+            budsjettpost.setKategori(nyKategori);
+        }
+        budsjettpostService.lagreAlle(budsjettposter);
+        instansOppdaterEkstraRedigeringsfelter();
+
+    }
 
     private ArrayList<KategoriMedSumOgAntall> finnKategorierMedSumOgAntall() {
         BudsjettpostService budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();

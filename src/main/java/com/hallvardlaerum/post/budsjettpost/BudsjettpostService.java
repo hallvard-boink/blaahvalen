@@ -41,6 +41,17 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
         return innInteger + utInteger;
     }
 
+    public LocalDate opprettPassendeDatoFraPeriode(Periode periode){
+        if (periode == null) {
+            return LocalDate.now();
+        } else {
+            if (periode.getDatoFraLocalDate()!=null) {
+                return periode.getDatoFraLocalDate();
+            } else {
+                return LocalDate.now();
+            }
+        }
+    }
 
     // === Standardmetoder ===
     public BudsjettpostService() {
@@ -72,6 +83,7 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
     public Post opprettEntitet() {
         Post budsjettpost = leggTilUUID(new Post());
         budsjettpost.setPostklasseEnum(PostklasseEnum.BUDSJETTPOST);
+        budsjettpost.setBudsjettpoststatusEnum(BudsjettpoststatusEnum.FORESLAATT);
         return budsjettpost;
     }
 

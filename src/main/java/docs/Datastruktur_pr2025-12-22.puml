@@ -82,6 +82,6 @@ class Periodepost {
 Post --o Kategori
 Periodepost --o Kategori
 Periodepost --o Periode
-Post --o Periodepost : Kun for kostnadspakker
+Post --o Periodepost : Kun for kostnadspakker\n og budsjettpostgrupper
 
 @enduml

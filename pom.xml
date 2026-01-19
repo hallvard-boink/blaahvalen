@@ -48,13 +48,14 @@
             <version>6.20.1</version>
         </dependency>
 
-        <!--
+
+<!-- Kommenter ut denne under utvikling, og fjern kommentering ved deploy
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope>
         </dependency>
-        -->
+-->
 
         <dependency>
             <groupId>com.hallvardlaerum.libs</groupId>

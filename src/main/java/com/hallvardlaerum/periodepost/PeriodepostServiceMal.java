@@ -2,6 +2,7 @@ package com.hallvardlaerum.periodepost;
 
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriRetning;
+import com.hallvardlaerum.kategori.KategoriType;
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
@@ -22,6 +23,14 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
     private NormalpostService normalpostService;
     private BudsjettpostService budsjettpostService;
 
+
+
+
+
+    // ===========================
+    // === Constructor og Init ===
+    //<editor-fold desc="Constructor og Init">
+
     public PeriodepostServiceMal() {
 
     }
@@ -38,11 +47,46 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         normalpostService = Allvitekyklop.hent().getNormalpostService();
         budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
     }
+    //</editor-fold>
+
+
+    // ============================
+    // === Slette periodeposter ===
+    //<editor-fold desc="Slette flere">
 
     public void slettAlle(List<Periodepost> periodepostList) {
         periodepostRepository.deleteAll(periodepostList);
         periodepostRepository.flush();
     }
+
+
+
+    public void slettUkategorisertForPeriode(Periode periode, KategoriRetning kategoriRetning) {
+        if (periode==null || kategoriRetning == null) {
+            return;
+        }
+
+        //Kategori ukategorisertKategori = Allvitekyklop.hent().getKategoriService().finnEllerOpprettKategoriUKATEGORISERT(kategoriRetning);
+        Kategori ukategorisertKategori = Allvitekyklop.hent().getKategoriService()
+                .finnEllerOpprettFraKategoriTypeOgKategoriretningOgNivaa(KategoriType.UKATEGORISERT,kategoriRetning,0);
+
+        Periodepost ukategorisertPeriodepost = finnEllerOpprettOgOppdaterPeriodepostUkategorisert(periode, ukategorisertKategori);
+        if (ukategorisertPeriodepost!=null) {
+            slett(ukategorisertPeriodepost);
+        }
+    }
+
+    //</editor-fold>
+
+
+    // ==========================
+    // === Finne periodeposter ===
+    //<editor-fold desc="Finne periodeposter">
+
+    public List<Periodepost> finnPeriodeposterEtterKategori(Kategori fjernesKategori) {
+        return periodepostRepository.findByKategori(fjernesKategori);
+    }
+
 
     public Periodepost finnStandardFraPeriodeOgKategori(Periode periode, Kategori kategori) {
         if (kategori.getNivaa()!=0) {
@@ -57,67 +101,6 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
                 Loggekyklop.bruk().loggADVARSEL("Fant mer enn en standard periodepost i perioden " + periode.hentBeskrivendeNavn() + " med kategorien " + kategori.hentBeskrivendeNavn());
             }
             return periodeposter.getFirst();
-        }
-    }
-
-    @Override
-    public Periodepost opprettEntitet() {
-        Periodepost periodepost = leggTilUUID(new Periodepost());
-        periodepost.setPeriodepostTypeEnum(periodepostTypeEnum);
-        return periodepost;
-    }
-
-    public void oppdaterOgLagreSummerForValgteVanligePeriodepost() {
-        oppdaterOgLagreSummerForVanligePeriodeposter(periodepostRedigeringsomraade.getEntitet());
-        periodepostRedigeringsomraade.lesBean();
-        periodepostRedigeringsomraade.instansOppdaterEkstraRedigeringsfelter();
-
-    }
-
-    public void oppdaterOgLagreSummerForVanligePeriodeposter(Periodepost periodepost) {
-        if (periodepost.getKategori()==null) {
-            return;
-        }
-        LocalDate fraLocalDate = periodepost.getPeriode().getDatoFraLocalDate();
-        LocalDate tilLocalDate = periodepost.getForelder().getDatoTilLocalDate();
-        String kategoriTittel = periodepost.getKategori().getTittel();
-
-        periodepost.setSumRegnskapInteger(normalpostService.sumInnEllerUtFradatoTildatoKategoritittel(fraLocalDate, tilLocalDate, kategoriTittel));
-        periodepost.setSumBudsjettInteger(budsjettpostService.sumInnEllerUtFradatoTildatoKategoritittel(fraLocalDate, tilLocalDate, kategoriTittel));
-
-        lagre(periodepost);
-    }
-
-
-
-
-    public String presenterPeriodeposterMenIkkeVisPeriode(List<Periodepost> periodepostList) {
-        if (periodepostList==null || periodepostList.isEmpty()) {
-            return "(tom liste)";
-        } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("\n");
-            for (int i = 0; i<periodepostList.size(); i++) {
-                Periodepost periodepost = periodepostList.get(i);
-                String kategoriString = "(kategori ikke satt)";
-                if (periodepost.getKategori()!=null) {
-                    kategoriString = periodepost.getKategori().getTittel();
-                }
-                sb.append(kategoriString).append(" ");
-
-                if (periodepost.getSumBudsjettInteger()==null) {
-                    sb.append("budsjett: null ");
-                } else {
-                    sb.append("budsjett: ").append(periodepost.getSumBudsjettInteger()).append(" ");
-                }
-                if (periodepost.getSumRegnskapInteger()==null) {
-                    sb.append("regnskap: null ");
-                } else {
-                    sb.append("regnskap: ").append(periodepost.getSumRegnskapInteger()).append(" ");
-                }
-                if (i>0){sb.append("\n");}
-            }
-            return sb.toString();
         }
     }
 
@@ -142,6 +125,15 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
             return new ArrayList<>();
         }
     }
+
+    //</editor-fold>
+
+
+
+
+    // ==========================================
+    // === Finne og evt. opprette periodepost ===
+    //<editor-fold desc="Finne og evt. opprette periodepost">
 
 
     public Periodepost finnEllerOpprettOgOppdaterPeriodepostUkategorisert(Periode periode, Kategori kategoriUkategorisert) {
@@ -182,18 +174,86 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         }
     }
 
+    //</editor-fold>
 
-    public void slettUkategorisertForPeriode(Periode periode, KategoriRetning kategoriRetning) {
-        if (periode==null || kategoriRetning == null) {
+
+    // ==========================
+    // === CRUD ===
+    //<editor-fold desc="CRUD">
+
+    @Override
+    public Periodepost opprettEntitet() {
+        Periodepost periodepost = leggTilUUID(new Periodepost());
+        periodepost.setPeriodepostTypeEnum(periodepostTypeEnum);
+        return periodepost;
+    }
+
+    //</editor-fold>
+
+
+    // =======================
+    // === Oppdatere summer ===
+    //<editor-fold desc="Oppdater summer">
+
+    public void oppdaterOgLagreSummerForValgteVanligePeriodepost() {
+        oppdaterOgLagreSummerForVanligePeriodeposter(periodepostRedigeringsomraade.getEntitet());
+        periodepostRedigeringsomraade.lesBean();
+        periodepostRedigeringsomraade.instansOppdaterEkstraRedigeringsfelter();
+
+    }
+
+    public void oppdaterOgLagreSummerForVanligePeriodeposter(Periodepost periodepost) {
+        if (periodepost.getKategori()==null) {
             return;
         }
+        LocalDate fraLocalDate = periodepost.getPeriode().getDatoFraLocalDate();
+        LocalDate tilLocalDate = periodepost.getForelder().getDatoTilLocalDate();
+        String kategoriTittel = periodepost.getKategori().getTittel();
 
-        Kategori ukategorisertKategori = Allvitekyklop.hent().getKategoriService().finnEllerOpprettKategoriUKATEGORISERT(kategoriRetning);
-        Periodepost ukategorisertPeriodepost = finnEllerOpprettOgOppdaterPeriodepostUkategorisert(periode, ukategorisertKategori);
-        if (ukategorisertPeriodepost!=null) {
-            slett(ukategorisertPeriodepost);
+        periodepost.setSumRegnskapInteger(normalpostService.sumInnEllerUtFradatoTildatoKategoritittel(fraLocalDate, tilLocalDate, kategoriTittel));
+        periodepost.setSumBudsjettInteger(budsjettpostService.sumInnEllerUtFradatoTildatoKategoritittel(fraLocalDate, tilLocalDate, kategoriTittel));
+
+        lagre(periodepost);
+    }
+
+    //</editor-fold>
+
+
+    // ====================================
+    // === Lage tekst fra periodeposter ===
+    //<editor-fold desc="Lage tekst fra periodeposter">
+
+    public String presenterPeriodeposterMenIkkeVisPeriode(List<Periodepost> periodepostList) {
+        if (periodepostList==null || periodepostList.isEmpty()) {
+            return "(tom liste)";
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append("\n");
+            for (int i = 0; i<periodepostList.size(); i++) {
+                Periodepost periodepost = periodepostList.get(i);
+                String kategoriString = "(kategori ikke satt)";
+                if (periodepost.getKategori()!=null) {
+                    kategoriString = periodepost.getKategori().getTittel();
+                }
+                sb.append(kategoriString).append(" ");
+
+                if (periodepost.getSumBudsjettInteger()==null) {
+                    sb.append("budsjett: null ");
+                } else {
+                    sb.append("budsjett: ").append(periodepost.getSumBudsjettInteger()).append(" ");
+                }
+                if (periodepost.getSumRegnskapInteger()==null) {
+                    sb.append("regnskap: null ");
+                } else {
+                    sb.append("regnskap: ").append(periodepost.getSumRegnskapInteger()).append(" ");
+                }
+                if (i>0){sb.append("\n");}
+            }
+            return sb.toString();
         }
     }
+
+    //</editor-fold>
 
 
 }

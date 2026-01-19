@@ -67,9 +67,8 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
             "WHERE " +
                 "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 " +
-                "AND k.tittel = ?3"
-    )
-    List<Post> finnEtterFraDatoTilDatoOgKategoritittel(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, String kategoriTittel);
+                "AND k.tittel = ?3" )
+    List<Post> finnEtterFraDatoTilDatoOgKategoritittelOgPostklasseEnum(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, String kategoriTittel);
 
 
     /**
@@ -79,12 +78,11 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
      *
      * @return liste av poster hvor normalposttype skal settes til 2 [Utelates]
      */
-    @NativeQuery(value = "SELECT p* " +
+    @NativeQuery(value = "SELECT p.* " +
             "FROM post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
             "WHERE " +
             "p.postklasse_enum = 0 AND " +
-            "k.kategori_type = 4 AND p.normalposttype_enum !=2 "
-    )
+            "k.kategori_type = 4 AND p.normalposttype_enum !=2 ")
     List<Post> finnPosterSomSkalKorrigeres_FeilNormalposttypeSelvOmKategoriErType4SkalIkkekategoriseres();
 
 // =================================
@@ -190,6 +188,8 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
         "p.kategori_uuid = ?3"
     )
     Tuple sumInnOgUtOgAntallFradatoTildatoKategori(LocalDate fraDatoLocalDate, LocalDate tilDatoLocalDate, UUID kategori_uuid);
+
+    List<Post> findByKategoriUuid(UUID kategori_uuid);
 }
 
 

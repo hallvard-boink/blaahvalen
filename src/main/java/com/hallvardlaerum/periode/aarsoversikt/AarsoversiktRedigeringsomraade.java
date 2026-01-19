@@ -198,7 +198,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         button.addClickListener(e -> {
             if (budsjettpostGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
                 List<Post> markertePoster = budsjettpostGrid.getSelectionModel().getSelectedItems().stream().toList();
-                budsjettpostService.slettAlle(markertePoster);
+                budsjettpostService.slettAllePoster(markertePoster);
                 instansOppdaterEkstraRedigeringsfelter();
             } else {
                 Notification.show("Marker en budsjettpost først").setPosition(Notification.Position.MIDDLE);

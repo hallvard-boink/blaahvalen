@@ -39,12 +39,12 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
     }
 
     @Override
-    public void init(){
+    public void init() {
         if (!erInitiert) {
             super.initRedigeringsomraadeMal();
             instansOpprettFelter();
             instansByggOppBinder();
-            erInitiert=true;
+            erInitiert = true;
         }
     }
 
@@ -58,6 +58,17 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
 
     }
 
+
+    @Override
+    public void aktiver(Boolean blnAktiver) {
+        super.aktiver(blnAktiver);
+        KategoriView kategoriView = Allvitekyklop.hent().getKategoriView();
+        if (kategoriView != null && kategoriView.dupliserButton != null) {
+            Allvitekyklop.hent().getKategoriView().dupliserButton.setEnabled(blnAktiver);
+        }
+
+    }
+
     @Override
     public void instansOpprettFelter() {
         String hovedtabString = "Hoved";
@@ -66,19 +77,19 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
         tittelTextField = new TextField("Tittel");
         undertittelTextField = new TextField("Undertittel");
         leggTilRedigeringsfelter(hovedtabString, tittelTextField, undertittelTextField);
-        settColspan(tittelTextField,2);
-        settColspan(undertittelTextField,2);
+        settColspan(tittelTextField, 2);
+        settColspan(undertittelTextField, 2);
 
         beskrivelseTextArea = leggTilRedigeringsfelt(new TextArea("Beskrivelse"));
         leggTilRedigeringsfelter(hovedtabString, beskrivelseTextArea);
-        settColspan(beskrivelseTextArea,4);
+        settColspan(beskrivelseTextArea, 4);
 
         erAktivCheckbox = new Checkbox("Er aktiv");
         brukesTilBudsjettCheckbox = new Checkbox("Brukes til budsjett");
         brukesTilFastePosterCheckbox = new Checkbox("Brukes til faste poster");
         brukesTilRegnskapCheckbox = new Checkbox("Brukes til regnskap");
         erOppsummerendeUnderkategoriCheckbox = new Checkbox("Er oppsummerende underkategori");
-        leggTilRedigeringsfelter(hovedtabString,erAktivCheckbox, brukesTilBudsjettCheckbox,  brukesTilFastePosterCheckbox, brukesTilRegnskapCheckbox, erOppsummerendeUnderkategoriCheckbox);
+        leggTilRedigeringsfelter(hovedtabString, erAktivCheckbox, brukesTilBudsjettCheckbox, brukesTilFastePosterCheckbox, brukesTilRegnskapCheckbox, erOppsummerendeUnderkategoriCheckbox);
 
         kategoriRetningComboBox = new ComboBox<>("Retning");
         kategoriRetningComboBox.setItems(KategoriRetning.values());

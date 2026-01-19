@@ -7,6 +7,7 @@ import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -14,6 +15,8 @@ import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
@@ -30,6 +33,7 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
 
     private TextField tittelFilterTextField;
     private TextField undertittelFilterTextField;
+    private IntegerField nivaaFilterIntegerField;
     private BooleanCombobox brukesTilBudsjettFilterBooleanCombobox;
     private BooleanCombobox brukestilRegnskapFilterBooleanCombobox;
     private BooleanCombobox brukesTilFastePosterFilterBooleanCombobox;
@@ -38,6 +42,9 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
     private BooleanCombobox erOppsummerendeUnderkategoriFilterCombobox;
 
     private boolean erInitiert;
+    protected Button dupliserButton;
+    private Button slaaSammenButton;
+
 
     public KategoriView() {
         super();
@@ -50,7 +57,7 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
         return false;
     }
 
-    public void init(){
+    public void init() {
         if (!erInitiert) {
             this.kategoriService = Allvitekyklop.hent().getKategoriService();
             this.kategoriRedigeringsomraade = Allvitekyklop.hent().getKategoriRedigeringsomraade();
@@ -58,14 +65,56 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
 
             opprettLayout(kategoriService, kategoriRedigeringsomraade);
             leggTilEkstraMenyValg();
+            tilpassKnapperad();
             erInitiert = true;
         }
     }
 
+
+    @Override
+    public void instansAktiverKnapperadRedigeringsfelt(Boolean aktiverBoolean) {
+        super.instansAktiverKnapperadRedigeringsfelt(aktiverBoolean);
+        dupliserButton.setEnabled(aktiverBoolean);
+
+    }
+
+    private void tilpassKnapperad() {
+        HorizontalLayout horizontalLayout = super.layoutRedigeringsknapper;
+        horizontalLayout.addToEnd(tilpassKnapperad_leggTilDupliserButton());
+        horizontalLayout.addToEnd((tilpassKnapperad_leggTilSlaaSammenButton()));
+    }
+
+    private Button tilpassKnapperad_leggTilSlaaSammenButton() {
+        slaaSammenButton = new Button("Slå sammen...");
+        slaaSammenButton.addClickListener(e -> new SlaaSammenKategorierDialog().open());
+        return slaaSammenButton;
+    }
+
+    private Button tilpassKnapperad_leggTilDupliserButton() {
+        dupliserButton = new Button("Dupliser kategori");
+        dupliserButton.setEnabled(false);
+        dupliserButton.addClickListener(e -> dupliserKategori());
+        return dupliserButton;
+    }
+
+
+    private void dupliserKategori() {
+        Kategori kategori = kategoriRedigeringsomraade.hentEntitet();
+        if (kategori == null) {
+            return;
+        }
+
+        Kategori nyKategori = kategoriService.dupliserKategori(kategori);
+        oppdaterSoekeomraadeFinnAlleRader();
+        hentGrid().select(nyKategori);
+        hentRedigeringsomraadeAktig().setEntitet(nyKategori);
+        oppdaterRedigeringsomraade();
+
+    }
+
+
     private void leggTilEkstraMenyValg() {
-
         hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blaahvalen", e -> importerKategorierFraGamleBlaahvalen());
-
     }
 
     private void importerKategorierFraGamleBlaahvalen() {
@@ -86,29 +135,33 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
             listDataView.addFilter(k -> TekstKyklop.hent().inneholderTekst(k.getUndertittel(), undertittelFilterTextField.getValue()));
         }
 
-        if (brukesTilBudsjettFilterBooleanCombobox.getValue()!=null) {
+        if (nivaaFilterIntegerField.getValue() != null) {
+            listDataView.addFilter(k -> k.getNivaa().equals(nivaaFilterIntegerField.getValue()));
+        }
+
+        if (brukesTilBudsjettFilterBooleanCombobox.getValue() != null) {
             listDataView.addFilter(k -> k.getBrukesTilBudsjett().equals(brukesTilBudsjettFilterBooleanCombobox.getValue()));
         }
 
-        if (brukesTilFastePosterFilterBooleanCombobox.getValue()!=null) {
-            listDataView.addFilter(k ->k.getBrukesTilFastePoster().equals(brukesTilFastePosterFilterBooleanCombobox.getValue()));
+        if (brukesTilFastePosterFilterBooleanCombobox.getValue() != null) {
+            listDataView.addFilter(k -> k.getBrukesTilFastePoster().equals(brukesTilFastePosterFilterBooleanCombobox.getValue()));
         }
 
-        if (brukestilRegnskapFilterBooleanCombobox.getValue()!=null) {
+        if (brukestilRegnskapFilterBooleanCombobox.getValue() != null) {
             listDataView.addFilter(k -> k.getBrukesTilRegnskap().equals(brukestilRegnskapFilterBooleanCombobox.getValue()));
         }
 
-        if (erOppsummerendeUnderkategoriFilterCombobox.getValue()!=null) {
-            listDataView.addFilter(k-> k.getErOppsummerendeUnderkategori().equals(erOppsummerendeUnderkategoriFilterCombobox.getValue()));
+        if (erOppsummerendeUnderkategoriFilterCombobox.getValue() != null) {
+            listDataView.addFilter(k -> k.getErOppsummerendeUnderkategori().equals(erOppsummerendeUnderkategoriFilterCombobox.getValue()));
         }
 
-        if (erAktivFilterBooleanCombobox.getValue()!=null) {
+        if (erAktivFilterBooleanCombobox.getValue() != null) {
             listDataView.addFilter(k -> k.getErAktiv().equals(erAktivFilterBooleanCombobox.getValue()));
         }
 
-        if (kategoriTypeFilterComboBox.getValue()!=null) {
+        if (kategoriTypeFilterComboBox.getValue() != null) {
             listDataView.addFilter(k -> {
-                if (k.getKategoriType()!=null) {
+                if (k.getKategoriType() != null) {
                     return k.getKategoriType().equals(kategoriTypeFilterComboBox.getValue());
                 } else {
                     return false;
@@ -116,7 +169,7 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
             });
         }
 
-        if (erOppsummerendeUnderkategoriFilterCombobox.getValue()!=null) {
+        if (erOppsummerendeUnderkategoriFilterCombobox.getValue() != null) {
             listDataView.addFilter(k -> k.getErAktiv().equals(erOppsummerendeUnderkategoriFilterCombobox.getValue()));
         }
 
@@ -132,57 +185,59 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
         grid.addColumn(Kategori::getUndertittel).setHeader("Undertittel").setRenderer(opprettKategoriUnderTittelRenderer());
         //grid.addColumn(Kategori::getBrukesTilBudsjett).setHeader("Budsjett");
 
+        grid.addColumn(Kategori::getNivaa).setHeader("Nivå");
+
         grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getBrukesTilBudsjett(), kategori))
-                .setTooltipGenerator(kategori -> kategori.getBrukesTilBudsjett()!=null? kategori.getBrukesTilBudsjett().toString() : "")
+                .setTooltipGenerator(kategori -> kategori.getBrukesTilBudsjett() != null ? kategori.getBrukesTilBudsjett().toString() : "")
                 .setHeader("Budsjett").setTextAlign(ColumnTextAlign.CENTER);
 
         grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getBrukesTilFastePoster(), kategori))
-                .setTooltipGenerator(kategori -> kategori.getBrukesTilFastePoster()!=null? kategori.getBrukesTilFastePoster().toString() : "")
+                .setTooltipGenerator(kategori -> kategori.getBrukesTilFastePoster() != null ? kategori.getBrukesTilFastePoster().toString() : "")
                 .setHeader("Faste poster").setTextAlign(ColumnTextAlign.CENTER);
 
         grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getBrukesTilRegnskap(), kategori))
-                .setTooltipGenerator(kategori -> kategori.getBrukesTilRegnskap()!=null? kategori.getBrukesTilRegnskap().toString() : "")
+                .setTooltipGenerator(kategori -> kategori.getBrukesTilRegnskap() != null ? kategori.getBrukesTilRegnskap().toString() : "")
                 .setHeader("Regnskap").setTextAlign(ColumnTextAlign.CENTER);
 
         grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getErOppsummerendeUnderkategori(), kategori))
-                .setTooltipGenerator(kategori -> kategori.getErOppsummerendeUnderkategori()!=null? kategori.getErOppsummerendeUnderkategori().toString() : "")
+                .setTooltipGenerator(kategori -> kategori.getErOppsummerendeUnderkategori() != null ? kategori.getErOppsummerendeUnderkategori().toString() : "")
                 .setHeader("Oppsummerende").setTextAlign(ColumnTextAlign.CENTER);
 
         grid.addComponentColumn(kategori -> opprettJaNeiIkon(kategori.getErAktiv(), kategori))
-                .setTooltipGenerator(kategori -> kategori.getErAktiv()!=null? kategori.getErAktiv().toString() : "")
+                .setTooltipGenerator(kategori -> kategori.getErAktiv() != null ? kategori.getErAktiv().toString() : "")
                 .setHeader("Aktiv").setTextAlign(ColumnTextAlign.CENTER);
 
         grid.addColumn(Kategori::getKategoriType).setHeader("Type").setRenderer(opprettKategoriTypeRenderer());
         grid.setItems(kategoriService.finnAlle());
     }
 
-    private ComponentRenderer<Span, Kategori> opprettKategoriTypeRenderer(){
+    private ComponentRenderer<Span, Kategori> opprettKategoriTypeRenderer() {
         return new ComponentRenderer<>(k -> {
             Span span = new Span();
-            if (k.getKategoriType()!=null) {
+            if (k.getKategoriType() != null) {
                 span.setText(k.getKategoriType().getTittel());
             }
-            if (k.getErAktiv()!=null && !k.getErAktiv()) {
+            if (k.getErAktiv() != null && !k.getErAktiv()) {
                 span.addClassName(LumoUtility.TextColor.TERTIARY);
             }
             return span;
         });
     }
 
-    private ComponentRenderer<Span, Kategori> opprettKategoriTittelRenderer(){
+    private ComponentRenderer<Span, Kategori> opprettKategoriTittelRenderer() {
         return new ComponentRenderer<>(k -> {
-           Span span = new Span(k.getTittel());
-           if (k.getErAktiv()!=null && !k.getErAktiv()) {
-               span.addClassName(LumoUtility.TextColor.TERTIARY);
-           }
-           return span;
+            Span span = new Span(k.getTittel());
+            if (k.getErAktiv() != null && !k.getErAktiv()) {
+                span.addClassName(LumoUtility.TextColor.TERTIARY);
+            }
+            return span;
         });
     }
 
-    private ComponentRenderer<Span, Kategori> opprettKategoriUnderTittelRenderer(){
+    private ComponentRenderer<Span, Kategori> opprettKategoriUnderTittelRenderer() {
         return new ComponentRenderer<>(k -> {
             Span span = new Span(k.getUndertittel());
-            if (k.getErAktiv()!=null && !k.getErAktiv()) {
+            if (k.getErAktiv() != null && !k.getErAktiv()) {
                 span.addClassName(LumoUtility.TextColor.TERTIARY);
             }
             return span;
@@ -193,11 +248,11 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
 
         Icon icon;
 
-        if (kategori.getErAktiv()!=null && !kategori.getErAktiv()) {
+        if (kategori.getErAktiv() != null && !kategori.getErAktiv()) {
             icon = VaadinIcon.BAN.create();
             icon.getElement().getThemeList().add("badge contrast");
         } else {
-            if (avkryssetBoolean!=null && avkryssetBoolean) {
+            if (avkryssetBoolean != null && avkryssetBoolean) {
                 icon = VaadinIcon.CHECK.create();
                 icon.getElement().getThemeList().add("badge success");
             } else {
@@ -214,14 +269,15 @@ public class KategoriView extends MasterDetailViewmal<Kategori, KategoriReposito
 
     @Override
     public void instansOpprettFilterFelter() {
-        tittelFilterTextField = leggTilFilterfelt(0,new TextField(),"tekst");
-        undertittelFilterTextField = leggTilFilterfelt(1, new TextField(),"tekst");
-        brukesTilBudsjettFilterBooleanCombobox = leggTilFilterfelt(2, new BooleanCombobox(),"Velg");
-        brukesTilFastePosterFilterBooleanCombobox = leggTilFilterfelt(3, new BooleanCombobox(),"Velg");
-        brukestilRegnskapFilterBooleanCombobox = leggTilFilterfelt(4, new BooleanCombobox(),"Velg");
-        erOppsummerendeUnderkategoriFilterCombobox = leggTilFilterfelt(5, new BooleanCombobox(),"Velg");
-        erAktivFilterBooleanCombobox = leggTilFilterfelt(6, new BooleanCombobox(),"Velg");
-        kategoriTypeFilterComboBox = leggTilFilterfelt(7,new ComboBox<>(),"Velg");
+        tittelFilterTextField = leggTilFilterfelt(0, new TextField(), "tekst");
+        undertittelFilterTextField = leggTilFilterfelt(1, new TextField(), "tekst");
+        nivaaFilterIntegerField = leggTilFilterfelt(2, new IntegerField(),"Nivå");
+        brukesTilBudsjettFilterBooleanCombobox = leggTilFilterfelt(3, new BooleanCombobox(), "Velg");
+        brukesTilFastePosterFilterBooleanCombobox = leggTilFilterfelt(4, new BooleanCombobox(), "Velg");
+        brukestilRegnskapFilterBooleanCombobox = leggTilFilterfelt(5, new BooleanCombobox(), "Velg");
+        erOppsummerendeUnderkategoriFilterCombobox = leggTilFilterfelt(6, new BooleanCombobox(), "Velg");
+        erAktivFilterBooleanCombobox = leggTilFilterfelt(7, new BooleanCombobox(), "Velg");
+        kategoriTypeFilterComboBox = leggTilFilterfelt(8, new ComboBox<>(), "Velg");
         kategoriTypeFilterComboBox.setItems(KategoriType.values());
         kategoriTypeFilterComboBox.setItemLabelGenerator(KategoriType::getTittel);
     }

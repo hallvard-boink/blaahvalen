@@ -39,39 +39,26 @@ public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
     private void leggTilKnapper(){
         leggTilKnapper_OpprettTestDataButton();
         leggTilKnapper_SlettTestDataButton();
-        leggTilKnapper_KorrigerDataButton1();
-        leggTilKnapper_KorrigerDataButton2();
-        leggTilKnapper_KorrigerDataButton3();
+        leggTilKnapper_VaskDataButton();
 
     }
 
-    private void leggTilKnapper_KorrigerDataButton3() {
-        Button button = new Button("Korriger inkonsistente poster");
-        button.addClickListener(e -> new DataDoktor().korrigerKonkretePoster());
+    private void leggTilKnapper_VaskDataButton() {
+        Button button = new Button("Vask data");
+        button.addClickListener(e -> new DataDoktor().vaskData());
         add(button);
     }
 
-    private void leggTilKnapper_KorrigerDataButton2() {
-        Button korrigerDataButton = new Button("Slett periodeposter med kategoritype SKAL_IKKE_KATEGORISERES");
-        korrigerDataButton.addClickListener(e -> DataDoktor.slettPeriodeposterMedKategoriType_SKAL_IKKE_KATEGORISERES());
-        add(korrigerDataButton);
-    }
-
-    private void leggTilKnapper_KorrigerDataButton1() {
-        Button korrigerDataButton = new Button("Korriger normalposter som skulle vært utelatt");
-        korrigerDataButton.addClickListener(e -> DataDoktor.reparerNormalposterSomSkulleVaertUtelatt());
-        add(korrigerDataButton);
-    }
 
     private void leggTilKnapper_OpprettTestDataButton() {
         Button opprettTestdataButton = new Button("Opprett testdata");
-        opprettTestdataButton.addClickListener(e -> testDataFabrikk.produserData(2050));
+        opprettTestdataButton.addClickListener(e -> testDataFabrikk.opprettTestData(2050));
         add(opprettTestdataButton);
     }
 
     private void leggTilKnapper_SlettTestDataButton() {
         Button slettTestdataButton = new Button("Slett testdata");
-        slettTestdataButton.addClickListener(e -> testDataFabrikk.slettTestData());
+        slettTestdataButton.addClickListener(e -> testDataFabrikk.slettTestData(2050));
         add(slettTestdataButton);
     }
 

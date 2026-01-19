@@ -6,7 +6,6 @@ import com.hallvardlaerum.kategori.KategoriRepository;
 import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.EntitetserviceMedForelderMal;
 import com.hallvardlaerum.periode.Periode;
-import com.hallvardlaerum.post.normalpost.NormalposttypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import jakarta.persistence.Tuple;
 
@@ -19,43 +18,24 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post, 
     private PostklasseEnum postklasseEnum;
     private PostRepository postRepository;
 
-    public PostServiceMal() {
-
-    }
-
-    public void initPostServiceMal(PostklasseEnum postklasseEnum) {
-        if (!erInitiert) {
-            this.postklasseEnum = postklasseEnum;
-            KategoriService kategoriService = Allvitekyklop.hent().getKategoriService();
-            super.initEntitetserviceMal(Post.class, Allvitekyklop.hent().getPostRepository());
-            super.initierEntitetserviceMedForelderMal(Kategori.class, kategoriService);
-            postRepository = Allvitekyklop.hent().getPostRepository();
-            erInitiert = true;
-        }
-    }
 
 
+    // ===================
     // === FINN POSTER ===
 
-    public List<Post> finnEtterDatoOgTekstfrabankenOgNormalposttypeenum(
-            LocalDate datoLocalDate, String tekstFraBankenString, NormalposttypeEnum normalposttypeEnum
-    ) {
-        return postRepository.findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(datoLocalDate, tekstFraBankenString, normalposttypeEnum);
-    }
 
-
-    public List<Post> finnEtterDatoOgTekstfrabankenOgKategori(
-            LocalDate datoLocalDate, String tekstFraBankenString, Kategori kategori
+    public List<Post> finnPostEtterDatoOgTekstfrabankenOgKategoriOgPostklasseEnum(
+            LocalDate datoLocalDate, String tekstFraBankenString, Kategori kategori, PostklasseEnum postklasseEnum
     ) {
         return postRepository.findByDatoLocalDateAndTekstFraBankenStringAndKategori(datoLocalDate, tekstFraBankenString, kategori);
     }
 
 
-    public List<Post> finnEtterFradatoOgTilDatoOgHovedkategori(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, Kategori kategori) {
-        return postRepository.finnEtterFraDatoTilDatoOgKategoritittel(datoFraLocalDate, datoTilLocalDate, kategori.getTittel());
+    public List<Post> finnPostEtterFradatoOgTilDatoOgHovedkategori(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, Kategori kategori) {
+        return postRepository.finnEtterFraDatoTilDatoOgKategoritittelOgPostklasseEnum(datoFraLocalDate, datoTilLocalDate, kategori.getTittel());
     }
 
-    public List<Post> finnEtterFraDatoTilDatoPostklasseHovedkategori(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, PostklasseEnum postklasseEnum, Kategori kategori) {
+    public List<Post> finnPostEtterFraDatoTilDatoPostklasseHovedkategori(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, PostklasseEnum postklasseEnum, Kategori kategori) {
         return postRepository.finnEtterFraDatoTilDatoOgPostklasseOgKategoritittel(
                 datoFraLocalDate,
                 datoTilLocalDate,
@@ -68,7 +48,12 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post, 
         return postRepository.findByDatoLocalDateBetweenAndPostklasseEnum(fraLocalDate, tilLocalDate, postklasseEnum);
     }
 
+    public List<Post> finnPosterEtterKategori(Kategori kategori) {
+        return postRepository.findByKategoriUuid(kategori.getUuid());
+    }
 
+
+    // ===================
     // == SLETT POSTER ===
     public void slettAllePosterAvDennePostklasseEnum(){
         List<Post> alleNormalposter = postRepository.findByPostklasseEnum(postklasseEnum);
@@ -77,14 +62,13 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post, 
         //refresh gjøres i View
     }
 
-    public void slettAlle(List<Post> poster) {
+    public void slettAllePoster(List<Post> poster) {
         postRepository.deleteAll(poster);
     }
 
 
+    // =================================
     // == OPPSUMMER INNHOLD I POSTER ===
-
-
 
     public Integer sumInnFradatoTilDatoNormalposterMedOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate) {
         return postRepository.sumInnFradatoTilDatoKategoriserteNormalposterMedOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
@@ -113,4 +97,26 @@ public abstract class PostServiceMal extends EntitetserviceMedForelderMal<Post, 
     public Integer sumUtFradatoTilDatoNormalposterUtenOverfoeringer(LocalDate fraOgMedLocalDate, LocalDate tilOgMedLocalDate) {
         return postRepository.sumUtFradatoTilDatoKategoriserteNormalposterUtenOverfoeringer(fraOgMedLocalDate,tilOgMedLocalDate);
     }
+
+
+
+    // ===========================
+    // === Init og constructor ===
+
+    public PostServiceMal() {
+
+    }
+
+    public void initPostServiceMal(PostklasseEnum postklasseEnum) {
+        if (!erInitiert) {
+            this.postklasseEnum = postklasseEnum;
+            KategoriService kategoriService = Allvitekyklop.hent().getKategoriService();
+            super.initEntitetserviceMal(Post.class, Allvitekyklop.hent().getPostRepository());
+            super.initierEntitetserviceMedForelderMal(Kategori.class, kategoriService);
+            postRepository = Allvitekyklop.hent().getPostRepository();
+            erInitiert = true;
+        }
+    }
+
+
 }

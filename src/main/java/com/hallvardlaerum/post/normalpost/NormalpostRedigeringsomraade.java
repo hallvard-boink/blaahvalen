@@ -3,6 +3,7 @@ package com.hallvardlaerum.post.normalpost;
 
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriService;
+import com.hallvardlaerum.libs.ui.RedigerEntitetDialogEgnet;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeMal;
 
@@ -31,7 +32,8 @@ import java.util.ArrayList;
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @UIScope
-public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> implements RedigeringsomraadeAktig<Post>, InitieringsEgnet {
+public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post>
+        implements RedigeringsomraadeAktig<Post>, InitieringsEgnet, RedigerEntitetDialogEgnet<Periodepost> {
     private boolean erInitiert = false;
     private KostnadspakkeService kostnadspakkeService;
 
@@ -54,6 +56,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
     private TextField forelderPostUUID;
     private ComboBox<Periodepost> kostnadspakkeComboBox;
     private KostnadspakkeMester kostnadspakkeMester;
+    private HorizontalLayout kostnadspakkeHaandteringHorizontalLayout;
 
     public NormalpostRedigeringsomraade() {
         super();
@@ -97,12 +100,14 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
 
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
-        Kategori kategori = hentEntitet().getKategori();
-        kategoriDetaljCombobox_OppdaterUtvalgOgSettTilOppsummerendeUnderkategori(kategori);
+        if (hentEntitet()!=null) {
+            Kategori kategori = hentEntitet().getKategori();
+            kategoriDetaljCombobox_OppdaterUtvalgOgSettTilOppsummerendeUnderkategori(kategori);
 
+        }
     }
 
-    private HorizontalLayout kostnadspakkeHaandteringHorizontalLayout;
+
 
     @Override
     public void instansOpprettFelter() {
@@ -170,13 +175,7 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
 
     private void instansOpprettFelter_opprettKostnadspakkeHaandteringHorizontallLayout() {
         kostnadspakkeComboBox = new ComboBox<>("Kostnadspakke");
-        kostnadspakkeComboBox.setItemLabelGenerator(p -> {
-            if (p.getTittelString()==null) {
-                return "(mangler tittel)" + p.getUuid();
-            } else {
-                return p.getTittelString();
-            }
-        });
+        kostnadspakkeComboBox.setItemLabelGenerator(Periodepost::hentKortnavn);
         kostnadspakkeComboBox.setItems(kostnadspakkeService.finnAlleKostnadspakker());
         kostnadspakkeComboBox.addValueChangeListener(event -> {
             if (event != null && hentEntitet() != null && event.isFromClient() && event.getValue()!=null) {
@@ -209,13 +208,17 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
 
         Button leggTilNyKostnadspakkeButton = new Button(new Icon(VaadinIcon.PLUS));
         leggTilNyKostnadspakkeButton.setTooltipText("Legg til ny kostnadspakke");
-        leggTilNyKostnadspakkeButton.addClickListener(e -> {
-            kostnadspakkeMester.leggTilNyKostnadspakke();
-        });
+        leggTilNyKostnadspakkeButton.addClickListener(e -> leggTilNyKostnadspakke());
 
         kostnadspakkeHaandteringHorizontalLayout.add(kostnadspakkeComboBox, brukSisteKostnadspakkeButton,brukNestsisteKostnadspakkeButton, leggTilNyKostnadspakkeButton);
 
     }
+
+    private void leggTilNyKostnadspakke() {
+        Allvitekyklop.hent().getNormalpostView().lagreEntitet();
+        kostnadspakkeMester.leggTilNyKostnadspakke(hentEntitet());
+    }
+
 
     private void brukKostnadspakke(Periodepost kostnadspakke){
         if (kostnadspakke!=null) {
@@ -273,5 +276,11 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post> im
         binder.bind(uuidTextField, Post::getUuidString, Post::setUuidStringFake);
         binder.bind(forelderPostUUID, Post::getForelderPostUUID, Post::setForelderPostUUID);
         binder.bind(kostnadspakkeComboBox, Post::getKostnadsPakke, Post::setKostnadsPakke);
+    }
+
+    @Override
+    public void oppdaterEtterLagringFraDialog(Periodepost kostnadspakke) {
+        kostnadspakkeComboBox.setItems(kostnadspakkeService.finnAlleKostnadspakker());
+        kostnadspakkeComboBox.setValue(kostnadspakke);
     }
 }

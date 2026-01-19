@@ -54,13 +54,12 @@ public class Periodepost extends AbstraktEntitet implements EntitetMedForelderAk
         if (periodepostTypeEnum ==null || kategori==null) {
             return "";
         } else {
-            switch (periodepostTypeEnum) {
+            return switch (periodepostTypeEnum) {
                 case AARSOVERSIKTPOST, MAANEDSOVERSIKTPOST ->  lagBeskrivendenavnAarsoversiktMaanedsoversikt();
                 case PERIODEOVERSIKTPOST -> lagBeskrivendenavnPeriodeoversiktpost();
-                default -> {return super.toString();}
-                }
+                default -> super.toString();
+                };
         }
-        return "";
     }
 
     private String lagBeskrivendenavnPeriodeoversiktpost() {
@@ -73,6 +72,30 @@ public class Periodepost extends AbstraktEntitet implements EntitetMedForelderAk
                 kategori.getTittel() + " " +
                 (sumBudsjettInteger!=null? "Budsjett:" + sumBudsjettInteger : "" ) + " " +
                 (sumRegnskapInteger!=null? "Regnskap:" + sumRegnskapInteger : "");
+    }
+
+    public String hentKortnavn(){
+        if (periodepostTypeEnum ==null || kategori==null) {
+            return "";
+        } else {
+            return switch (periodepostTypeEnum) {
+                case AARSOVERSIKTPOST, MAANEDSOVERSIKTPOST ->  lagBeskrivendenavnAarsoversiktMaanedsoversikt();
+                case PERIODEOVERSIKTPOST -> lagKostnadspakkeKortnavn();
+                default -> super.toString();
+            };
+        }
+    }
+
+    private String lagKostnadspakkeKortnavn(){
+        StringBuilder sb = new StringBuilder();
+        if (periode!=null) {
+            sb.append(periode.getDatoFraLocalDate().getYear()).append(" ");
+        }
+        if (kategori!=null) {
+            sb.append(kategori.hentKortnavn()).append(" ");
+        }
+        sb.append(tittelString);
+        return sb.toString();
     }
 
     @Override

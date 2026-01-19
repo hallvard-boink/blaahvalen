@@ -2,6 +2,7 @@ package com.hallvardlaerum.verktoy.testing;
 
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriService;
+import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
@@ -22,6 +23,7 @@ import com.hallvardlaerum.verktoy.Allvitekyklop;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class TestDataFabrikk {
@@ -41,18 +43,17 @@ public class TestDataFabrikk {
      * Produser testData for et årstall som kan skilles fra ekte data
      * @param aarstall Årstallet det skal opprettes testdata for
      */
-    public void produserData(Integer aarstall){
-        this.aarstall = aarstall;
+    public void opprettTestData(Integer aarstall){
+        settAarstallOgDatospenn(aarstall);
         hentServicer();
-        fraLocalDate = LocalDate.of(this.aarstall, 1,1);
-        tilLocalDate = LocalDate.of(this.aarstall, 12,31);
 
-        slettTestData();
+        slettTestData(aarstall);
 
         produserAarsoversikt();
         produserMaanedsoversikter();
         produserNormalposter();
         produserBudsjettposter();
+        Loggekyklop.bruk().loggINFO("Opprettet testdata for " + aarstall);
     }
 
     /**
@@ -205,35 +206,51 @@ public class TestDataFabrikk {
      * Lag en aarsoversikt med summer som er lette å gjenkjenne, og legg informasjon om dem i beskrivelsen
      */
     private void produserAarsoversikt(){
-        Periode aarsoversikt = aarsoversiktService.opprettEntitet();
-        aarsoversikt.setDatoFraLocalDate(LocalDate.of(aarstall,1,1));
-        aarsoversikt.setDatoTilLocalDate(LocalDate.of(aarstall,12,31));
-        aarsoversikt.setBeskrivelseString("Automatisk opprettet testdata");
-        aarsoversiktService.lagre(aarsoversikt);
+        Periode aarsoversikt = aarsoversiktService.finnAarsoversiktFraAarString(String.valueOf(aarstall));
+        if (aarsoversikt==null) {
+            aarsoversikt = aarsoversiktService.opprettEntitet();
+            aarsoversikt.setDatoFraLocalDate(fraLocalDate);
+            aarsoversikt.setDatoTilLocalDate(tilLocalDate);
+            aarsoversikt.setBeskrivelseString("Automatisk opprettet testdata");
+            aarsoversiktService.lagre(aarsoversikt);
+        }
+    }
+
+    private void settAarstallOgDatospenn(Integer aarstall){
+        this.aarstall=aarstall;
+        fraLocalDate = LocalDate.of(aarstall,1,1);
+        tilLocalDate = LocalDate.of(aarstall,12,31);
     }
 
     private void hentServicer(){
-        aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
-        aarsoversiktpostService = Allvitekyklop.hent().getAarsoversiktpostService();
-        maanedsoversiktService = Allvitekyklop.hent().getMaanedsoversiktService();
-        maanedsoversiktpostService = Allvitekyklop.hent().getMaanedsoversiktpostService();
-        kategoriService = Allvitekyklop.hent().getKategoriService();
-        normalpostService = Allvitekyklop.hent().getNormalpostService();
-        budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
+        if (aarsoversiktService==null) {
+            aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
+            aarsoversiktpostService = Allvitekyklop.hent().getAarsoversiktpostService();
+            maanedsoversiktService = Allvitekyklop.hent().getMaanedsoversiktService();
+            maanedsoversiktpostService = Allvitekyklop.hent().getMaanedsoversiktpostService();
+            kategoriService = Allvitekyklop.hent().getKategoriService();
+            normalpostService = Allvitekyklop.hent().getNormalpostService();
+            budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
+        }
     }
 
     /**
      * Slett alle data fra årstallet for test, for eksempel 2050
      */
-    public void slettTestData() {
+    public void slettTestData(Integer aarstall) {
+        if (!Objects.equals(aarstall, this.aarstall)) {
+            settAarstallOgDatospenn(aarstall);
+        }
+        hentServicer();
         slettPoster();
         slettPeriodeoversiktposter();
         slettPerioder();
+        Loggekyklop.bruk().loggINFO("Slettet alle testdata fra " + aarstall);
     }
 
     private void slettPoster() {
-        normalpostService.slettAlle(normalpostService.finnPosterFraDatoTilDatoPostklasse(fraLocalDate, tilLocalDate, PostklasseEnum.NORMALPOST));
-        normalpostService.slettAlle(normalpostService.finnPosterFraDatoTilDatoPostklasse(fraLocalDate, tilLocalDate, PostklasseEnum.BUDSJETTPOST));
+        normalpostService.slettAllePoster(normalpostService.finnPosterFraDatoTilDatoPostklasse(fraLocalDate, tilLocalDate, PostklasseEnum.NORMALPOST));
+        normalpostService.slettAllePoster(normalpostService.finnPosterFraDatoTilDatoPostklasse(fraLocalDate, tilLocalDate, PostklasseEnum.BUDSJETTPOST));
     }
 
     private void slettPerioder() {
@@ -242,7 +259,9 @@ public class TestDataFabrikk {
         maanedsoversiktService.slettAlle(maanedsoversiktService.finnEtterPeriodetypeOgFradato(PeriodetypeEnum.MAANEDSOVERSIKT,LocalDate.of(aarstall,3,1)));
 
         Periode aarsoversikt = aarsoversiktService.finnAarsoversiktFraAarString(aarstall.toString());
-        aarsoversiktService.slett(aarsoversikt);
+        if (aarsoversikt!=null) {
+            aarsoversiktService.slett(aarsoversikt);
+        }
 
     }
 

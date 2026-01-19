@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Entitetservicer skal ha metoder på norsk, og fungerer som en oversetter mot repository
+ */
 @Service
 public class NormalpostService extends PostServiceMal implements InitieringsEgnet {
     private KategoriService kategoriService;
@@ -32,12 +35,80 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
     private PostRepository postRepository;
 
 
-    //TODO: Hva brukes denne til?
-    @Override
-    public Post opprettEntitetMedForelder() {
-        return opprettEntitet();
-        //Skulle det ha vært satt inn en forelder her? Fra hvor???
+
+
+
+    // ===================
+    // === Finn poster ===
+
+    public List<Post> finnEtterDatoOgTekstfrabankenOgNormalposttypeenum(LocalDate datoLocalDate, String tekstFraBankenString, NormalposttypeEnum normalposttypeEnum) {
+        return postRepository.findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(datoLocalDate, tekstFraBankenString, normalposttypeEnum);
     }
+
+    public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
+        return postRepository.findByKostnadsPakke(kostnadspakke);
+    }
+
+
+
+    // =======================
+    // === Finn enkeltpost ===
+
+    public Post finnEtterDatoOgTekstfrabankenOgBeskrivelseNormalposttypeenum(LocalDate dato, String tekstFraBankenString, String beskrivelseString) {
+        if (dato==null || tekstFraBankenString==null) {
+            return null;
+        }
+
+        List<Post> poster = postRepository.findByDatoLocalDateAndTekstFraBankenStringAndBeskrivelseString(dato, tekstFraBankenString,beskrivelseString);
+        if (poster.isEmpty()) {
+            Loggekyklop.bruk().loggADVARSEL("Fant ikke post for dato:" + dato + ", tekstfrabanken:" + tekstFraBankenString + ", beskrivelseString:" + beskrivelseString + ". Avbryter");
+            return null;
+        } else if (poster.size()>1) {
+            Loggekyklop.bruk().loggADVARSEL("Fant mer enn en post for dato:" + dato + ", tekstfrabanken:" + tekstFraBankenString + ", beskrivelseString:" + beskrivelseString + ". Avbryter");
+            return null;
+        } else {
+            return poster.getFirst();
+        }
+    }
+
+
+
+    // ==============
+    // === Summer ===
+
+    public Integer sumInnPeriodeNormalposterUtenkategori(Periode periode) {
+        if (periode==null) {
+            return null;
+        }
+
+        return postRepository.sumInnFraDatoTilDatoNormalposterUtenKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+
+    }
+
+    public Integer sumUtPeriodeNormalposterUtenkategori(Periode periode) {
+        if (periode==null) {
+            return null;
+        }
+
+        return postRepository.sumUtFraDatoTilDatoNormalposterUtenKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+    }
+
+    public Integer sumInnEllerUtFradatoTildatoKategoritittel(LocalDate fraDato, LocalDate tilDato, String kategoritittel) {
+        Tuple tuple = postRepository.sumNormalPosterFradatoTilDatoKategoritittel(fraDato, tilDato, kategoritittel);
+        if (tuple==null) {
+            return 0;
+        }
+
+        Integer innInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class), true);
+        Integer utInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class), true);
+
+        return innInteger + utInteger;
+    }
+
+
+
+    // ============
+    // === CRUD ===
 
     @Override
     public Post opprettEntitet() {
@@ -46,6 +117,17 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
         return normalpost;
     }
 
+    //TODO: Hva brukes denne til?
+    @Override
+    public Post opprettEntitetMedForelder() {
+        return opprettEntitet();
+        //Skulle det ha vært satt inn en forelder her? Fra hvor???
+    }
+
+
+
+    // =========================
+    // === Import og eksport ===
 
     @Override
     public boolean behandleSpesialfeltVedImport(Object entitet, Field field, String nyVerdi, String importradString) {
@@ -71,25 +153,6 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
 
         return false;
 
-    }
-
-
-    @Override
-    public boolean erInitiert() {
-        return erInitiert;
-    }
-
-    public NormalpostService() {
-    }
-
-    @Override
-    public void init() {
-        if (!erInitiert) {
-            super.initPostServiceMal(PostklasseEnum.NORMALPOST);
-            this.kategoriService = Allvitekyklop.hent().getKategoriService();
-            this.postRepository = Allvitekyklop.hent().getPostRepository();
-            erInitiert=true;
-        }
     }
 
     @Override
@@ -141,55 +204,30 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
         }
     }
 
-    public Post finnEtterDatoOgTekstfrabankenOgBeskrivelseNormalposttypeenum(LocalDate dato, String tekstFraBankenString, String beskrivelseString) {
-        if (dato==null || tekstFraBankenString==null) {
-            return null;
-        }
 
-        List<Post> poster = postRepository.findByDatoLocalDateAndTekstFraBankenStringAndBeskrivelseString(dato, tekstFraBankenString,beskrivelseString);
-        if (poster.isEmpty()) {
-            Loggekyklop.bruk().loggADVARSEL("Fant ikke post for dato:" + dato + ", tekstfrabanken:" + tekstFraBankenString + ", beskrivelseString:" + beskrivelseString + ". Avbryter");
-            return null;
-        } else if (poster.size()>1) {
-            Loggekyklop.bruk().loggADVARSEL("Fant mer enn en post for dato:" + dato + ", tekstfrabanken:" + tekstFraBankenString + ", beskrivelseString:" + beskrivelseString + ". Avbryter");
-            return null;
-        } else {
-            return poster.getFirst();
+
+    // =================================
+    // === Constructor og Initiering ===
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+    public NormalpostService() {
+    }
+
+    @Override
+    public void init() {
+        if (!erInitiert) {
+            super.initPostServiceMal(PostklasseEnum.NORMALPOST);
+            this.kategoriService = Allvitekyklop.hent().getKategoriService();
+            this.postRepository = Allvitekyklop.hent().getPostRepository();
+            erInitiert=true;
         }
     }
 
-    public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
-        return postRepository.findByKostnadsPakke(kostnadspakke);
-    }
 
-    public Integer sumInnPeriodeNormalposterUtenkategori(Periode periode) {
-        if (periode==null) {
-            return null;
-        }
-
-        return postRepository.sumInnFraDatoTilDatoNormalposterUtenKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-
-    }
-
-    public Integer sumUtPeriodeNormalposterUtenkategori(Periode periode) {
-        if (periode==null) {
-            return null;
-        }
-
-        return postRepository.sumUtFraDatoTilDatoNormalposterUtenKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-    }
-
-    public Integer sumInnEllerUtFradatoTildatoKategoritittel(LocalDate fraDato, LocalDate tilDato, String kategoritittel) {
-        Tuple tuple = postRepository.sumNormalPosterFradatoTilDatoKategoritittel(fraDato, tilDato, kategoritittel);
-        if (tuple==null) {
-            return 0;
-        }
-
-        Integer innInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class), true);
-        Integer utInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class), true);
-
-        return innInteger + utInteger;
-    }
 
 
     private static class Ekstrafeltrad {

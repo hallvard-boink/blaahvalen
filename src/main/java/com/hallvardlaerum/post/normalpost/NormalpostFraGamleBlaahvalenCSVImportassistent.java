@@ -178,10 +178,11 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
             ekstrafeltrad.getPost().setForelderPostUUID(forelderposter.getFirst().getUuid().toString());
             normalpostService.lagre(ekstrafeltrad.getPost());
         } else {
-            List<Post> forelderposterSkalIkkeKategoriseres = normalpostService.finnEtterDatoOgTekstfrabankenOgKategori(
+            List<Post> forelderposterSkalIkkeKategoriseres = normalpostService.finnPostEtterDatoOgTekstfrabankenOgKategoriOgPostklasseEnum(
                     ekstrafeltrad.getPost().getDatoLocalDate(),
                     ekstrafeltrad.getPost().getTekstFraBankenString(),
-                    skalIkkekategoriseresKategori
+                    skalIkkekategoriseresKategori,
+                    PostklasseEnum.NORMALPOST
             );
             if (!forelderposterSkalIkkeKategoriseres.isEmpty()) {
                 ekstrafeltrad.getPost().setForelderPostUUID(forelderposterSkalIkkeKategoriseres.getFirst().getUuid().toString());

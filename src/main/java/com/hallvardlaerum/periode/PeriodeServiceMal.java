@@ -121,7 +121,9 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
      * @param periode aktuelle periode
      */
     private void oppdaterPeriodensPeriodeposterOgSummer_LeggTilOgOppdaterEllerFjernUkategorisert(Periode periode) {
-        Kategori ukategorisertInnKategori = kategoriService.finnEllerOpprettKategoriUKATEGORISERT(KategoriRetning.INN);
+        //Kategori ukategorisertInnKategori = kategoriService.finnEllerOpprettKategoriUKATEGORISERT(KategoriRetning.INN);
+        Kategori ukategorisertInnKategori = kategoriService.finnEllerOpprettFraKategoriTypeOgKategoriretningOgNivaa(KategoriType.UKATEGORISERT,KategoriRetning.INN,0);
+
         Integer sumUkategorisertInnInteger = postService.sumInnNormalposterEtterPeriodeOgUkategorisert(periode);
         if (sumUkategorisertInnInteger!=null && sumUkategorisertInnInteger>0) {
             Periodepost ukategorisertInnPeriodepost = periodepostService.finnEllerOpprettOgOppdaterPeriodepostUkategorisert(periode, ukategorisertInnKategori);
@@ -130,7 +132,8 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
             periodepostService.slettUkategorisertForPeriode(periode, KategoriRetning.INN);
         }
 
-        Kategori ukategorisertUtKategori = kategoriService.finnEllerOpprettKategoriUKATEGORISERT(KategoriRetning.UT);
+        //Kategori ukategorisertUtKategori = kategoriService.finnEllerOpprettKategoriUKATEGORISERT(KategoriRetning.UT);
+        Kategori ukategorisertUtKategori = kategoriService.finnEllerOpprettFraKategoriTypeOgKategoriretningOgNivaa(KategoriType.UKATEGORISERT,KategoriRetning.UT,0);
         Integer sumUkategorisertUtInteger = postService.sumInnNormalposterEtterPeriodeOgUkategorisert(periode);
         if (sumUkategorisertUtInteger!=null && sumUkategorisertUtInteger>0) {
             Periodepost ukategorisertUtPeriodepost = periodepostService.finnEllerOpprettOgOppdaterPeriodepostUkategorisert(periode, ukategorisertUtKategori);
@@ -175,7 +178,7 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
 //                     periodepostService.slett(periodepost); //denne ga feilmelding     Unable to find com.hallvardlaerum.periodepost.Periodepost with id 17274df3-154f-4625-97ce-a3626b0fb835
                 } else {
                     // Alle de vanlige inkl. overføring og sparing skal sjekkes
-                    List<Post> postList = postService.finnEtterFradatoOgTilDatoOgHovedkategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), periodepost.getKategori());
+                    List<Post> postList = postService.finnPostEtterFradatoOgTilDatoOgHovedkategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate(), periodepost.getKategori());
                     if (postList.isEmpty()) {
                         periodeposterSomSkalSlettesArrayList.add(periodepost);
                     }

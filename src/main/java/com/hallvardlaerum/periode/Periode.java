@@ -59,7 +59,7 @@ public class Periode extends AbstraktEntitet {
     @SkalEksporteres
     private Integer sumRegnskapResultatMedOverfoeringerInteger;
 
-    @OneToMany(fetch =  FetchType.EAGER, mappedBy = "periode", cascade = CascadeType.REMOVE)
+    @OneToMany(fetch =  FetchType.LAZY, mappedBy = "periode", cascade = CascadeType.REMOVE)
     private List<Periodepost> periodeposterList;
 
     public List<Periodepost> getPeriodeposterList() {

@@ -41,6 +41,9 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     }
 
 
+
+
+
     @Override
     public boolean erInitiert() {
         return erInitiert;
@@ -100,29 +103,57 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         return kategoriRepository.findByTittelAndErOppsummerendeUnderkategori(kategoriString, true);
     }
 
-    public Kategori finnUKATEGORISERT(KategoriRetning kategoriRetning) {
-        List<Kategori> kategoriList = kategoriRepository.findByKategoriTypeAndKategoriRetning(KategoriType.UKATEGORISERT, kategoriRetning);
+    public Kategori dupliserKategori(Kategori kategoriOriginal) {
+        Kategori nyKategori = opprettEntitet();
+        nyKategori.setTittel(kategoriOriginal.getTittel());
+        nyKategori.setUndertittel(kategoriOriginal.getUndertittel() + " kopi");
+        nyKategori.setNivaa(kategoriOriginal.getNivaa());
+        nyKategori.setBrukesTilBudsjett(kategoriOriginal.getBrukesTilBudsjett());
+        nyKategori.setBrukesTilFastePoster(kategoriOriginal.getBrukesTilFastePoster());
+        nyKategori.setBrukesTilRegnskap(kategoriOriginal.getBrukesTilRegnskap());
+        nyKategori.setBeskrivelse(kategoriOriginal.getBeskrivelse());
+        nyKategori.setErAktiv(true);
+        nyKategori.setKategoriType(kategoriOriginal.getKategoriType());
+        nyKategori.setKategoriRetning(kategoriOriginal.getKategoriRetning());
+        nyKategori.setErOppsummerendeUnderkategori(false);
+        nyKategori.setRekkefoelge(kategoriOriginal.getRekkefoelge());
+        lagre(nyKategori);
+        return nyKategori;
+    }
+
+    public Kategori finnEllerOpprettFraKategoriTypeOgKategoriretningOgNivaa(KategoriType kategoriType, KategoriRetning kategoriRetning, Integer nivaa) {
+        List<Kategori> kategoriList = kategoriRepository.findByKategoriTypeAndKategoriRetningAndNivaa(kategoriType,kategoriRetning,nivaa);
         if (kategoriList.isEmpty()) {
-            return null;
+            Kategori kategori = opprettEntitet();
+            kategori.setTittel("[" + kategoriType.getTittel() + " - " + kategoriRetning.getTittel() + "]");
+            if (nivaa==0) {
+                kategori.setUndertittel("(Hovedkategori)");
+                kategori.setErOppsummerendeUnderkategori(false);
+            } else if (nivaa==1) {
+                kategori.setUndertittel("-");
+                kategori.setErOppsummerendeUnderkategori(true);
+            }
+            kategori.setKategoriType(kategoriType);
+            kategori.setKategoriRetning(kategoriRetning);
+            kategori.setNivaa(nivaa);
+            if (kategoriType==KategoriType.UKATEGORISERT) {
+                kategori.setBrukesTilRegnskap(false);
+            } else {
+                kategori.setBrukesTilRegnskap(true);
+            }
+            kategori.setBrukesTilFastePoster(false);
+            kategori.setBrukesTilBudsjett(false);
+            kategori.setErAktiv(true);
+            lagre(kategori);
+            return kategori;
+
         } else {
             if (kategoriList.size()>1) {
-                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en kategori med kategoritype UKATEGORISERT og retning " + kategoriRetning + ". Rydd opp i kategoriene");
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en kategori av type " + kategoriType.getTittel() + ", retning " + kategoriType.getTittel() + " og nivå " + nivaa);
             }
             return kategoriList.getFirst();
         }
     }
 
-    public Kategori finnEllerOpprettKategoriUKATEGORISERT(KategoriRetning kategoriRetning) {
-        Kategori kategoriUkategorisert = finnUKATEGORISERT(kategoriRetning);
-        if (kategoriUkategorisert==null) {
-            kategoriUkategorisert = opprettEntitet();
-            kategoriUkategorisert.setTittel("[Ukategorisert " + kategoriRetning.getTittel() + "]");
-            kategoriUkategorisert.setKategoriType(KategoriType.UKATEGORISERT);
-            kategoriUkategorisert.setKategoriRetning(kategoriRetning);
-            lagre(kategoriUkategorisert);
-            return kategoriUkategorisert;
-        } else {
-            return kategoriUkategorisert;
-        }
-    }
+
 }

@@ -307,7 +307,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
 
     private ComponentRenderer<Span,Post> opprettKostnadspakkeRenderer(){
         return new ComponentRenderer<>(post -> {
-            Span span = post.getKostnadsPakke() != null ? new Span(post.getKostnadsPakke().getTittelString()) : new Span("");
+            Span span = post.getKostnadsPakke() != null ? new Span(post.getKostnadsPakke().hentKortnavn()) : new Span("");
             //span.setClassName(LumoUtility.TextAlignment.RIGHT);
             settStil(span, post);
             return span;

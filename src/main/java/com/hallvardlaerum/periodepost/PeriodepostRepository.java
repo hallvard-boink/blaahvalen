@@ -19,11 +19,13 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
 
 
 
+    Periodepost findByTittelString(String kostnadspakketittelString);
+
+
+
     List<Periodepost> findByPeriodeAndKategori(Periode periode, Kategori kategori);
 
     List<Periodepost> findByPeriodepostTypeEnum(PeriodepostTypeEnum periodepostTypeEnum);
-
-    Periodepost findByTittelString(String kostnadspakketittelString);
 
     List<Periodepost> findByPeriodepostTypeEnumOrderByTittelStringDesc(PeriodepostTypeEnum periodepostTypeEnum);
 
@@ -68,4 +70,6 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
         "FROM periodepost pp JOIN kategori k ON pp.kategori_uuid = k.uuid " +
         "WHERE k.kategori_type = 4")
     List<Periodepost> finnEtterKategoriType(KategoriType kategoriType);
+
+    List<Periodepost> findByKategori(Kategori kategori);
 }

@@ -85,14 +85,14 @@ public class PeriodepostTester {
 
     private void sjekkPoster_Aarsoversiktpost() {
         boolean gikkBra = true;
-        List<Post> normalposter = Allvitekyklop.hent().getNormalpostService().finnEtterFraDatoTilDatoPostklasseHovedkategori(
+        List<Post> normalposter = Allvitekyklop.hent().getNormalpostService().finnPostEtterFraDatoTilDatoPostklasseHovedkategori(
                     periodepost.getPeriode().getDatoFraLocalDate(),
                     periodepost.getPeriode().getDatoTilLocalDate(),
                     PostklasseEnum.NORMALPOST,
                     periodepost.getKategori()
             );
 
-        List<Post> budsjettposter = Allvitekyklop.hent().getBudsjettpostService().finnEtterFraDatoTilDatoPostklasseHovedkategori(
+        List<Post> budsjettposter = Allvitekyklop.hent().getBudsjettpostService().finnPostEtterFraDatoTilDatoPostklasseHovedkategori(
                     periodepost.getPeriode().getDatoFraLocalDate(),
                     periodepost.getPeriode().getDatoTilLocalDate(),
                     PostklasseEnum.BUDSJETTPOST,

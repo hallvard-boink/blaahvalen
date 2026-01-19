@@ -28,6 +28,7 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
 
     List<Kategori> findByKategoriTypeAndKategoriRetning(KategoriType kategoriType, KategoriRetning kategoriRetning);
 
+    List<Kategori> findByKategoriTypeAndKategoriRetningAndNivaa(KategoriType kategoriType, KategoriRetning kategoriRetning, Integer nivaa);
 
     @NativeQuery(
             "SELECT k2.* " +
@@ -41,9 +42,9 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
                 ") as kjerne " +
                 "LEFT JOIN kategori k2 ON kjerne.tittel = k2.tittel " +
             "WHERE " +
-                "k2.nivaa =0;"
-    )
+                "k2.nivaa =0;")
     List<Kategori> finnHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate);
+
     // kategori_type = 3: SKAL_IKKE_KATEGORISERES
 
 }

@@ -80,8 +80,20 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
             sb.append(undertittel);
         }
         sb.append(" [");
-        sb.append(kategoriType.getTittel()).append(", ");
-        sb.append(kategoriRetning.getTittel()).append("]");
+
+        if (kategoriType==null) {
+            sb.append("ukjent type");
+        } else {
+            sb.append(kategoriType.getTittel());
+        }
+
+        if (kategoriRetning==null) {
+            sb.append(", ukjent retning");
+        } else {
+            sb.append(", ").append(kategoriRetning.getTittel());
+        }
+        sb.append("]");
+
         return sb.toString();
     }
 

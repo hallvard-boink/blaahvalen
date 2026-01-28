@@ -2,14 +2,19 @@ package com.hallvardlaerum.periodepost;
 
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.libs.database.AbstraktEntitet;
-import com.hallvardlaerum.libs.database.EntitetMedForelderAktig;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;
 import com.hallvardlaerum.periode.Periode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class Periodepost extends AbstraktEntitet implements EntitetMedForelderAktig<Periode> {
+public class Periodepost extends AbstraktEntitet {
+
+
+// ===========================
+// region Felter
+// ===========================
+
 
     @SkalEksporteres
     private PeriodepostTypeEnum periodepostTypeEnum;
@@ -34,40 +39,42 @@ public class Periodepost extends AbstraktEntitet implements EntitetMedForelderAk
     @SkalEksporteres
     private String tittelString;
 
+// endregion
+
+
+
+// ===========================
+// region toString og beskrivendeNavn
+// ===========================
 
 
     @Override
     public String toString(){
-        StringBuilder sb = new StringBuilder();
-        if (getUuid()!=null) {
-            sb.append(getUuid()).append(": ");
-        }
-        if (kategori!=null) {
-            sb.append(kategori.hentBeskrivendeNavn());
-        }
-
-        return sb.toString();
+        return hentBeskrivendeNavn() + " (Periodepost)";
     }
 
     @Override
     public String hentBeskrivendeNavn() {
-        if (periodepostTypeEnum ==null || kategori==null) {
-            return "";
+        if (periodepostTypeEnum ==null) {
+            if (kategori!=null) {
+                return kategori.hentBeskrivendeNavn();
+            } else {
+                return "";
+            }
         } else {
             return switch (periodepostTypeEnum) {
-                case AARSOVERSIKTPOST, MAANEDSOVERSIKTPOST ->  lagBeskrivendenavnAarsoversiktMaanedsoversikt();
-                case PERIODEOVERSIKTPOST -> lagBeskrivendenavnPeriodeoversiktpost();
-                default -> super.toString();
+                case AARSOVERSIKTPOST, MAANEDSOVERSIKTPOST ->  lagBeskrivendenavn_AarsoversiktMaanedsoversikt();
+                case PERIODEOVERSIKTPOST -> lagBeskrivendenavn_Periodeoversiktpost();
                 };
         }
     }
 
-    private String lagBeskrivendenavnPeriodeoversiktpost() {
+    private String lagBeskrivendenavn_Periodeoversiktpost() {
         return "Kostnadspakke " + kategori.hentKortnavn() + " " +
                 (sumRegnskapInteger!=null? "Regnskap:" + sumRegnskapInteger : "");
     }
 
-    private String lagBeskrivendenavnAarsoversiktMaanedsoversikt(){
+    private String lagBeskrivendenavn_AarsoversiktMaanedsoversikt(){
         return periodepostTypeEnum.getTittel() + " " +
                 kategori.getTittel() + " " +
                 (sumBudsjettInteger!=null? "Budsjett:" + sumBudsjettInteger : "" ) + " " +
@@ -79,9 +86,8 @@ public class Periodepost extends AbstraktEntitet implements EntitetMedForelderAk
             return "";
         } else {
             return switch (periodepostTypeEnum) {
-                case AARSOVERSIKTPOST, MAANEDSOVERSIKTPOST ->  lagBeskrivendenavnAarsoversiktMaanedsoversikt();
+                case AARSOVERSIKTPOST, MAANEDSOVERSIKTPOST ->  lagBeskrivendenavn_AarsoversiktMaanedsoversikt();
                 case PERIODEOVERSIKTPOST -> lagKostnadspakkeKortnavn();
-                default -> super.toString();
             };
         }
     }
@@ -98,18 +104,13 @@ public class Periodepost extends AbstraktEntitet implements EntitetMedForelderAk
         return sb.toString();
     }
 
-    @Override
-    public void setForelder(Periode forelder) {
-        this.periode = forelder;
-    }
-
-    @Override
-    public Periode getForelder() {
-        return periode;
-    }
+// endregion
 
 
-    // === Getters and setters ===
+
+// ===========================
+// region Getters and setters
+// ===========================
 
 
     public String getTittelString() {
@@ -166,7 +167,7 @@ public class Periodepost extends AbstraktEntitet implements EntitetMedForelderAk
 
     public void setPeriode(Periode periode) {
         this.periode = periode;
-    }
+    }// endregion
 
 
 }

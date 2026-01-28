@@ -21,7 +21,12 @@ import java.time.LocalDate;
 @Entity
 public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kategori> {
 
-    // Felter som er felles for normalposter og budsjettposter
+
+// ===========================
+// === Felter som er felles for normalposter og budsjettposter ===
+// region Felles felter
+
+
     @SkalEksporteres
     private PostklasseEnum postklasseEnum;
 
@@ -45,9 +50,13 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     @SkalEksporteres
     @ManyToOne(targetEntity = Periodepost.class)
     private Periodepost kostnadsPakke;
+// endregion
 
 
-    // Felter som er unike for normalposter
+
+// ===========================
+// region Felter for normalposter
+// ===========================
 
     @SkalEksporteres
     @Column(length = 1000)
@@ -66,8 +75,14 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
     @Column(length = 1000)
     private String ekstraInfoString;
 
+// endregion
 
-    // Felter som er unike for budsjettposter
+
+
+// ===========================
+// region Felter for budsjettposter
+// ===========================
+
     @SkalEksporteres
     private BudsjettpoststatusEnum budsjettpoststatusEnum;
 
@@ -85,36 +100,25 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
 
     @SkalEksporteres
     Boolean erRegelmessigBoolean;
-
-
-    // === Getters and Setters ===
-
+// endregion
 
 
 
-    public Periodepost getKostnadsPakke() {
-        return kostnadsPakke;
+// ===========================
+// region toString og beskrivende navn
+// ===========================
+
+    @Override
+    public String toString(){
+        if (getUuid()!=null) {
+            return "UUID " + getUuidString() + ": " + hentBeskrivendeNavn();
+        } else {
+            return "beskrivendeNavn " + hentBeskrivendeNavn();
+        }
     }
 
-    public void setKostnadsPakke(Periodepost kostnadsPakke) {
-        this.kostnadsPakke = kostnadsPakke;
-    }
 
-    public DatopresisjonEnum getDatopresisjonEnum() {
-        return datopresisjonEnum;
-    }
 
-    public void setDatopresisjonEnum(DatopresisjonEnum datopresisjonEnum) {
-        this.datopresisjonEnum = datopresisjonEnum;
-    }
-
-    public String getUuidString(){
-        return getUuid().toString();
-    }
-
-    public void setUuidStringFake(String uuid){
-        //Do nothing
-    }
 
     @Override
     public String hentBeskrivendeNavn() {
@@ -156,14 +160,44 @@ public class Post extends AbstraktEntitet implements EntitetMedForelderAktig<Kat
         }
     }
 
-    @Override
-    public String toString(){
-        if (getUuid()!=null) {
-            return getUuidString() + ": " + hentBeskrivendeNavn();
-        } else {
-            return "(ingen uuid ennå): " + hentBeskrivendeNavn();
-        }
+
+// endregion
+
+
+
+
+// ===========================
+// region Getters and setters
+// ===========================
+
+
+    public Periodepost getKostnadsPakke() {
+        return kostnadsPakke;
     }
+
+    public void setKostnadsPakke(Periodepost kostnadsPakke) {
+        this.kostnadsPakke = kostnadsPakke;
+    }
+
+    public DatopresisjonEnum getDatopresisjonEnum() {
+        return datopresisjonEnum;
+    }
+
+    public void setDatopresisjonEnum(DatopresisjonEnum datopresisjonEnum) {
+        this.datopresisjonEnum = datopresisjonEnum;
+    }
+
+    public String getUuidString(){
+        return getUuid().toString();
+    }
+
+    public void setUuidStringFake(String uuid){
+        //Do nothing
+    }
+
+
+
+
 
     public Kategori getKategori() {
         return kategori;

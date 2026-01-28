@@ -13,19 +13,18 @@ import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportassistentMal<Post> {
-    private NormalpostService normalpostService;
+    private final NormalpostService normalpostService;
     private Post normalpost;
-    private NormalpostView normalpostView;
+    private final NormalpostView normalpostView;
     private ArrayList<Ekstrafeltrad> ekstrafeltradArrayList;
-    private KategoriService kategoriService;
+    private final KategoriService kategoriService;
     private Kategori skalIkkekategoriseresKategori;
-    private KostnadspakkeService kostnadspakkeService;
+    private final KostnadspakkeService kostnadspakkeService;
 
     public NormalpostFraGamleBlaahvalenCSVImportassistent() {
         this.normalpostService = Allvitekyklop.hent().getNormalpostService();
@@ -95,6 +94,10 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
 
 
     private void knyttTilKategori(String kategoriString) {
+        if (kategoriString==null || kategoriString.isEmpty()) {
+            return;
+        }
+
         Optional<Kategori> kategoriOptional = kategoriService.finnOppsummerendeUnderkategori(kategoriString);
         //Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(kategoriString,"-");
         if (kategoriOptional.isEmpty()) {
@@ -103,7 +106,7 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
         }
 
         Kategori kategori = kategoriOptional.get();
-        Kategori kategoriFraKostnadspakke = null;
+        Kategori kategoriFraKostnadspakke;
 
         if (normalpost.getKostnadsPakke()==null) {
             normalpost.setKategori(kategori);
@@ -208,7 +211,7 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
             return null;
         }
 
-        Ekstrafeltrad ekstrafeltrad = null;
+        Ekstrafeltrad ekstrafeltrad;
         if (ekstrafeltradArrayList==null) {
             ekstrafeltradArrayList = new ArrayList<>();
             ekstrafeltrad = new Ekstrafeltrad(post);
@@ -227,41 +230,18 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
     }
 
 
-    private class Ekstrafeltrad {
+    private static class Ekstrafeltrad {
         Post post;
         String forelderpostkortnavnString;
         String[] importradString;
-        LocalDate datoLocalDate;
-        String tekstFraBanken;
 
 
         public Ekstrafeltrad(Post post) {
             this.post = post;
         }
 
-
-        public LocalDate getDatoLocalDate() {
-            return datoLocalDate;
-        }
-
-        public void setDatoLocalDate(LocalDate datoLocalDate) {
-            this.datoLocalDate = datoLocalDate;
-        }
-
-        public String getTekstFraBanken() {
-            return tekstFraBanken;
-        }
-
-        public void setTekstFraBanken(String tekstFraBanken) {
-            this.tekstFraBanken = tekstFraBanken;
-        }
-
         public Post getPost() {
             return post;
-        }
-
-        public void setPost(Post post) {
-            this.post = post;
         }
 
         public String getForelderpostkortnavnString() {
@@ -270,10 +250,6 @@ public class NormalpostFraGamleBlaahvalenCSVImportassistent extends CSVImportass
 
         public void setForelderpostkortnavnString(String forelderpostkortnavnString) {
             this.forelderpostkortnavnString = forelderpostkortnavnString;
-        }
-
-        public String[] getImportradString() {
-            return importradString;
         }
 
         public void setImportradString(String[] importradString) {

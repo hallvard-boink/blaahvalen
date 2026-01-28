@@ -43,8 +43,8 @@ public class OmView extends MainViewmal {
                   KategoriRepository kategoriRepository, KategoriService kategoriService, KategoriRedigeringsomraade kategoriRedigeringsomraade,
                   AarsoversiktService aarsoversiktService, AarsoversiktRedigeringsomraade aarsoversiktRedigeringsomraade,
                   MaanedsoversiktService maanedsoversiktService, MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade,
-                  MaanedsoversiktpostService maanedsoversiktpostService, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraade, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraadeTilDialog,
-                  AarsoversiktpostService aarsoversiktpostService, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog,
+                  MaanedsoversiktpostService maanedsoversiktpostService, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraade,
+                  AarsoversiktpostService aarsoversiktpostService, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade,
                   NormalpostService normalpostService, NormalpostRedigeringsomraade normalPostRedigeringsomraade,
                   BudsjettpostService budsjettpostService, BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade,
                   KostnadspakkeService kostnadspakkeService, KostnadspakkeRedigeringsomraade kostnadspakkeRedigeringsomraade
@@ -57,7 +57,7 @@ public class OmView extends MainViewmal {
             if (!erInitiert) {
                 erInitiert = true;
 
-                Loggekyklop.hent().settNivaaINFO();
+                Loggekyklop.hent().settNivaaDEBUG();
                 Filkyklop.hent().initierRotmappeFile("blaahvalen");
                 Versjonskyklop.hent().initier(); // for å initiere versjonskyklop
 
@@ -110,14 +110,6 @@ public class OmView extends MainViewmal {
 
     }
 
-
-
-    public static void showOmView() { // Også for å unngå "not in context"-feilmeldingene
-        UI current = UI.getCurrent();
-        if (current != null) {
-            current.access(() -> current.navigate(OmView.class));
-        }
-    }
 
 }
 

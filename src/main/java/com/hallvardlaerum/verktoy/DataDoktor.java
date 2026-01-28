@@ -230,16 +230,18 @@ public class DataDoktor {
         if (post != null) {
             String beskrivendenavnString = post.hentBeskrivendeNavn();
 
-            Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(tittelNyKategoriString, "-");
-            if (kategoriOptional.isEmpty()) {
+            List<Kategori> kategoriList = kategoriService.finnEtterTittelOgUnderTittel(tittelNyKategoriString, "-");
+            if (kategoriList.isEmpty()) {
                 Loggekyklop.bruk().loggADVARSEL("Fant ikke kategori med tittel " + tittelNyKategoriString + ", avbryter oppdatering.");
-            } else {
-                Kategori kategori = kategoriOptional.get();
+            } else if (kategoriList.size()==1) {
+                Kategori kategori = kategoriList.getFirst();
                 if (!post.getKategori().equals(kategori)) {
-                    post.setKategori(kategoriOptional.get());
+                    post.setKategori(kategori);
                     normalpostService.lagre(post);
                     Loggekyklop.bruk().loggINFO(beskrivendenavnString + ": Endret kategori til " + tittelNyKategoriString);
                 }
+            } else {
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en kategori med tittel " + tittelNyKategoriString + ", avbryter oppdatering.");
             }
         }
 
@@ -257,18 +259,20 @@ public class DataDoktor {
         if (!poster.isEmpty()) {
             String beskrivendenavnString = poster.getFirst().hentBeskrivendeNavn();
 
-            Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(tittelNyKategoriString, "-");
-            if (kategoriOptional.isEmpty()) {
+            List<Kategori> kategoriList = kategoriService.finnEtterTittelOgUnderTittel(tittelNyKategoriString, "-");
+            if (kategoriList.isEmpty()) {
                 Loggekyklop.bruk().loggADVARSEL("Fant ikke kategori med tittel " + tittelNyKategoriString + ", avbryter oppdatering.");
-            } else {
-                Kategori kategori = kategoriOptional.get();
+            } else if (kategoriList.size()==1){
+                Kategori kategori = kategoriList.getFirst();
                 for (Post post : poster) {
                     if (!post.getKategori().equals(kategori)) {
-                        post.setKategori(kategoriOptional.get());
+                        post.setKategori(kategori);
                         normalpostService.lagre(post);
                         Loggekyklop.bruk().loggINFO(beskrivendenavnString + ": Endret kategori til " + tittelNyKategoriString);
                     }
                 }
+            } else {
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en kategori med tittel " + tittelNyKategoriString + ", avbryter oppdatering.");
             }
         } else {
             Loggekyklop.bruk().loggADVARSEL("Fant ikke post med dato " + datoString + " og tekstFraBanken " + tekstFraBankenString);

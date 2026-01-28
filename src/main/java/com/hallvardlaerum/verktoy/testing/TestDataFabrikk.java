@@ -70,21 +70,24 @@ public class TestDataFabrikk {
         ArrayList<NormalpostDataKnippe> normalpostKnippe = opprettDataknipper_Normalposter();
         for (NormalpostDataKnippe normalpostDataKnippe :normalpostKnippe) {
             Kategori kategori = null;
-            Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(normalpostDataKnippe.kategoriTittel, normalpostDataKnippe.kategoriUndertittel);
-            if (kategoriOptional.isPresent()) {
-                kategori = kategoriOptional.get();
+            List<Kategori> kategoriList = kategoriService.finnEtterTittelOgUnderTittel(normalpostDataKnippe.kategoriTittel, normalpostDataKnippe.kategoriUndertittel);
+            if (kategoriList.isEmpty()) {
+                Loggekyklop.bruk().loggADVARSEL("Fant ingen kategori med tittel " + normalpostDataKnippe.kategoriTittel + " og undertittel " + normalpostDataKnippe.kategoriUndertittel + ", avbryter");
+            } else if (kategoriList.size()==1) {
+                kategori = kategoriList.getFirst();
+                Post normalpost = normalpostService.opprettEntitet();
+                normalpost.setDatoLocalDate(Datokyklop.hent().opprettDatoSomYYYY_MM_DD(aarstall + "-" + normalpostDataKnippe.deldatoString));
+                normalpost.setKategori(kategori);
+                normalpost.setNormalposttypeEnum(normalpostDataKnippe.normalposttypeEnum);
+                normalpost.setNormalPoststatusEnum(normalpostDataKnippe.normalpoststatusEnum);
+                normalpost.setBeskrivelseString(normalpostDataKnippe.beskrivelse);
+                normalpost.setInnPaaKontoInteger(normalpostDataKnippe.innPaaKontoInteger);
+                normalpost.setUtFraKontoInteger(normalpostDataKnippe.utFraKontoInteger);
+                normalpost.setTekstFraBankenString("Automatisk opprettet testdata");
+                normalpostService.lagre(normalpost);
+            } else {
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en kategori med tittel " + normalpostDataKnippe.kategoriTittel + " og undertittel " + normalpostDataKnippe.kategoriUndertittel + ", avbryter");
             }
-            Post normalpost = normalpostService.opprettEntitet();
-            normalpost.setDatoLocalDate(Datokyklop.hent().opprettDatoSomYYYY_MM_DD(aarstall + "-" + normalpostDataKnippe.deldatoString));
-            normalpost.setKategori(kategori);
-            normalpost.setNormalposttypeEnum(normalpostDataKnippe.normalposttypeEnum);
-            normalpost.setNormalPoststatusEnum(normalpostDataKnippe.normalpoststatusEnum);
-            normalpost.setBeskrivelseString(normalpostDataKnippe.beskrivelse);
-            normalpost.setInnPaaKontoInteger(normalpostDataKnippe.innPaaKontoInteger);
-            normalpost.setUtFraKontoInteger(normalpostDataKnippe.utFraKontoInteger);
-            normalpost.setTekstFraBankenString("Automatisk opprettet testdata");
-            normalpostService.lagre(normalpost);
-
         }
     }
 
@@ -148,20 +151,24 @@ public class TestDataFabrikk {
         ArrayList<BudsjettpostDataKnippe> knipper = opprettDataknipper_Budsjettposter();
         for (BudsjettpostDataKnippe knippe :knipper) {
             Kategori kategori = null;
-            Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(knippe.kategoriTittel, knippe.kategoriUndertittel);
-            if (kategoriOptional.isPresent()) {
-                kategori = kategoriOptional.get();
-            }
-            Post budsjettpost = budsjettpostService.opprettEntitet();
-            budsjettpost.setDatoLocalDate(Datokyklop.hent().opprettDatoSomYYYY_MM_DD(aarstall + "-" + knippe.deldatoString));
-            budsjettpost.setKategori(kategori);
-            budsjettpost.setBeskrivelseString(knippe.beskrivelse);
-            budsjettpost.setInnPaaKontoInteger(knippe.innPaaKontoInteger);
-            budsjettpost.setUtFraKontoInteger(knippe.utFraKontoInteger);
-            budsjettpost.setBudsjettpoststatusEnum(knippe.budsjettpoststatusEnum);
-            budsjettpost.setTekstFraBankenString("Automatisk opprettet testdata");
-            budsjettpostService.lagre(budsjettpost);
+            List<Kategori> kategoriList = kategoriService.finnEtterTittelOgUnderTittel(knippe.kategoriTittel, knippe.kategoriUndertittel);
+            if (kategoriList.isEmpty()) {
+                Loggekyklop.bruk().loggADVARSEL("Fant ingen kategori med tittel " + knippe.kategoriTittel + " og undertittel " + knippe.kategoriUndertittel + ", avbryter.");
+            } else if (kategoriList.size()==1) {
+                kategori = kategoriList.getFirst();
+                Post budsjettpost = budsjettpostService.opprettEntitet();
+                budsjettpost.setDatoLocalDate(Datokyklop.hent().opprettDatoSomYYYY_MM_DD(aarstall + "-" + knippe.deldatoString));
+                budsjettpost.setKategori(kategori);
+                budsjettpost.setBeskrivelseString(knippe.beskrivelse);
+                budsjettpost.setInnPaaKontoInteger(knippe.innPaaKontoInteger);
+                budsjettpost.setUtFraKontoInteger(knippe.utFraKontoInteger);
+                budsjettpost.setBudsjettpoststatusEnum(knippe.budsjettpoststatusEnum);
+                budsjettpost.setTekstFraBankenString("Automatisk opprettet testdata");
+                budsjettpostService.lagre(budsjettpost);
 
+            } else {
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en kategori med tittel " + knippe.kategoriTittel + " og undertittel " + knippe.kategoriUndertittel + ", avbryter.");
+            }
         }
     }
 

@@ -2,6 +2,7 @@ package com.hallvardlaerum.kategori;
 
 import com.hallvardlaerum.libs.database.AbstraktEntitet;
 import com.hallvardlaerum.libs.database.EntitetMedBarnAktig;
+import com.hallvardlaerum.libs.database.EntitetMedForelderAktig;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;
 import com.hallvardlaerum.post.Post;
 import jakarta.persistence.*;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Post> {
+public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Post>, EntitetMedForelderAktig<Kategori> {
 
     @SkalEksporteres
     private String tittel;
@@ -105,6 +106,15 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
         }
     }
 
+    @Override
+    public void setForelder(Kategori forelder) {
+        setHovedKategori(forelder);
+    }
+
+    @Override
+    public Kategori getForelder() {
+        return getHovedKategori();
+    }
 
 
     // === Getters and setters ====

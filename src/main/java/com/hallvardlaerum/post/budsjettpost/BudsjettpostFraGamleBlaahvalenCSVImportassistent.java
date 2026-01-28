@@ -12,6 +12,7 @@ import com.hallvardlaerum.verktoy.Allvitekyklop;
 
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class BudsjettpostFraGamleBlaahvalenCSVImportassistent extends CSVImportassistentMal<Post> {
@@ -64,12 +65,16 @@ public class BudsjettpostFraGamleBlaahvalenCSVImportassistent extends CSVImporta
         if (kategoriNavn==null || kategoriNavn.isEmpty()) {
             return null;
         }
-        Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(kategoriNavn,"-");
-        if (kategoriOptional.isPresent()) {
-            return kategoriOptional.get();
-        } else {
-            Loggekyklop.hent().loggTilFilINFO("Fant ikke kategori med tittel " + kategoriNavn + " og undertittel '-'");
+        List<Kategori> kategoriList = kategoriService.finnEtterTittelOgUnderTittel(kategoriNavn,"-");
+
+        if (kategoriList.isEmpty()) {
+            Loggekyklop.hent().loggINFO("Fant ikke kategori med tittel " + kategoriNavn + " og undertittel '-'");
             return null;
+        } else {
+            if ((kategoriList.size()>1)) {
+                Loggekyklop.hent().loggINFO("Fant mer enn en kategori med tittel " + kategoriNavn + " og undertittel '-'. Bruker den første, og fortsetter.");
+            }
+            return kategoriList.getFirst();
         }
 
     }

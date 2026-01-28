@@ -11,8 +11,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSpecificationExecutor<Kategori>, RepositoryTillegg<Kategori> {
-    Optional<Kategori> findByTittel(String tittel);
-    Optional<Kategori> findByTittelAndUndertittel(String tittel, String undertittel);
+    List<Kategori> findByTittel(String tittel);
+    List<Kategori> findByTittelAndUndertittel(String tittel, String undertittel);
+
     List<Kategori> findAllByOrderByErAktivDescTittelAscUndertittelAsc();
     List<Kategori> findByKategoriType(KategoriType kategoriType);
 
@@ -44,6 +45,8 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
             "WHERE " +
                 "k2.nivaa =0;")
     List<Kategori> finnHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate);
+
+    List<Kategori> findByTittelAndUndertittelAndKategoriTypeAndKategoriRetning(String tittelString, String undertittelString, KategoriType kategoriType, KategoriRetning kategoriRetning);
 
     // kategori_type = 3: SKAL_IKKE_KATEGORISERES
 

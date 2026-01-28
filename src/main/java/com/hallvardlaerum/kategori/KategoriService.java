@@ -1,18 +1,20 @@
 package com.hallvardlaerum.kategori;
 
-import com.hallvardlaerum.libs.database.EntitetserviceMal;
+import com.hallvardlaerum.libs.database.*;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.skalTilHavaara.RegexMester;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class KategoriService extends EntitetserviceMal<Kategori, KategoriRepository> implements InitieringsEgnet {
+public class KategoriService extends EntitetserviceMal<Kategori, KategoriRepository> implements InitieringsEgnet, EntitetserviceMedForelderAktig<Kategori, Kategori, KategoriRepository, KategoriRepository> {
     private KategoriRepository kategoriRepository;
     private boolean erInitiert = false;
 
@@ -41,8 +43,31 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     }
 
 
+    @Override
+    public void initierEntitetserviceMedForelderMal(Class forelderklasse, EntitetserviceAktig forelderentitetService) {
+        // trenger ikke gjøre noe
+    }
 
+    @Override
+    public Kategori opprettEntitetMedForelder() {
+        return null;
+    }
 
+    @Override
+    public void oppdaterForelderVedImport(Object o, Field field, String s) {
+        // Regner med at dette er en uuid?
+        Kategori forelderKategori = finnEtterUUID(s);
+        try {
+            field.set(o,forelderKategori);
+        } catch (IllegalAccessException e) {
+            Loggekyklop.bruk().loggADVARSEL("Klarte ikke å sette hovedkategorien for denne kategorien til uuid=" + s);
+        }
+    }
+
+    @Override
+    public String hentForelderFeltNavn() {
+        return "";
+    }
 
     @Override
     public boolean erInitiert() {
@@ -57,6 +82,8 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         }
     }
 
+
+
     public Kategori finnHovedKategoriEtterTittel(String tittel) {
         List<Kategori> kategoriList = kategoriRepository.findByTittelAndNivaaOrderByUndertittel(tittel, 0);
         if (kategoriList.isEmpty()) {
@@ -69,6 +96,53 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         }
     }
 
+    public Kategori finnEtterBeskrivendeNavn(String beskrivendeNavnString){
+        //Offentlig kommunikasjon: - [Standard, Ut]
+
+        String tittelString = hentUtFraBeskrivendeNavnString_tittel(beskrivendeNavnString);
+        String undertittelString = hentUtFraBeskrivendeNavnString_undertittel(beskrivendeNavnString);
+//        String kategoritypeString = hentUtFraBeskrivendeNavnString_kategoritype(beskrivendeNavnString);
+//        KategoriType kategoriType = KategoriType.hentFraTittel(kategoritypeString);
+//        String kategoriretningString = hentUtFraBeskrivendeNavnString_kategoriretning(beskrivendeNavnString);
+//        KategoriRetning kategoriRetning = KategoriRetning.hentFraTittel(kategoriretningString);
+
+        List<Kategori> funnetList = kategoriRepository.findByTittelAndUndertittel(tittelString,undertittelString);
+        if (funnetList.isEmpty()) {
+            Loggekyklop.bruk().loggINFO("Fant ikke kategori '" + beskrivendeNavnString + "'. Tittel: '" +
+                    tittelString + ", Undertittel:'" + undertittelString);
+            return null;
+        } else if (funnetList.size()==1) {
+            return funnetList.getFirst();
+        } else {
+            Loggekyklop.bruk().loggINFO("Fant " + funnetList.size() + " kategorier med beskrivendeNavn='" + beskrivendeNavnString + "', returnerer null. Tittel: '" +
+                    tittelString + ", Undertittel:'" + undertittelString );
+            return null;
+        }
+    }
+
+
+    public String hentUtFraBeskrivendeNavnString_tittel(String beskrivendeNavnString) {
+        return RegexMester.hentUtMedRegEx(beskrivendeNavnString,"^(.+?): ",1);
+    }
+
+    public String hentUtFraBeskrivendeNavnString_undertittel(String beskrivendeNavnString) {
+        return RegexMester.hentUtMedRegEx(beskrivendeNavnString,"(?<=: ).*?(?= \\[)",0);
+    }
+
+    public String hentUtFraBeskrivendeNavnString_kategoritype(String beskrivendeNavnString) {
+        return RegexMester.hentUtMedRegEx(beskrivendeNavnString,"\\[\\s*(.*?)(?=, )",1);
+
+    }
+
+
+    public String hentUtFraBeskrivendeNavnString_kategoriretning(String beskrivendeNavnString) {
+        //return RegexMester.hentUtMedRegEx(beskrivendeNavnString,"(?<=, ).*?(?=\\])",0);
+        return RegexMester.hentUtMedRegEx(beskrivendeNavnString,"\\[[^\\]]*,\\s*([^\\]]+)\\]",1);
+    }
+
+
+
+
     @Override
     public Kategori opprettEntitet() {
         return leggTilUUID(new Kategori());
@@ -80,11 +154,11 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         return new ArrayList<>(kategoriRepository.findAllByOrderByErAktivDescTittelAscUndertittelAsc());
     }
 
-    public Optional<Kategori> finnEtterTittel(String tittel) {
+    public List<Kategori> finnEtterTittel(String tittel) {
         return kategoriRepository.findByTittel(tittel);
     }
 
-    public Optional<Kategori> finnEtterTittelOgUnderTittel(String tittel, String undertittel) {
+    public List<Kategori> finnEtterTittelOgUnderTittel(String tittel, String undertittel) {
         return kategoriRepository.findByTittelAndUndertittel(tittel, undertittel);
 
     }

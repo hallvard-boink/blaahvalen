@@ -1,6 +1,7 @@
 package com.hallvardlaerum.periode;
 
 import com.hallvardlaerum.libs.database.AbstraktEntitet;
+import com.hallvardlaerum.libs.database.EntitetMedBarnAktig;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.periodepost.Periodepost;
@@ -8,10 +9,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Periode extends AbstraktEntitet {
+public class Periode extends AbstraktEntitet implements EntitetMedBarnAktig<Periodepost> {
 
     @SkalEksporteres
     private PeriodetypeEnum periodetypeEnum;
@@ -67,6 +69,11 @@ public class Periode extends AbstraktEntitet {
     }
 
     public Periode() {
+    }
+
+    @Override
+    public ArrayList<Periodepost> hentBarn() {
+        return new ArrayList<>(getPeriodeposterList());
     }
 
     @Override

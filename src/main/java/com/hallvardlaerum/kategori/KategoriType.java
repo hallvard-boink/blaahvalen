@@ -9,7 +9,7 @@ public enum KategoriType implements EnumAktig {
     UKATEGORISERT("Ukategorisert","Ikke kategorisert ennå"), // [3]
     SKAL_IKKE_KATEGORISERES("Skal ikke kategoriseres","Poster som det ikke gir mening å kategorisere"),  // [4]
     KATEGORI_IKKE_FUNNET("Kategori ikke funnet","Poster vi ikke har klart å finne kategori til"),  // [5]
-    TIL_SPARING("Til sparing","Kategorier som handler om å sette av penger."),  // [6]
+    TIL_SPARING("Til sparing","Kategorier som handler om å sette av penger.")  // [6]
     ;
 
 

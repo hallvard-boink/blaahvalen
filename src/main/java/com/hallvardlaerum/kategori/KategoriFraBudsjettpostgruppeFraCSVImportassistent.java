@@ -1,8 +1,10 @@
 package com.hallvardlaerum.kategori;
 
 import com.hallvardlaerum.libs.eksportimport.CSVImportassistentMal;
+import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -26,14 +28,15 @@ public class KategoriFraBudsjettpostgruppeFraCSVImportassistent extends CSVImpor
         String tittelString = hentVerdi("Kategori");
         String undertittelString = hentVerdi("Tittel");
 
-        Optional<Kategori> kategoriOptional;
+
+        List<Kategori> kategoriList;
         if (undertittelString==null || undertittelString.isEmpty()) {
-            kategoriOptional = kategoriService.finnEtterTittel(tittelString);
+             kategoriList = kategoriService.finnEtterTittel(tittelString);
         } else {
-            kategoriOptional = kategoriService.finnEtterTittelOgUnderTittel(tittelString, undertittelString);
+            kategoriList = kategoriService.finnEtterTittelOgUnderTittel(tittelString, undertittelString);
         }
 
-        if (kategoriOptional.isEmpty()) {
+        if (kategoriList.isEmpty()) {
             Kategori kategori = kategoriService.opprettEntitet();
 
             kategori.setTittel(tittelString);
@@ -50,7 +53,10 @@ public class KategoriFraBudsjettpostgruppeFraCSVImportassistent extends CSVImpor
             return kategori;
 
         } else {
-            return null;
+            if (kategoriList.size()>1) {
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en kategori med tittel " + tittelString + " og undertittel " + undertittelString + ". Bruker første i lista, og fortsetter.");
+            }
+            return kategoriList.getFirst();
         }
 
     }

@@ -57,6 +57,8 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
     private KategoriService kategoriService;
     private NormaldelpostViewMester normaldelpostViewMester;
 
+    protected  ConfirmDialog slettNormalposterconfirmDialog;
+
     public NormalpostView() {
         super();
         Allvitekyklop.hent().setNormalpostView(this);
@@ -109,20 +111,24 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
         hentVerktoeySubMeny().addItem("Importer CSV fra Gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
     }
 
+
     private void opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleNormalposterMenuItem(){
-        slettAlleMenuItem = verktoeySubMenu.addItem("Slett alle normalposter");
-        slettAlleMenuItem.addClickListener(e -> new ConfirmDialog(
-                        "Slette alle månedsoversikter?",
-                        "Vil du virkelig slette månedsoversikter med månedsoversiktposter?",
-                        "Ja, sett i gang",
-                        ee -> {
-                            postService.slettAllePosterAvDennePostklasseEnum();
-                            oppdaterSoekeomraadeFinnAlleRader();
-                            oppdaterRedigeringsomraade();
-                        },
-                        "Nei, er du GAL!",
-                        null).open()
-                );
+        slettNormalposterconfirmDialog = new ConfirmDialog(
+                "Slette alle normalposter?",
+                "Vil du virkelig slette normalpostene?",
+                "Ja, sett i gang",
+                ee -> {
+                    postService.slettAllePosterAvDennePostklasseEnum();
+                    oppdaterSoekeomraadeFinnAlleRader();
+                    oppdaterRedigeringsomraade();
+                },
+                "Nei, er du GAL!",
+                e -> lukkDialogslettNormalposter());
+        hentVerktoeySubMeny().addItem("Slett alle normalposter",e -> slettNormalposterconfirmDialog.open());
+    }
+
+    private void lukkDialogslettNormalposter(){
+        slettNormalposterconfirmDialog.close();
     }
 
     private void importerCSVFraGamleBlaahvalen() {

@@ -27,6 +27,7 @@ import com.hallvardlaerum.post.normalpost.NormalpostRedigeringsomraade;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.PermitAll;
@@ -101,6 +102,8 @@ public class OmView extends MainViewmal {
                 Allvitekyklop.hent().initierAlleObjekter();
 
                 opprettLayout(Versjonskyklop.hent());
+                leggTilBanner();
+
             }
 
             //TODO: Når er det behov for å hente redigeringsomraade fra serviceklassen? Sjekk havaara mot childTable
@@ -108,6 +111,15 @@ public class OmView extends MainViewmal {
         });
 
 
+
+
+    }
+
+    private void leggTilBanner() {
+        Image img = new Image("images/banner.jpeg", "Banner");
+        img.setAlt("Banner");
+        //img.setWidth("1000px"); // optional
+        hentBannerplassHorizontalLayout().add(img);
     }
 
 

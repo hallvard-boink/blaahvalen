@@ -289,6 +289,13 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         }
     }
 
+    protected void oppdaterAllePeriodeposterAvSammeType(PeriodepostTypeEnum periodepostTypeEnum) {
+        List<Periodepost> periodepostList = periodepostRepository.findByPeriodepostTypeEnum(periodepostTypeEnum);
+        for (Periodepost periodepost:periodepostList) {
+            oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
+        }
+    }
+
 //endregion
 
 

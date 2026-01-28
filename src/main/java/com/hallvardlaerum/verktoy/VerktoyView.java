@@ -1,6 +1,7 @@
 package com.hallvardlaerum.verktoy;
 
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.testing.TestDataFabrikk;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -40,7 +41,19 @@ public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
         leggTilKnapper_OpprettTestDataButton();
         leggTilKnapper_SlettTestDataButton();
         leggTilKnapper_VaskDataButton();
+        leggTilKnapper_OppdaterAlleSummer();
+    }
 
+    private void leggTilKnapper_OppdaterAlleSummer() {
+        Button button = new Button("Oppdater alle perioder og periodeposter");
+        button.addClickListener(e -> {
+            Allvitekyklop.hent().getMaanedsoversiktpostService().oppdaterAlleMaanedsoversiktposter();
+            Allvitekyklop.hent().getAarsoversiktpostService().oppdaterAlleAarsoversiktposter();
+            Allvitekyklop.hent().getKostnadspakkeService().oppdaterAlleKostnadspakker();
+            Allvitekyklop.hent().getMaanedsoversiktService().oppdaterAlleMaanedsoversikter();
+            Allvitekyklop.hent().getAarsoversiktService().oppdaterAlleAarsoversikter();
+        });
+        add(button);
     }
 
     private void leggTilKnapper_VaskDataButton() {

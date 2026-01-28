@@ -1,5 +1,6 @@
  package com.hallvardlaerum.periodepost.kostnadspakke;
 
+ import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
  import com.hallvardlaerum.libs.felter.HelTallMester;
  import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
  import com.hallvardlaerum.periode.Periode;
@@ -46,6 +47,15 @@ public class KostnadspakkeService extends PeriodepostServiceMal implements Initi
     public boolean erInitiert() {
         return erInitiert;
     }
+
+     public void oppdaterAlleKostnadspakker() {
+         Loggekyklop.bruk().loggINFO("Oppdaterer kostnadspakker...");
+         List<Periodepost> kostnadspakkeList = periodepostRepository.findByPeriodepostTypeEnum(PeriodepostTypeEnum.PERIODEOVERSIKTPOST);
+         for (Periodepost kostnadspakke:kostnadspakkeList) {
+             oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
+             lagre(kostnadspakke);
+         }
+     }
 
     public void oppdaterSumUtgifterFraTilknyttedePoster(Periodepost kostnadspakke) {
         if (kostnadspakke==null) {
@@ -126,4 +136,6 @@ public class KostnadspakkeService extends PeriodepostServiceMal implements Initi
          List<Periodepost> kostnadspakker = hentRepository().findByPeriodepostTypeEnum(PeriodepostTypeEnum.PERIODEOVERSIKTPOST);
          hentRepository().deleteAll(kostnadspakker);
      }
+
+
  }

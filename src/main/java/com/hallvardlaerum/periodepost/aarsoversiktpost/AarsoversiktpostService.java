@@ -1,5 +1,6 @@
 package com.hallvardlaerum.periodepost.aarsoversiktpost;
 
+import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
@@ -41,5 +42,10 @@ public class AarsoversiktpostService extends PeriodepostServiceMal implements In
     public void slettAlleAarsoversiktposter() {
         List<Periodepost> aarsoversiktposter = hentRepository().findByPeriodepostTypeEnum(PeriodepostTypeEnum.AARSOVERSIKTPOST);
         hentRepository().deleteAll(aarsoversiktposter);
+    }
+
+    public void oppdaterAlleAarsoversiktposter() {
+        Loggekyklop.bruk().loggINFO("Oppdaterer årsoversiktposter...");
+        super.oppdaterAllePeriodeposterAvSammeType(PeriodepostTypeEnum.AARSOVERSIKTPOST);
     }
 }

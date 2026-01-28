@@ -136,7 +136,7 @@ public class PeriodepostRedigeringsomraadeMal extends RedigeringsomraadeMal<Peri
 
         periodeComboBox = new ComboBox<>("Periode");
         periodeComboBox.setItemLabelGenerator(Periode::hentBeskrivendeNavn);
-        periodeComboBox.setItems(periodeServiceMal.finnAlleEgnedePerioder(periodetypeEnum));
+        periodeComboBox.setItems(periodeServiceMal.finnAllePerioderEtterPeriodetypeEnum(periodetypeEnum));
 
         kategoriComboBox = new ComboBox<>("Kategori");
         kategoriComboBox.setItemLabelGenerator(Kategori::hentKortnavn);

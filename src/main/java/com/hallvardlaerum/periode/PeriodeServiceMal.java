@@ -52,7 +52,14 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         super.initEntitetserviceMal(Periode.class, periodeRepository);
     }
 
-    public List<Periode> finnAlleEgnedePerioder(PeriodetypeEnum periodetypeEnum) {
+    public void oppdaterAllePerioderAvSammeType(PeriodetypeEnum periodetypeEnum) {
+        List<Periode> periodeList = finnAllePerioderEtterPeriodetypeEnum(periodetypeEnum);
+        for (Periode periode:periodeList) {
+            oppdaterOgLagreSummer(periode);
+        }
+    }
+
+    public List<Periode> finnAllePerioderEtterPeriodetypeEnum(PeriodetypeEnum periodetypeEnum) {
         return periodeRepository.findByPeriodetypeEnumOrderByDatoFraLocalDateDesc(periodetypeEnum);
     }
 

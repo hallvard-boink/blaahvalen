@@ -77,4 +77,9 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
     public void slettAlleAarsoversikter() {
         super.slettAllePerioderMedPeriodeposter(PeriodetypeEnum.AARSOVERSIKT);
     }
+
+    public void oppdaterAlleAarsoversikter() {
+        Loggekyklop.bruk().loggINFO("Oppdaterer årsoversikter...");
+        oppdaterAllePerioderAvSammeType(PeriodetypeEnum.AARSOVERSIKT);
+    }
 }

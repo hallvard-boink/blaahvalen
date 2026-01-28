@@ -98,6 +98,8 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
 
     }
 
+
+
     public void slettAlleMaanedsoversikter() {
         super.slettAllePerioderMedPeriodeposter(PeriodetypeEnum.MAANEDSOVERSIKT);
     }
@@ -108,5 +110,11 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
 
     public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
+    }
+
+
+    public void oppdaterAlleMaanedsoversikter() {
+        Loggekyklop.bruk().loggINFO("Oppdaterer månedsoversikter...");
+        oppdaterAllePerioderAvSammeType(PeriodetypeEnum.MAANEDSOVERSIKT);
     }
 }

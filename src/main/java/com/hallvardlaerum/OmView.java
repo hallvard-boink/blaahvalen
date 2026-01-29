@@ -118,7 +118,8 @@ public class OmView extends MainViewmal {
     private void leggTilBanner() {
         Image img = new Image("images/banner.jpeg", "Banner");
         img.setAlt("Banner");
-        //img.setWidth("1000px"); // optional
+        img.setWidth("1000px"); // optional
+        img.setHeight("400px");
         hentBannerplassHorizontalLayout().add(img);
     }
 

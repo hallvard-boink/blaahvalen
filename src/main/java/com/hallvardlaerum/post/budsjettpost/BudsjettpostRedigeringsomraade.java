@@ -1,6 +1,7 @@
 package com.hallvardlaerum.post.budsjettpost;
 
 import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriRetning;
 import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.ui.BooleanCombobox;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
@@ -10,6 +11,7 @@ import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -22,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @UIScope
 public class BudsjettpostRedigeringsomraade extends RedigeringsomraadeMal<Post> implements RedigeringsomraadeAktig<Post>, InitieringsEgnet {
-    private boolean erInitiert = false;
+    private final boolean erInitiert = false;
     private KategoriService kategoriService;
 
     private DatePicker datoDatePicker;
@@ -37,9 +39,44 @@ public class BudsjettpostRedigeringsomraade extends RedigeringsomraadeMal<Post> 
     private BooleanCombobox erRegelmessigBooleanCombobox;
 
 
+
+
+// ===========================
+// region 0.Constructor og init
+// ===========================
+
+
+
     public BudsjettpostRedigeringsomraade() {
         super();
     }
+
+
+
+    @Override
+    public void init() {
+        if (!erInitiert) {
+            super.initRedigeringsomraadeMal();
+            this.kategoriService = Allvitekyklop.hent().getKategoriService();
+            instansOpprettFelter();
+            instansByggOppBinder();
+        }
+    }
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+// endregion
+
+
+
+// ===========================
+// region 1.Opprett felter og binder
+// ===========================
+
+
 
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
@@ -55,6 +92,18 @@ public class BudsjettpostRedigeringsomraade extends RedigeringsomraadeMal<Post> 
         kategoriComboBox = new ComboBox<>("Kategori");
         kategoriComboBox.setItemLabelGenerator(Kategori::hentBeskrivendeNavn);
         kategoriComboBox.setItems(kategoriService.finnAlle());
+        kategoriComboBox.addValueChangeListener(e -> {
+           if (e.isFromClient() && kategoriComboBox.getValue()!=null) {
+               if (kategoriComboBox.getValue().getKategoriRetning()==KategoriRetning.UT && innPaaKontoIntegerField.getValue()!=null && innPaaKontoIntegerField.getValue()>0) {
+                   Notification.show("Du kan ikke velge en kategori beregnet på utgifter hvis posten inneholder inntekter",4000, Notification.Position.MIDDLE);
+                   kategoriComboBox.setValue(null);
+               } else if (kategoriComboBox.getValue().getKategoriRetning()==KategoriRetning.INN && utFraKontoIntegerField.getValue()!=null && utFraKontoIntegerField.getValue()>0) {
+                   Notification.show("Du kan ikke velge en kategori beregnet på inntekter hvis posten inneholder utgifter",4000, Notification.Position.MIDDLE);
+                   kategoriComboBox.setValue(null);
+               }
+           }
+        });
+
         leggTilRedigeringsfelter(hovedtabString, datoDatePicker, kategoriComboBox);
 
         beskrivelseTextField = leggTilRedigeringsfelt(hovedtabString, new TextField("Beskrivelse"));
@@ -83,7 +132,7 @@ public class BudsjettpostRedigeringsomraade extends RedigeringsomraadeMal<Post> 
         rekkefoelgeIntegerField = new IntegerField("Rekkefølge");
         leggTilRedigeringsfelt(ekstratabString, rekkefoelgeIntegerField);
 
-        super.setFokusComponent(beskrivelseTextField);
+        super.settFokusKomponent(beskrivelseTextField);
 
     }
 
@@ -103,18 +152,6 @@ public class BudsjettpostRedigeringsomraade extends RedigeringsomraadeMal<Post> 
 
     }
 
-    @Override
-    public void init() {
-        if (!erInitiert) {
-            super.initRedigeringsomraadeMal();
-            this.kategoriService = Allvitekyklop.hent().getKategoriService();
-            instansOpprettFelter();
-            instansByggOppBinder();
-        }
-    }
 
-    @Override
-    public boolean erInitiert() {
-        return erInitiert;
-    }
+
 }

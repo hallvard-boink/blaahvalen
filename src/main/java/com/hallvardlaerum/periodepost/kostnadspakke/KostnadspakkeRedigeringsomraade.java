@@ -7,7 +7,6 @@ import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostRedigeringsomraadeMal;
 import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.post.Post;
-import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
 import com.hallvardlaerum.post.normalpost.NormalpostRedigeringsomraade;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -27,6 +25,20 @@ public class KostnadspakkeRedigeringsomraade extends PeriodepostRedigeringsomraa
     private boolean erInitiert = false;
     private RedigerEntitetDialog<Post,Periodepost> normalpostRedigerEntitetDialog;
 
+    //oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
+
+// ===========================
+// region 0 Constructor og Init
+// ===========================
+
+    public KostnadspakkeRedigeringsomraade() {
+        super();
+    }
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
 
     @Override
     public void init() {
@@ -41,15 +53,14 @@ public class KostnadspakkeRedigeringsomraade extends PeriodepostRedigeringsomraa
         }
     }
 
-    @Override
-    public void instansOppdaterEkstraRedigeringsfelter() {
-        Periodepost periodepost = hentEntitet();
-        sumRegnskapSpan.settInteger(periodepost.getSumRegnskapInteger());
-        List<Post> normalposterList = Allvitekyklop.hent().getNormalpostService().finnPosterIKostnadspakken(periodepost);
-        normalposterGrid.setItems(normalposterList);
-    }
+// endregion
 
 
+
+
+// ===========================
+// region 1. Opprett felter
+// ===========================
 
     @Override
     public void instansOpprettFelter() {
@@ -107,12 +118,27 @@ public class KostnadspakkeRedigeringsomraade extends PeriodepostRedigeringsomraa
 
     }
 
-    public KostnadspakkeRedigeringsomraade() {
-        super();
-    }
+
+// endregion
+
+
+
+// ===========================
+// region 2.CRUDO og oppdatering
+// ===========================
+
 
     @Override
-    public boolean erInitiert() {
-        return erInitiert;
+    public void instansOppdaterEkstraRedigeringsfelter() {
+        Periodepost periodepost = hentEntitet();
+        sumRegnskapSpan.settInteger(periodepost.getSumRegnskapInteger());
+        List<Post> normalposterList = Allvitekyklop.hent().getNormalpostService().finnPosterIKostnadspakken(periodepost);
+        normalposterGrid.setItems(normalposterList);
     }
+
+// endregion
+
+
+
+
 }

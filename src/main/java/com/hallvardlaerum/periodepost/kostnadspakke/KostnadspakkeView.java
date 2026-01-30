@@ -22,6 +22,13 @@ public class KostnadspakkeView extends PeriodepostViewMal implements Initierings
     private boolean erInitiert;
     private KostnadspakkeService kostnadspakkeService;
 
+
+    // ===========================
+    // region 0 Constructor og Init
+    // ===========================
+
+
+
     @Override
     public void init() {
         if (!erInitiert) {
@@ -43,6 +50,24 @@ public class KostnadspakkeView extends PeriodepostViewMal implements Initierings
             erInitiert=true;
         }
     }
+    public KostnadspakkeView() {
+        super();
+        Allvitekyklop.hent().setPeriodeoversiktpostView(this);
+        init();
+    }
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+// endregion
+
+
+
+// ===========================
+// region 1 Opprett søkeområde med grid
+// ===========================
 
 
     @Override
@@ -86,9 +111,19 @@ public class KostnadspakkeView extends PeriodepostViewMal implements Initierings
         hentKnapperadRedigeringsfelt().add(oppdaterSummerButton);
     }
 
+    // endregion
+
+
+
+// ===========================
+// region 9 Hjelpeprosedyrer
+// ===========================
+
+
+
     private void oppdaterSummer() {
         Periodepost kostnadspakke = Allvitekyklop.hent().getPeriodeoversiktpostView().hentEntitet();
-        kostnadspakkeService.oppdaterOgLagreSummerForValgteVanligePeriodepost();
+        kostnadspakkeService.oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
         //periodeoversiktpostService.oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
         Allvitekyklop.hent().getPeriodeoversiktpostView().oppdaterRedigeringsomraade();
         Allvitekyklop.hent().getPeriodeoversiktpostView().oppdaterSoekeomraadeFinnAlleRader();
@@ -101,15 +136,7 @@ public class KostnadspakkeView extends PeriodepostViewMal implements Initierings
         );
     }
 
+// endregion
 
-    public KostnadspakkeView() {
-        super();
-        Allvitekyklop.hent().setPeriodeoversiktpostView(this);
-        init();
-    }
 
-    @Override
-    public boolean erInitiert() {
-        return erInitiert;
-    }
 }

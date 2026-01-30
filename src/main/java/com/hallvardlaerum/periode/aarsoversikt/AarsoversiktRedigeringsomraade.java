@@ -127,10 +127,15 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     }
 
 
+    // ===========================
+    // region 1.1 Faste utgifter
+    // ===========================
+
+
     private void instansOpprettFelter_leggTilFasteUtgifterTab() {
         String redigerFastUtgifterTabString = "Faste utgifter";
 
-        instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriMedSumOgAntalLGrid();
+        instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriMedSumOgAntallGrid();
         instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostGrid();
 
         VerticalLayout budsjettPosterVerticalLayout = new VerticalLayout();
@@ -312,10 +317,16 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
             budsjettpostGrid.setDropMode(null);
         });
 
+        budsjettpostGrid.addItemClickListener( e -> {
+            if (e.isShiftKey()) {
+                Notification.show("Bruk heller CTRL-klikk for markere flere samtidig!",4000, Notification.Position.MIDDLE);
+            }
+        });
+
         instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostGrid_opprettOgKobleRedigeringsdialog();
     }
 
-    private void instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriMedSumOgAntalLGrid() {
+    private void instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriMedSumOgAntallGrid() {
         kategoriMedSumOgAntallGrid = new Grid<>();
         kategoriMedSumOgAntallGrid.addColumn(KategoriMedSumOgAntall::getTittel).setHeader("Tittel");
         kategoriMedSumOgAntallGrid.addColumn(KategoriMedSumOgAntall::getUndertittel).setHeader("Undertittel");
@@ -328,6 +339,8 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
                 oppdaterBudsjettpostgrid(e.getFirstSelectedItem().get().getKategori());
             }
         });
+
+
 
         // drag and drop
         kategoriMedSumOgAntallGrid.setRowsDraggable(true);
@@ -346,6 +359,13 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
 
         kategoriMedSumOgAntallGrid.setSizeFull();
     }
+
+// endregion
+
+
+// ===========================
+// region 1.2 Kostnadspakker
+// ===========================
 
 
     private void instansOpprettFelter_leggTilKostnadspakkerTab() {
@@ -379,6 +399,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
 
 
 
+// endregion
 // endregion
 
 

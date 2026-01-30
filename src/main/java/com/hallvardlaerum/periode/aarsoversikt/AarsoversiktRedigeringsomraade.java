@@ -2,6 +2,7 @@ package com.hallvardlaerum.periode.aarsoversikt;
 
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriMedSumOgAntall;
+import com.hallvardlaerum.kategori.KategoriRedigeringsomraade;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.Gridkyklop;
@@ -25,6 +26,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -55,8 +57,8 @@ import java.util.List;
  * <ul>
  *     <li>CRUD budsjettposter</li>
  *     <li>Oppdater sum og beskrivelse for resten av de viste budsjettpostene</li>
- *     <li>Lag en kopi per måned</li>
- *     <li>Lag en kopi per kvartal</li>
+ *     <li>Lag en kopi for hver måned</li>
+ *     <li>Lag en kopi for hvert kvartal</li>
  * </ul>
  * <br/><br/>
  */
@@ -68,38 +70,54 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     private Grid<KategoriMedSumOgAntall> kategoriMedSumOgAntallGrid;
     private Grid<Post> budsjettpostGrid;
     private RedigerEntitetDialog<Periodepost, Periode> kostnadspakkeRedigerEntitetDialog;
+    private RedigerEntitetDialog<Kategori, Periode> kategoriRedigerEntitetDialog;
     private RedigerEntitetDialog<Post, Periode> budsjettpostRedigerEntitetDialog;
     private BudsjettpostService budsjettpostService;
+    private List<Post> draggedItemsList;
 
+
+// ===========================
+// region 0.Constructor og init
+// ===========================
 
     public AarsoversiktRedigeringsomraade() {
         super();
     }
 
     @Override
-    public void instansOppdaterEkstraRedigeringsfelter() {
-        super.instansOppdaterEkstraRedigeringsfelter();
-        oppdaterFasteUtgifterTab_KategoriGrid();
-        oppdaterKostnadspakkerTab();
-    }
-
-    private void oppdaterFasteUtgifterTab_KategoriGrid() {
-        KategoriMedSumOgAntall markertKategoriMedSumOgAntall;
-        if (kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
-            markertKategoriMedSumOgAntall = kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().get();
-        } else {
-            markertKategoriMedSumOgAntall = null;
-        }
-        kategoriMedSumOgAntallGrid.setItems(finnKategorierMedSumOgAntall());
-        if (markertKategoriMedSumOgAntall != null) {
-            markerRadIKategoriMedSumOgAntallGrid(markertKategoriMedSumOgAntall);
-            oppdaterBudsjettpostgridMedValgteKategori();
+    public void init() {
+        if (!erInitiert) {
+            AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade = new AarsoversiktpostRedigeringsomraade();
+            aarsoversiktpostRedigeringsomraade.init();
+            super.initierPeriodeRedigeringsomraadeMal(PeriodetypeEnum.AARSOVERSIKT,
+                    Allvitekyklop.hent().getAarsoversiktpostService(),
+                    aarsoversiktpostRedigeringsomraade,
+                    Allvitekyklop.hent().getAarsoversiktService(),
+                    PeriodepostTypeEnum.AARSOVERSIKTPOST,
+                    Allvitekyklop.hent().getAarsoversiktView()
+            );
+            budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
+            erInitiert = true;
         }
     }
 
     @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+
+// endregion
+
+
+
+// ===========================
+// region 1 Opprett felter
+// ===========================
+
+
+    @Override
     public void instansOpprettFelter() {
-        //super.instansOpprettFelter();
         instansOpprettFelter_leggTilHovedTab();
         instansOpprettFelter_leggTilKategorierTab();
         instansOpprettFelter_leggTilFasteUtgifterTab();
@@ -115,82 +133,96 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriMedSumOgAntalLGrid();
         instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostGrid();
 
-        VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad());
-        verticalLayout.add(budsjettpostGrid);
-        leggTilRedigeringsfelter(redigerFastUtgifterTabString, kategoriMedSumOgAntallGrid, verticalLayout);
+        VerticalLayout budsjettPosterVerticalLayout = new VerticalLayout();
+        budsjettPosterVerticalLayout.add(instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostKnapperad());
+        budsjettPosterVerticalLayout.add(budsjettpostGrid);
+
+        VerticalLayout kategoriVerticalLayout = new VerticalLayout();
+        kategoriVerticalLayout.add(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad());
+        kategoriVerticalLayout.add(kategoriMedSumOgAntallGrid);
+        leggTilRedigeringsfelter(redigerFastUtgifterTabString, kategoriVerticalLayout, budsjettPosterVerticalLayout);
 
         hentFormLayoutFraTab(redigerFastUtgifterTabString).setSizeFull();
     }
 
-    private HorizontalLayout instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad() {
+    private HorizontalLayout instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad() {
         HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.setAlignItems(Alignment.END);
+        //horizontalLayout.setAlignItems(Alignment.END);
         horizontalLayout.setWidthFull();
 
-        horizontalLayout.add(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilOpprettNyBudsjettpostButton());
-        horizontalLayout.add(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilRedigerBudsjettpostButton());
-        horizontalLayout.add(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilGjoerMaanedligButton());
-        horizontalLayout.add(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilGjorKvartalsvisButton());
-        horizontalLayout.add(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilSlettBudsjettpostButton());
-        horizontalLayout.add(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilKopierTilDeAndreButton());
+        horizontalLayout.add(new H2("Kategorier"));
+        horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_leggTilOpprettNyUnderKategoriButton());
+        instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_InitierDialog();
 
-        horizontalLayout.add(kategoriMedSumOgAntallGrid);
         return horizontalLayout;
     }
+
+    private void instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_InitierDialog() {
+        KategoriRedigeringsomraade kategoriRedigeringsomraade = new KategoriRedigeringsomraade();
+        kategoriRedigeringsomraade.init();
+
+        kategoriRedigerEntitetDialog = new RedigerEntitetDialog<>(
+                Allvitekyklop.hent().getKategoriService(),
+                Allvitekyklop.hent().getAarsoversiktService(),
+                "Legg til kategori",
+                "Legg til ny kategori, basert på eksisterende.",
+                kategoriRedigeringsomraade,
+                this
+        );
+    }
+
+
+    private Button instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_leggTilOpprettNyUnderKategoriButton() {
+        Button button = new Button("Legg til underkategori");
+        button.addClickListener(e -> leggTilUnderkategori());
+        return button;
+    }
+
+    private void leggTilUnderkategori() {
+        if (kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().isEmpty()) {
+            Notification.show("Marker først en kategori du vil ta utgangspunkt i", 3000, Notification.Position.MIDDLE);
+            return;
+        }
+
+        Kategori markertKategori = kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().get().getKategori();
+        Kategori nyKategori = Allvitekyklop.hent().getKategoriService().opprettEntitet();
+
+        nyKategori.setTittel(markertKategori.getTittel());
+        nyKategori.setNivaa(2);
+        nyKategori.setKategoriType(markertKategori.getKategoriType());
+        nyKategori.setKategoriRetning(markertKategori.getKategoriRetning());
+        nyKategori.setErAktiv(true);
+        nyKategori.setBrukesTilRegnskap(markertKategori.getBrukesTilRegnskap());
+        nyKategori.setBrukesTilBudsjett(markertKategori.getBrukesTilBudsjett());
+        nyKategori.setBrukesTilFastePoster(markertKategori.getBrukesTilFastePoster());
+
+        kategoriRedigerEntitetDialog.vis(nyKategori);
+    }
+
+
+    private HorizontalLayout instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostKnapperad() {
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        //horizontalLayout.setAlignItems(Alignment.END);
+        horizontalLayout.setWidthFull();
+
+        horizontalLayout.add(new H2("Faste utgifter"));
+        horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilOpprettNyBudsjettpostButton());
+        horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilRedigerBudsjettpostButton());
+        horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilGjoerMaanedligButton());
+        horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilGjorKvartalsvisButton());
+        horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilSlettBudsjettpostButton());
+        horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilKopierTilDeAndreButton());
+
+        return horizontalLayout;
+    }
+
+
 
     private Button instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilKopierTilDeAndreButton() {
         Button button = new Button("Kopier til de andre");
         button.addClickListener(e -> kopierTilAndreBudsjettposterMedSammeKategori());
         return button;
     }
-
-    private void kopierTilAndreBudsjettposterMedSammeKategori() {
-        if (budsjettpostGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
-            Post markertPost = budsjettpostGrid.getSelectionModel().getFirstSelectedItem().get();
-            Kategori kategori = markertPost.getKategori();
-
-            ArrayList<Post> andreposterArrayList = new ArrayList<>(budsjettpostService.finnEtterPeriodeOgKategori(hentEntitet(), kategori));
-            andreposterArrayList.remove(markertPost);
-            for (Post budsjettpost : andreposterArrayList) {
-                budsjettpost.setBeskrivelseString(markertPost.getBeskrivelseString());
-                budsjettpost.setInnPaaKontoInteger(markertPost.getInnPaaKontoInteger());
-                budsjettpost.setUtFraKontoInteger(markertPost.getUtFraKontoInteger());
-            }
-            budsjettpostService.lagreAlle(andreposterArrayList);
-
-
-            // Oppdater listene
-            KategoriMedSumOgAntall markertKategoriMSA;
-            if (kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
-                markertKategoriMSA = kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().get();
-            } else {
-                markertKategoriMSA = null;
-            }
-            instansOppdaterEkstraRedigeringsfelter();
-            markerRadIKategoriMedSumOgAntallGrid(markertKategoriMSA);
-            budsjettpostGrid.select(markertPost);
-
-        } else {
-            Notification.show("Marker en rad først", 3, Notification.Position.MIDDLE);
-        }
-    }
-
-    private void markerRadIKategoriMedSumOgAntallGrid(KategoriMedSumOgAntall markertKategoriMSA) {
-        if (markertKategoriMSA==null) {
-            return;
-        }
-
-        List<KategoriMedSumOgAntall> kategoriMSAer = kategoriMedSumOgAntallGrid.getListDataView().getItems().toList();
-        for (KategoriMedSumOgAntall kategoriMedSumOgAntall:kategoriMSAer) {
-            if (kategoriMedSumOgAntall.getKategori().equals(markertKategoriMSA.getKategori())) {
-                kategoriMedSumOgAntallGrid.select(kategoriMedSumOgAntall);
-                break;
-            }
-        }
-    }
-
-
 
     private Button instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilSlettBudsjettpostButton() {
         Button button = new Button(new Icon(VaadinIcon.CLOSE_CIRCLE));
@@ -240,65 +272,22 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     }
 
 
-    private void opprettEnEllerFlereBudsjettposter(FrekvensPerAarEnum frekvensPerAarEnum) {
-        Integer antallPerAar = frekvensPerAarEnum.getAntallPerAar();
-        ArrayList<Post> posterSomSkalOpprettesArrayList = new ArrayList<>();
+    private void instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostGrid_opprettOgKobleRedigeringsdialog() {
+        BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraadeTilDialog = new BudsjettpostRedigeringsomraade();
+        budsjettpostRedigeringsomraadeTilDialog.init();
 
-        Kategori kategori;
-        if (kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
-            kategori = kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().get().getKategori();
-        } else {
-            Notification.show("Ingen kategori er valgt, avbryter").setPosition(Notification.Position.MIDDLE);
-            return;
-        }
-
-        Post markertBudsjettpost = null;
-        if (budsjettpostGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
-            markertBudsjettpost = budsjettpostGrid.getSelectionModel().getFirstSelectedItem().get();
-        }
-
-        Integer aarInteger = hentEntitet().getDatoFraLocalDate().getYear();
-
-        int startInteger;
-        if (markertBudsjettpost != null && frekvensPerAarEnum == FrekvensPerAarEnum.MAANEDLIG) { //virker bare med månedlige poster
-            startInteger = markertBudsjettpost.getDatoLocalDate().getMonthValue();
-        } else {
-            startInteger = 0;
-        }
-
-        for (int i = startInteger; i < antallPerAar; i++) {
-            Post budsjettpost = budsjettpostService.opprettEntitet();
-
-            budsjettpost.setKategori(kategori);
-            budsjettpost.setDatoLocalDate(opprettDato(aarInteger, i + 1, frekvensPerAarEnum));
-
-            if (markertBudsjettpost != null) {
-                budsjettpost.setInnPaaKontoInteger(markertBudsjettpost.getInnPaaKontoInteger());
-                budsjettpost.setUtFraKontoInteger(markertBudsjettpost.getUtFraKontoInteger());
-                budsjettpost.setBeskrivelseString(markertBudsjettpost.getBeskrivelseString());
-            }
-
-            posterSomSkalOpprettesArrayList.add(budsjettpost);
-        }
-
-        budsjettpostService.lagreAlle(posterSomSkalOpprettesArrayList);
-        instansOppdaterEkstraRedigeringsfelter();
-        //Post skalMarkeresBudsjettpost = posterSomSkalOpprettesArrayList.getFirst();
-        //oppdaterBudsjettpostgridOgMarkerPost(skalMarkeresBudsjettpost);
+        budsjettpostRedigerEntitetDialog = new RedigerEntitetDialog<>(
+                Allvitekyklop.hent().getBudsjettpostService(),
+                Allvitekyklop.hent().getAarsoversiktService(),
+                "Rediger fast utgift",
+                "",
+                budsjettpostRedigeringsomraadeTilDialog,
+                this
+        );
+        budsjettpostGrid.addItemDoubleClickListener(e -> budsjettpostRedigerEntitetDialog.vis(e.getItem()));
     }
 
-    private LocalDate opprettDato(Integer aar, Integer nr, FrekvensPerAarEnum frekvensPerAarEnum) {
-        LocalDate dato = null;
-        switch (frekvensPerAarEnum) {
-            case EN_GANG -> dato = LocalDate.of(aar, 1, 1);
-            case MAANEDLIG -> dato = LocalDate.of(aar, nr, 1);
-            case HVERT_KVARTAL -> dato = LocalDate.of(aar, ((nr - 1) * 3) + 1, 1);
-            case HVERT_HALVAAR -> dato = LocalDate.of(aar, ((nr - 1) * 6) + 1, 1);
-        }
-        return dato;
-    }
 
-    private List<Post> draggedItemsList;
     private void instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostGrid() {
         budsjettpostGrid = new Grid<>();
         budsjettpostGrid.addColumn(Post::getDatoLocalDate).setHeader("Dato");
@@ -319,56 +308,11 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         });
 
         budsjettpostGrid.addDragEndListener(e -> {
-           draggedItemsList=null;
-           budsjettpostGrid.setDropMode(null);
+            draggedItemsList=null;
+            budsjettpostGrid.setDropMode(null);
         });
+
         instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostGrid_opprettOgKobleRedigeringsdialog();
-    }
-
-    private void budsjettpostGrid_markerRader(ItemClickEvent<Post> e) {
-        Post klikketBudsjettpost = e.getItem();
-        GridSelectionModel<Post> sm = budsjettpostGrid.getSelectionModel();
-
-        if (e.isCtrlKey()) {
-            budsjettpostGrid_markerRader_markerMange(klikketBudsjettpost, !sm.isSelected(klikketBudsjettpost));
-        } else {
-            if (sm.isSelected(klikketBudsjettpost)) {
-                sm.deselect(klikketBudsjettpost);
-            } else {
-                sm.select(klikketBudsjettpost);
-            }
-        }
-    }
-
-    private void budsjettpostGrid_markerRader_markerMange(Post klikketBudsjettpost, boolean skalMarkeres) {
-        Post startBudsjettpost = budsjettpostGrid.getSelectionModel().getFirstSelectedItem().orElse(budsjettpostGrid.getListDataView().getItem(0));
-        int startIndeksInteger = budsjettpostGrid.getListDataView().getItemIndex(startBudsjettpost).orElse(0);
-        int sluttIndeksInteger = budsjettpostGrid.getListDataView().getItemIndex(klikketBudsjettpost).orElse(0);
-        for (int i=startIndeksInteger; i<sluttIndeksInteger; i++) {
-            Post post = budsjettpostGrid.getListDataView().getItem(i);
-            if (skalMarkeres) {
-                budsjettpostGrid.getSelectionModel().select(post);
-            } else {
-                budsjettpostGrid.getSelectionModel().deselect(post);
-            }
-        }
-
-    }
-
-
-    private void instansOpprettFelter_leggTilFasteUtgifterTab_opprettBudsjettpostGrid_opprettOgKobleRedigeringsdialog() {
-        BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraadeTilDialog = new BudsjettpostRedigeringsomraade();
-        budsjettpostRedigeringsomraadeTilDialog.init();
-
-        budsjettpostRedigerEntitetDialog = new RedigerEntitetDialog<>(
-                Allvitekyklop.hent().getBudsjettpostService(),
-                Allvitekyklop.hent().getAarsoversiktService(),
-                "Rediger fast utgift",
-                "",
-                budsjettpostRedigeringsomraadeTilDialog,
-                this
-        );
-        budsjettpostGrid.addItemDoubleClickListener(e -> budsjettpostRedigerEntitetDialog.vis(e.getItem()));
     }
 
     private void instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriMedSumOgAntalLGrid() {
@@ -395,58 +339,12 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         });
 
         kategoriMedSumOgAntallGrid.addDragEndListener(e -> {
-           draggedItemsList=null;
-           kategoriMedSumOgAntallGrid.setDropMode(null);
+            draggedItemsList=null;
+            kategoriMedSumOgAntallGrid.setDropMode(null);
         });
 
 
-
         kategoriMedSumOgAntallGrid.setSizeFull();
-    }
-
-
-    private void oppdaterBudsjettposterMedNyKategori(Kategori nyKategori, List<Post> budsjettposter){
-        if (nyKategori==null || budsjettposter==null) {
-            return;
-        }
-
-        for (Post budsjettpost:budsjettposter) {
-            budsjettpost.setKategori(nyKategori);
-        }
-        budsjettpostService.lagreAlle(budsjettposter);
-        instansOppdaterEkstraRedigeringsfelter();
-
-    }
-
-    private ArrayList<KategoriMedSumOgAntall> finnKategorierMedSumOgAntall() {
-        BudsjettpostService budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
-        Periode aarsoversikt = hentEntitet();
-
-        List<Kategori> kategorier = Allvitekyklop.hent().getKategoriService().finnAlleUnderkategorier();
-        ArrayList<KategoriMedSumOgAntall> kategoriMedSumOgAntallArrayList = new ArrayList<>();
-        for (Kategori kategori : kategorier) {
-            kategoriMedSumOgAntallArrayList.add(budsjettpostService.opprettKategoriMedSumOgAntallBudsjettposter(aarsoversikt.getDatoFraLocalDate(), aarsoversikt.getDatoTilLocalDate(), kategori));
-        }
-        return kategoriMedSumOgAntallArrayList;
-    }
-
-
-
-
-    private void oppdaterBudsjettpostgridMedValgteKategori() {
-        if (kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
-            oppdaterBudsjettpostgrid(kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().get().getKategori());
-        } else {
-            Loggekyklop.bruk().loggADVARSEL("Ingen markert rad i kategoriMedSumOgAntallGrid, fortsetter likevel");
-        }
-    }
-
-    private void oppdaterBudsjettpostgrid(Kategori kategori) {
-        if (kategori == null) {
-            return;
-        }
-
-        budsjettpostGrid.setItems(budsjettpostService.finnEtterPeriodeOgKategori(hentEntitet(), kategori));
     }
 
 
@@ -479,31 +377,235 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     }
 
 
-    private void oppdaterKostnadspakkerTab() {
-        kostnadspakkerGrid.setItems(Allvitekyklop.hent().getKostnadspakkeService().hentKostnadspakkerForPerioden(hentEntitet()));
-    }
+
+
+// endregion
+
+
+
+// ===========================
+// region 2.CRUD og oppdatering
+// ===========================
+
 
     @Override
-    public void init() {
-        if (!erInitiert) {
-            AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade = new AarsoversiktpostRedigeringsomraade();
-            aarsoversiktpostRedigeringsomraade.init();
-            super.initierPeriodeRedigeringsomraadeMal(PeriodetypeEnum.AARSOVERSIKT,
-                    Allvitekyklop.hent().getAarsoversiktpostService(),
-                    aarsoversiktpostRedigeringsomraade,
-                    Allvitekyklop.hent().getAarsoversiktService(),
-                    PeriodepostTypeEnum.AARSOVERSIKTPOST,
-                    Allvitekyklop.hent().getAarsoversiktView()
-            );
-            budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
-            erInitiert = true;
+    public void instansOppdaterEkstraRedigeringsfelter() {
+        super.instansOppdaterEkstraRedigeringsfelter();
+        instansOppdaterEkstraRedigeringsfelter_oppdaterFasteUtgifterTab_KategoriGrid();
+        instansOppdaterEkstraRedigeringsfelter_oppdaterKostnadspakkerTab();
+    }
+
+    private void instansOppdaterEkstraRedigeringsfelter_oppdaterFasteUtgifterTab_KategoriGrid() {
+        KategoriMedSumOgAntall markertKategoriMedSumOgAntall;
+        if (kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
+            markertKategoriMedSumOgAntall = kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().get();
+        } else {
+            markertKategoriMedSumOgAntall = null;
+        }
+        kategoriMedSumOgAntallGrid.setItems(finnKategorierMedSumOgAntall());
+        if (markertKategoriMedSumOgAntall != null) {
+            markerRadIKategoriMedSumOgAntallGrid(markertKategoriMedSumOgAntall);
+            oppdaterBudsjettpostgridMedValgteKategori();
         }
     }
 
-    @Override
-    public boolean erInitiert() {
-        return erInitiert;
+    private void instansOppdaterEkstraRedigeringsfelter_oppdaterKostnadspakkerTab() {
+        kostnadspakkerGrid.setItems(Allvitekyklop.hent().getKostnadspakkeService().hentKostnadspakkerForPerioden(hentEntitet()));
     }
+
+    private ArrayList<KategoriMedSumOgAntall> finnKategorierMedSumOgAntall() {
+        BudsjettpostService budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
+        Periode aarsoversikt = hentEntitet();
+
+        List<Kategori> kategorier = Allvitekyklop.hent().getKategoriService().finnKategorierTilFastePoster();
+        ArrayList<KategoriMedSumOgAntall> kategoriMedSumOgAntallArrayList = new ArrayList<>();
+        for (Kategori kategori : kategorier) {
+            kategoriMedSumOgAntallArrayList.add(budsjettpostService.opprettKategoriMedSumOgAntallBudsjettposter(aarsoversikt.getDatoFraLocalDate(), aarsoversikt.getDatoTilLocalDate(), kategori));
+        }
+        return kategoriMedSumOgAntallArrayList;
+    }
+
+// endregion
+
+
+
+// ===========================
+// region 5 Faste utgifter
+// ===========================
+
+
+    private void kopierTilAndreBudsjettposterMedSammeKategori() {
+        if (budsjettpostGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
+            Post markertPost = budsjettpostGrid.getSelectionModel().getFirstSelectedItem().get();
+            Kategori kategori = markertPost.getKategori();
+
+            ArrayList<Post> andreposterArrayList = new ArrayList<>(budsjettpostService.finnEtterPeriodeOgKategori(hentEntitet(), kategori));
+            andreposterArrayList.remove(markertPost);
+            for (Post budsjettpost : andreposterArrayList) {
+                budsjettpost.setBeskrivelseString(markertPost.getBeskrivelseString());
+                budsjettpost.setInnPaaKontoInteger(markertPost.getInnPaaKontoInteger());
+                budsjettpost.setUtFraKontoInteger(markertPost.getUtFraKontoInteger());
+            }
+            budsjettpostService.lagreAlle(andreposterArrayList);
+
+
+            // Oppdater listene
+            KategoriMedSumOgAntall markertKategoriMSA;
+            if (kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
+                markertKategoriMSA = kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().get();
+            } else {
+                markertKategoriMSA = null;
+            }
+            instansOppdaterEkstraRedigeringsfelter();
+            markerRadIKategoriMedSumOgAntallGrid(markertKategoriMSA);
+            budsjettpostGrid.select(markertPost);
+
+        } else {
+            Notification.show("Marker en rad først", 3, Notification.Position.MIDDLE);
+        }
+    }
+
+    private void markerRadIKategoriMedSumOgAntallGrid(KategoriMedSumOgAntall markertKategoriMSA) {
+        if (markertKategoriMSA==null) {
+            return;
+        }
+
+        List<KategoriMedSumOgAntall> kategoriMSAer = kategoriMedSumOgAntallGrid.getListDataView().getItems().toList();
+        for (KategoriMedSumOgAntall kategoriMedSumOgAntall:kategoriMSAer) {
+            if (kategoriMedSumOgAntall.getKategori().equals(markertKategoriMSA.getKategori())) {
+                kategoriMedSumOgAntallGrid.select(kategoriMedSumOgAntall);
+                break;
+            }
+        }
+    }
+
+
+    private void opprettEnEllerFlereBudsjettposter(FrekvensPerAarEnum frekvensPerAarEnum) {
+        Integer antallPerAar = frekvensPerAarEnum.getAntallPerAar();
+        ArrayList<Post> posterSomSkalOpprettesArrayList = new ArrayList<>();
+
+        Kategori kategori;
+        if (kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
+            kategori = kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().get().getKategori();
+        } else {
+            Notification.show("Ingen kategori er valgt, avbryter").setPosition(Notification.Position.MIDDLE);
+            return;
+        }
+
+        Post markertBudsjettpost = null;
+        if (budsjettpostGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
+            markertBudsjettpost = budsjettpostGrid.getSelectionModel().getFirstSelectedItem().get();
+        }
+
+        Integer aarInteger = hentEntitet().getDatoFraLocalDate().getYear();
+
+        int startInteger;
+        if (markertBudsjettpost != null && frekvensPerAarEnum == FrekvensPerAarEnum.MAANEDLIG) { //virker bare med månedlige poster
+            startInteger = markertBudsjettpost.getDatoLocalDate().getMonthValue();
+        } else {
+            startInteger = 0;
+        }
+
+        for (int i = startInteger; i < antallPerAar; i++) {
+            Post budsjettpost = budsjettpostService.opprettEntitet();
+
+            budsjettpost.setKategori(kategori);
+            budsjettpost.setDatoLocalDate(opprettDatoForFrekvens(aarInteger, i + 1, frekvensPerAarEnum));
+
+            if (markertBudsjettpost != null) {
+                budsjettpost.setInnPaaKontoInteger(markertBudsjettpost.getInnPaaKontoInteger());
+                budsjettpost.setUtFraKontoInteger(markertBudsjettpost.getUtFraKontoInteger());
+                budsjettpost.setBeskrivelseString(markertBudsjettpost.getBeskrivelseString());
+            }
+
+            posterSomSkalOpprettesArrayList.add(budsjettpost);
+        }
+
+        budsjettpostService.lagreAlle(posterSomSkalOpprettesArrayList);
+        instansOppdaterEkstraRedigeringsfelter();
+        //Post skalMarkeresBudsjettpost = posterSomSkalOpprettesArrayList.getFirst();
+        //oppdaterBudsjettpostgridOgMarkerPost(skalMarkeresBudsjettpost);
+    }
+
+    //TODO: ER flyttet til Havaara, kan fjernes neste gang havaara kompileres
+    private LocalDate opprettDatoForFrekvens(Integer aar, Integer nr, FrekvensPerAarEnum frekvensPerAarEnum) {
+        LocalDate dato = null;
+        switch (frekvensPerAarEnum) {
+            case EN_GANG -> dato = LocalDate.of(aar, 1, 1);
+            case MAANEDLIG -> dato = LocalDate.of(aar, nr, 1);
+            case HVERT_KVARTAL -> dato = LocalDate.of(aar, ((nr - 1) * 3) + 1, 1);
+            case HVERT_HALVAAR -> dato = LocalDate.of(aar, ((nr - 1) * 6) + 1, 1);
+        }
+        return dato;
+    }
+
+
+
+    private void budsjettpostGrid_markerRader(ItemClickEvent<Post> e) {
+        Post klikketBudsjettpost = e.getItem();
+        GridSelectionModel<Post> sm = budsjettpostGrid.getSelectionModel();
+
+        if (e.isCtrlKey()) {
+            budsjettpostGrid_markerRader_markerMange(klikketBudsjettpost, !sm.isSelected(klikketBudsjettpost));
+        } else {
+            if (sm.isSelected(klikketBudsjettpost)) {
+                sm.deselect(klikketBudsjettpost);
+            } else {
+                sm.select(klikketBudsjettpost);
+            }
+        }
+    }
+
+    private void budsjettpostGrid_markerRader_markerMange(Post klikketBudsjettpost, boolean skalMarkeres) {
+        Post startBudsjettpost = budsjettpostGrid.getSelectionModel().getFirstSelectedItem().orElse(budsjettpostGrid.getListDataView().getItem(0));
+        int startIndeksInteger = budsjettpostGrid.getListDataView().getItemIndex(startBudsjettpost).orElse(0);
+        int sluttIndeksInteger = budsjettpostGrid.getListDataView().getItemIndex(klikketBudsjettpost).orElse(0);
+        for (int i=startIndeksInteger; i<sluttIndeksInteger; i++) {
+            Post post = budsjettpostGrid.getListDataView().getItem(i);
+            if (skalMarkeres) {
+                budsjettpostGrid.getSelectionModel().select(post);
+            } else {
+                budsjettpostGrid.getSelectionModel().deselect(post);
+            }
+        }
+
+    }
+
+
+    private void oppdaterBudsjettposterMedNyKategori(Kategori nyKategori, List<Post> budsjettposter){
+        if (nyKategori==null || budsjettposter==null) {
+            return;
+        }
+
+        for (Post budsjettpost:budsjettposter) {
+            budsjettpost.setKategori(nyKategori);
+        }
+        budsjettpostService.lagreAlle(budsjettposter);
+        instansOppdaterEkstraRedigeringsfelter();
+
+    }
+
+
+
+
+
+    private void oppdaterBudsjettpostgridMedValgteKategori() {
+        if (kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
+            oppdaterBudsjettpostgrid(kategoriMedSumOgAntallGrid.getSelectionModel().getFirstSelectedItem().get().getKategori());
+        } else {
+            Loggekyklop.bruk().loggADVARSEL("Ingen markert rad i kategoriMedSumOgAntallGrid, fortsetter likevel");
+        }
+    }
+
+    private void oppdaterBudsjettpostgrid(Kategori kategori) {
+        if (kategori == null) {
+            return;
+        }
+
+        budsjettpostGrid.setItems(budsjettpostService.finnEtterPeriodeOgKategori(hentEntitet(), kategori));
+    }
+
+
 
 
 }

@@ -27,8 +27,6 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
 
     List<Kategori> findByErOppsummerendeUnderkategoriOrderByTittelAscUndertittelAsc(boolean erOppsummerende);
 
-    List<Kategori> findByKategoriTypeAndKategoriRetning(KategoriType kategoriType, KategoriRetning kategoriRetning);
-
     List<Kategori> findByKategoriTypeAndKategoriRetningAndNivaa(KategoriType kategoriType, KategoriRetning kategoriRetning, Integer nivaa);
 
     @NativeQuery(
@@ -46,8 +44,7 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
                 "k2.nivaa =0;")
     List<Kategori> finnHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate);
 
-    List<Kategori> findByTittelAndUndertittelAndKategoriTypeAndKategoriRetning(String tittelString, String undertittelString, KategoriType kategoriType, KategoriRetning kategoriRetning);
+    List<Kategori> findAllByBrukesTilFastePosterAndErAktivOrderByTittelAscUndertittelAsc(boolean brukesTilFastePoster, boolean erAktiv);
 
-    // kategori_type = 3: SKAL_IKKE_KATEGORISERES
 
 }

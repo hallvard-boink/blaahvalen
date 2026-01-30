@@ -1,7 +1,9 @@
 package com.hallvardlaerum.periode.aarsoversikt;
 
 import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
+import com.hallvardlaerum.libs.ui.RedigerEntitetDialog;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeViewMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
@@ -27,13 +29,19 @@ import com.vaadin.flow.spring.annotation.UIScope;
 public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet {
     private AarsoversiktService aarsoversiktService;
     private boolean erInitiert = false;
+    private RedigerEntitetDialog<Periode, Periode> redigerAarsoversiktDialog;
+
+
+
+// ===========================
+// region 0.Constructor og init
+// ===========================
 
     public AarsoversiktView() {
         super();
         Allvitekyklop.hent().setAarsoversiktView(this);
         init();
     }
-
 
     @Override
     public boolean erInitiert() {
@@ -56,9 +64,33 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
             super.tilpassKnapperadRedigeringsfelt();
             //verktøymenyen håndteres med overkjøring av opprettSoekeomraade()
 
+            opprettRedigerAarsoversiktViewDialog();
             erInitiert = true;
         }
     }
+
+    private void opprettRedigerAarsoversiktViewDialog(){
+        AarsoversiktRedigeringsomraade aarsoversiktRedigeringsomraadeTilDialog = new AarsoversiktRedigeringsomraade();
+        aarsoversiktRedigeringsomraadeTilDialog.init();
+        redigerAarsoversiktDialog = new RedigerEntitetDialog<>(
+                Allvitekyklop.hent().getMaanedsoversiktService(),
+                Allvitekyklop.hent().getMaanedsoversiktService(),
+                "Redigere årsoversikt",
+                "",
+                aarsoversiktRedigeringsomraadeTilDialog,
+                Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade()
+        );
+        super.hentGrid().addItemDoubleClickListener(e -> redigerAarsoversiktDialog.vis(e.getItem()));
+    }
+
+// endregion
+
+
+// ===========================
+// region 1.Tilpass søkeområde med liste
+// ===========================
+
+
 
     @Override
     protected VerticalLayout opprettSoekeomraade() {
@@ -107,4 +139,6 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
         super.oppdaterSummerOgPeriodeposterButton.setEnabled(aktiverBoolean);
         super.lastNedPDFAnchor.setEnabled(aktiverBoolean);
     }
+// endregion
+
 }

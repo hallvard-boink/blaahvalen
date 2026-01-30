@@ -20,6 +20,14 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
     private MaanedsoversiktService maanedsoversiktService;
     private boolean erInitiert = false;
     private RedigerEntitetDialog<Periode, Periode> redigerMaanedsoversiktDialog;
+    private ConfirmDialog bekreftSlettingAvMaanedsoversikterConfirmDialog;
+
+
+// ===========================
+// region 0.Constructor og Init
+// ===========================
+
+
 
     public MaanedsoversiktView() {
         super();
@@ -65,10 +73,13 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
         }
     }
 
-    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem() {
-        hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
+// endregion
 
-    }
+
+    // ===========================
+    // region 1.Tilpass Søkeområdet
+    // ===========================
+
 
     @Override
     protected VerticalLayout opprettSoekeomraade(){
@@ -87,14 +98,17 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
         return super.opprettSoeomraade_settSammenDetHele();
     }
 
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem() {
+        hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
+    }
+
     private void opprettSoekeomraade_leggTilVerktoyMeny_opprettMaanedsoversikter() {
         hentVerktoeySubMeny().addItem("Opprett månedsoversikter", e -> maanedsoversiktService.opprettMaanedsoversikterForHeleAaret());
     }
 
-
     private void opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleMaanedsoversikterMenuItem() {
         slettAlleMenuItem = super.verktoeySubMenu.addItem("Slett alle månedsoversikter");
-        slettAlleMenuItem.addClickListener(e -> new ConfirmDialog(
+        bekreftSlettingAvMaanedsoversikterConfirmDialog = new ConfirmDialog(
                 "Slette alle månedsoversikter?",
                 "Vil du virkelig slette månedsoversikter med månedsoversiktposter?",
                 "Ja, sett i gang",
@@ -104,15 +118,13 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
                     oppdaterRedigeringsomraade();
                 },
                 "Nei, er du GAL!",
-                null).open());
+                e -> bekreftSlettingAvMaanedsoversikterConfirmDialog.close());
+        slettAlleMenuItem.addClickListener(e -> bekreftSlettingAvMaanedsoversikterConfirmDialog.open());
     }
-
-
 
     private void importerCSVFraGamleBlaahvalen() {
         new CSVImportmester(new MaanedsoversiktFraGamleBlaahvalenCSVImportassistent()).velgImportfilOgKjoerImport(maanedsoversiktService);
     }
-
 
     @Override
     public void instansAktiverKnapperadRedigeringsfelt(Boolean aktiverBoolean) {
@@ -120,5 +132,8 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
         super.lastNedPDFAnchor.setEnabled(aktiverBoolean);
         super.oppdaterSummerOgPeriodeposterButton.setEnabled(aktiverBoolean);
     }
+
+// endregion
+
 
 }

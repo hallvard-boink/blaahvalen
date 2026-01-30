@@ -41,6 +41,13 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
     protected Anchor lastNedPDFAnchor;
     protected Button oppdaterSummerOgPeriodeposterButton;
 
+
+    // ===========================
+    // region 0.Constructur og init
+    // ===========================
+
+
+
     public PeriodeViewMal() {
         super();
 
@@ -91,6 +98,15 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         initierGridMedPagedSearch();
     }
 
+// endregion
+
+
+
+// ===========================
+// region 2. Tilpass redigeringsfelter og knapper
+// ===========================
+
+
 
     protected void tilpassKnapperadRedigeringsfelt() {
         tilpassKnapperadRedigeringsfelt_OppdaterSummerButton();
@@ -117,11 +133,27 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
     }
 
 
+// endregion
+
+
+// ===========================
+// region SKAL SANERES i HAVAARA
+// ===========================
+
+
     @Override
     public void instansTilpassNyopprettetEntitet(){
         Periode periode = hentEntitet();
         periode.setPeriodetypeEnum(periodetypeEnum);
     }
+
+// endregion
+
+
+
+// ===========================
+// region 1.Tilpass søkeområde med liste
+// ===========================
 
 
     public void initierGridMedPagedSearch() {
@@ -138,6 +170,15 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
                         query.getLimit(),
                         periodeservice.getEntityFilterSpecification())
         );
+    }
+
+
+
+    @Override
+    public void instansOpprettFilterFelter() {
+        fraDatoFilterDatePicker = leggTilFilterfelt(0,new DatePicker(),"<dato");
+        beskrivelseFilterTextField = leggTilFilterfelt(1, new TextField(),"tekst");
+        resultatFilterIntegerField = leggTilFilterfelt(2, new IntegerField(),"<tall");
     }
 
     @Override
@@ -172,7 +213,6 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
     }
 
 
-
     private ComponentRenderer<Span, Periode> opprettResultatRenderer() {
         return new ComponentRenderer<>(periode -> {
             Span span = new Span();
@@ -200,12 +240,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         });
     }
 
-    @Override
-    public void instansOpprettFilterFelter() {
-        fraDatoFilterDatePicker = leggTilFilterfelt(0,new DatePicker(),"<dato");
-        beskrivelseFilterTextField = leggTilFilterfelt(1, new TextField(),"tekst");
-        resultatFilterIntegerField = leggTilFilterfelt(2, new IntegerField(),"<tall");
-    }
+
 
     protected void skrivUtPerioderapport(){
         Periode periode = hentRedigeringsomraadeAktig().getEntitet();
@@ -218,5 +253,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
 
         new PeriodeRapportMester().lagrePeriodeSomPDF(periode, periodeposterArrayList, periodedelAvKostnadspakkeRadArrayList);
     }
+
+    // endregion
 
 }

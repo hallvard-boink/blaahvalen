@@ -1,9 +1,10 @@
 package com.hallvardlaerum.kategori;
 
-import com.hallvardlaerum.libs.database.*;
+import com.hallvardlaerum.libs.database.EntitetserviceAktig;
+import com.hallvardlaerum.libs.database.EntitetserviceMal;
+import com.hallvardlaerum.libs.database.EntitetserviceMedForelderAktig;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
-import com.hallvardlaerum.skalTilHavaara.RegexMester;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import org.springframework.stereotype.Service;
 
@@ -96,52 +97,6 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
         }
     }
 
-    public Kategori finnEtterBeskrivendeNavn(String beskrivendeNavnString){
-        //Offentlig kommunikasjon: - [Standard, Ut]
-
-        String tittelString = hentUtFraBeskrivendeNavnString_tittel(beskrivendeNavnString);
-        String undertittelString = hentUtFraBeskrivendeNavnString_undertittel(beskrivendeNavnString);
-//        String kategoritypeString = hentUtFraBeskrivendeNavnString_kategoritype(beskrivendeNavnString);
-//        KategoriType kategoriType = KategoriType.hentFraTittel(kategoritypeString);
-//        String kategoriretningString = hentUtFraBeskrivendeNavnString_kategoriretning(beskrivendeNavnString);
-//        KategoriRetning kategoriRetning = KategoriRetning.hentFraTittel(kategoriretningString);
-
-        List<Kategori> funnetList = kategoriRepository.findByTittelAndUndertittel(tittelString,undertittelString);
-        if (funnetList.isEmpty()) {
-            Loggekyklop.bruk().loggINFO("Fant ikke kategori '" + beskrivendeNavnString + "'. Tittel: '" +
-                    tittelString + ", Undertittel:'" + undertittelString);
-            return null;
-        } else if (funnetList.size()==1) {
-            return funnetList.getFirst();
-        } else {
-            Loggekyklop.bruk().loggINFO("Fant " + funnetList.size() + " kategorier med beskrivendeNavn='" + beskrivendeNavnString + "', returnerer null. Tittel: '" +
-                    tittelString + ", Undertittel:'" + undertittelString );
-            return null;
-        }
-    }
-
-
-    public String hentUtFraBeskrivendeNavnString_tittel(String beskrivendeNavnString) {
-        return RegexMester.hentUtMedRegEx(beskrivendeNavnString,"^(.+?): ",1);
-    }
-
-    public String hentUtFraBeskrivendeNavnString_undertittel(String beskrivendeNavnString) {
-        return RegexMester.hentUtMedRegEx(beskrivendeNavnString,"(?<=: ).*?(?= \\[)",0);
-    }
-
-    public String hentUtFraBeskrivendeNavnString_kategoritype(String beskrivendeNavnString) {
-        return RegexMester.hentUtMedRegEx(beskrivendeNavnString,"\\[\\s*(.*?)(?=, )",1);
-
-    }
-
-
-    public String hentUtFraBeskrivendeNavnString_kategoriretning(String beskrivendeNavnString) {
-        //return RegexMester.hentUtMedRegEx(beskrivendeNavnString,"(?<=, ).*?(?=\\])",0);
-        return RegexMester.hentUtMedRegEx(beskrivendeNavnString,"\\[[^\\]]*,\\s*([^\\]]+)\\]",1);
-    }
-
-
-
 
     @Override
     public Kategori opprettEntitet() {
@@ -210,11 +165,7 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
             kategori.setKategoriType(kategoriType);
             kategori.setKategoriRetning(kategoriRetning);
             kategori.setNivaa(nivaa);
-            if (kategoriType==KategoriType.UKATEGORISERT) {
-                kategori.setBrukesTilRegnskap(false);
-            } else {
-                kategori.setBrukesTilRegnskap(true);
-            }
+            kategori.setBrukesTilRegnskap(kategoriType != KategoriType.UKATEGORISERT);
             kategori.setBrukesTilFastePoster(false);
             kategori.setBrukesTilBudsjett(false);
             kategori.setErAktiv(true);
@@ -230,4 +181,7 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
     }
 
 
+    public List<Kategori> finnKategorierTilFastePoster() {
+        return kategoriRepository.findAllByBrukesTilFastePosterAndErAktivOrderByTittelAscUndertittelAsc(true,true);
+    }
 }

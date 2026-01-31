@@ -371,6 +371,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     private void instansOpprettFelter_leggTilKostnadspakkerTab() {
         String kostnadspakketabString = "Kostnadspakker";
         kostnadspakkerGrid = new Grid<>();
+        kostnadspakkerGrid.setSizeFull();
 
         kostnadspakkerGrid.addColumn(pp -> pp.getKategori() != null ? pp.getKategori().hentKortnavn() : "").setHeader("Kategori");
         kostnadspakkerGrid.addColumn(Periodepost::getTittelString).setHeader("Tittel");

@@ -57,7 +57,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
     private KategoriService kategoriService;
     private NormaldelpostViewMester normaldelpostViewMester;
 
-    protected  ConfirmDialog slettNormalposterconfirmDialog;
+    protected ConfirmDialog slettNormalposterconfirmDialog;
 
 
 

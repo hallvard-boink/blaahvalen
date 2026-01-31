@@ -15,6 +15,7 @@
  import org.springframework.stereotype.Service;
 
  import java.math.BigDecimal;
+ import java.time.LocalDate;
  import java.util.ArrayList;
  import java.util.List;
  import java.util.UUID;
@@ -138,4 +139,16 @@ public class KostnadspakkeService extends PeriodepostServiceMal implements Initi
      }
 
 
+     public List<Periodepost> finnKostnadspakkerFraSammeAar(LocalDate datoLocalDate) {
+        if (datoLocalDate==null) {
+            return finnAlleKostnadspakker();
+        }
+        Periode aarsOversikt =  Allvitekyklop.hent().getAarsoversiktService().finnAarsoversiktFraDato(datoLocalDate);
+        if (aarsOversikt==null) {
+            Loggekyklop.bruk().loggADVARSEL("Du mangler årsoversikt for dato " + datoLocalDate + ". Legg den til nå.");
+            return finnAlleKostnadspakker();
+        } else {
+            return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.PERIODEOVERSIKTPOST,aarsOversikt);
+        }
+     }
  }

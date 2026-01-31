@@ -82,4 +82,22 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
         Loggekyklop.bruk().loggINFO("Oppdaterer årsoversikter...");
         oppdaterAllePerioderAvSammeType(PeriodetypeEnum.AARSOVERSIKT);
     }
+
+    public Periode finnAarsoversiktFraDato(LocalDate datoLocalDate) {
+        if (datoLocalDate==null) {
+            return null;
+        }
+        LocalDate fraLocalDate = LocalDate.of(datoLocalDate.getYear(),1,1);
+
+        List<Periode> aarsoversikter = hentRepository().findByPeriodetypeEnumAndDatoFraLocalDate(PeriodetypeEnum.AARSOVERSIKT,fraLocalDate);
+        if (aarsoversikter.isEmpty()) {
+            Loggekyklop.bruk().loggINFO("Fant ikke aarsoversikt for dato " + datoLocalDate);
+            return null;
+        } else {
+            if (aarsoversikter.size()>1) {
+                Loggekyklop.bruk().loggINFO("Fant mer enn en aarsoversikt for dato " + datoLocalDate + ", returnerer den første. Sjekk årsoversiktene dine, du har nok duplikater.");
+            }
+            return aarsoversikter.getFirst();
+        }
+    }
 }

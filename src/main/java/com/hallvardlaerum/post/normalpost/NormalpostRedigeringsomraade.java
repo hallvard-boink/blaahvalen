@@ -29,6 +29,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 @Component
@@ -264,7 +265,19 @@ public class NormalpostRedigeringsomraade extends RedigeringsomraadeMal<Post>
         if (hentEntitet()!=null) {
             Kategori kategori = hentEntitet().getKategori();
             kategoriDetaljCombobox_OppdaterUtvalgOgSettTilOppsummerendeUnderkategori(kategori);
+            kostnadspakkeComboBox_OppdaterUtvalgTilKostnadspakkeFraAaretPostenHoererTil(hentEntitet().getDatoLocalDate());
+        }
+    }
 
+    private void kostnadspakkeComboBox_OppdaterUtvalgTilKostnadspakkeFraAaretPostenHoererTil(LocalDate datoLocalDate) {
+        Periodepost valgtKostnadspakke = kostnadspakkeComboBox.getValue();
+        if(datoDatePicker.getValue()==null) {
+            kostnadspakkeComboBox.setItems(kostnadspakkeService.finnAlleKostnadspakker());
+        } else {
+            kostnadspakkeComboBox.setItems(kostnadspakkeService.finnKostnadspakkerFraSammeAar(datoLocalDate));
+        }
+        if (valgtKostnadspakke!=null) {
+            kostnadspakkeComboBox.setValue(valgtKostnadspakke);
         }
     }
 

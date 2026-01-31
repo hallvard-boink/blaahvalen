@@ -99,7 +99,7 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
     }
 
     public String hentKortnavn(){
-        if (undertittel!=null && !undertittel.isEmpty()) {
+        if (undertittel!=null && !undertittel.isEmpty() && !undertittel.equals("-")) {
             return tittel + ": " + undertittel;
         } else {
             return tittel;

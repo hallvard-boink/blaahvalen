@@ -9,8 +9,7 @@ import com.hallvardlaerum.periode.PeriodeServiceMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.vaadin.flow.component.notification.Notification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,9 +20,6 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
     private AarsoversiktService aarsoversiktService;
     private boolean erInitiert = false;
     private MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
 
 
@@ -74,6 +70,12 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
 
 
     public void opprettMaanedsoversikterForHeleAaret() {
+        Periode maanedsoversiktPeriode = maanedsoversiktRedigeringsomraade.hentEntitet();
+        if (maanedsoversiktPeriode == null) {
+            Notification.show("Marker en månedsoversikt først",3000, Notification.Position.MIDDLE);
+            return;
+        }
+
         Periode aarsoversiktPeriode = aarsoversiktService.finnAarsoversiktFraMaanedsoversikt(maanedsoversiktRedigeringsomraade.hentEntitet());
         if (aarsoversiktPeriode==null) {
             Loggekyklop.hent().loggADVARSEL("Fant ikke årsoversikt som passet med månedsoversikten med datoFra " +
@@ -102,14 +104,6 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
 
     public void slettAlleMaanedsoversikter() {
         super.slettAllePerioderMedPeriodeposter(PeriodetypeEnum.MAANEDSOVERSIKT);
-    }
-
-    public EntityManager getEntityManager() {
-        return entityManager;
-    }
-
-    public void setEntityManager(EntityManager entityManager) {
-        this.entityManager = entityManager;
     }
 
 

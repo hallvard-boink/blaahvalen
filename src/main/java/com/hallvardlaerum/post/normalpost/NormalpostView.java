@@ -378,7 +378,7 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
         }
 
         if (!egenbeskrivelseFilterTextField.getValue().isEmpty()) {
-            filtre.add(new SearchCriteria("egenbeskrivelseString",":",egenbeskrivelseFilterTextField.getValue()));
+            filtre.add(new SearchCriteria("beskrivelseString",":",egenbeskrivelseFilterTextField.getValue()));
         }
 
         if (innpaakontoFilterIntegerField.getValue()!=null) {

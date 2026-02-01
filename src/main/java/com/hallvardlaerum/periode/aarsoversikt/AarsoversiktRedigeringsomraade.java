@@ -21,6 +21,7 @@ import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.skalTilHavaara.FrekvensPerAarEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
@@ -74,7 +75,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     private RedigerEntitetDialog<Post, Periode> budsjettpostRedigerEntitetDialog;
     private BudsjettpostService budsjettpostService;
     private List<Post> draggedItemsList;
-
+    private ConfirmDialog kopierFasteutgifterFraIfjorConfirmDialog;
 
 // ===========================
 // region 0.Constructor og init
@@ -157,12 +158,32 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
 
         horizontalLayout.add(new H2("Kategorier"));
         horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_leggTilOpprettNyUnderKategoriButton());
-        instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_InitierDialog();
+        horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_leggTilKopierFasteUtgifterFraForrigeAar());
+        instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_InitierKategoriRedigeringsDialog();
 
         return horizontalLayout;
     }
 
-    private void instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_InitierDialog() {
+
+    private Button instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_leggTilKopierFasteUtgifterFraForrigeAar() {
+        Button button = new Button("Kopier faste utgifter fra ifjor");
+        kopierFasteutgifterFraIfjorConfirmDialog = new ConfirmDialog("Kopiere budsjettposter fra ifjor?",
+                "Dette kopierere alle faste utgifter fra forrige år til dette året. Hvis det er overflødig, blir det fryktelig mange budsjettposter å slette senere. Er du sikker?",
+                "Ja, kjør på",
+                e -> {
+                    budsjettpostService.kopierFasteUtgifterFraIForrigeAar();
+                    Allvitekyklop.hent().getAarsoversiktView().oppdaterSoekeomraadeFinnAlleRader();
+                },
+                "Nei, avbryt",
+                e -> kopierFasteutgifterFraIfjorConfirmDialog.close()
+        );
+
+        button.addClickListener(e -> kopierFasteutgifterFraIfjorConfirmDialog.open());
+        return button;
+
+    }
+
+    private void instansOpprettFelter_leggTilFasteUtgifterTab_opprettKategoriKnapperad_InitierKategoriRedigeringsDialog() {
         KategoriRedigeringsomraade kategoriRedigeringsomraade = new KategoriRedigeringsomraade();
         kategoriRedigeringsomraade.init();
 

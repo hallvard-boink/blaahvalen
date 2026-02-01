@@ -11,6 +11,12 @@ public class Versjonskyklop extends Versjonskyklopmal implements InitieringsEgne
     @Override
     public void byggOppVersjoner() {
         super.leggTilVersjon(
+                "1.0.5",
+                "2026-02-01",
+                "Første oppdatering",
+                "Rettet feil ved opprettelse av årets månedsoversikter, og la til 'kopier faste utgifter fra ifjor'");
+
+        super.leggTilVersjon(
                 "1.0.0",
                 "2026-01-31",
                 "Første release",

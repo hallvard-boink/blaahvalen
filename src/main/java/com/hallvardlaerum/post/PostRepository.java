@@ -19,7 +19,7 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
         RepositoryTillegg<Post> {
 
 // =================
-// === ENKLE SØK ===
+// region 1 Enkle søk med JPA
 // =================
 
     List<Post> findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(LocalDate datoLocalDate, String tekstFraBankenString, NormalposttypeEnum normalposttypeEnum);
@@ -37,9 +37,29 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 
     List<Post> findByDatoLocalDateBetweenAndKategoriUuidAndPostklasseEnumOrderByDatoLocalDateAsc(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate, UUID uuid, PostklasseEnum postklasseEnum);
 
+    List<Post> findByKategoriUuid(UUID kategori_uuid);
+
+
+// endregion
+
+
+
 // =====================
-// === KOMPLEKSE SØK ===
+// region 2 Komplekse søk
+// Disse krever mer avanserte SQL-uttrykk enn bare JPA på kortform.
 // =====================
+
+    @NativeQuery(
+            "SELECT " +
+                    "p.* " +
+                    "FROM " +
+                    "post p LEFT JOIN kategori k ON p.kategori_uuid = k.uuid " +
+                    "WHERE " +
+                    "p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 " +
+                    "AND p.postklasse_enum = 1 " +
+                    "AND k.brukes_til_faste_poster = true " +
+                    "AND k.er_aktiv = true")
+    List<Post> finnBudsjettposterFraDatoTilDatoKategoriFastUtgift(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate);
 
     @NativeQuery(
             "SELECT " +
@@ -85,10 +105,15 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "k.kategori_type = 4 AND p.normalposttype_enum !=2 ")
     List<Post> finnPosterSomSkalKorrigeres_FeilNormalposttypeSelvOmKategoriErType4SkalIkkekategoriseres();
 
+// endregion
+
+
+
 // =================================
-// === Utregning av en og en sum ===
+// region 3 Utregning av en og en sum
 // =================================
-    // Disse er enklere å håndtere enn søk som returnerer Tuple, fordi klassen er gitt før kjøring
+
+// Disse er enklere å håndtere enn søk som returnerer Tuple, fordi klassen er gitt før kjøring
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) " +
             "FROM post p JOIN kategori k ON p.kategori_uuid = k.uuid " +
@@ -131,11 +156,6 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
     //Postklasse 0 = Normalpost, Normalposttype 2 = Utelates, , Kategoritype 2 = Overføring
 
 
-    @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) FROM post p " +
-            "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
-            "p.postklasse_enum = 1 AND p.budsjettpoststatus_enum = 1")
-    List<Tuple> sumInnUtFradatoTilDatoTildelteBudsjettposter(LocalDate fraDato, LocalDate tilDato);
-
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer) " +
             "FROM post p WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
@@ -148,11 +168,13 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
             "p.postklasse_enum = 0 AND p.normalposttype_enum!= 2 AND p.kategori_uuid IS NULL")
     Integer sumUtFraDatoTilDatoNormalposterUtenKategori(LocalDate datoFraLocalDate, LocalDate datoTilLocalDate);
 
+// endregion
+
 
 // ==========================================
-// === Utregning av flere summer samtidig ===
+// region 4 Utregning av flere summer samtidig
 // ==========================================
-    // Disse søkene returnerer en enkelt Tuple (som er et sett av verdier), eller en av liste av dem.
+// Disse søkene returnerer en Tuple (som er et sett av verdier), eller en av liste av dem.
 
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) " +
@@ -179,6 +201,11 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
 
     List<Post> findByDatoLocalDateAndTekstFraBankenStringAndBeskrivelseString(LocalDate dato, String tekstFraBankenString, String beskrivelseString);
 
+    @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer) FROM post p " +
+            "WHERE p.dato_local_date >= ?1 AND p.dato_local_date <= ?2 AND " +
+            "p.postklasse_enum = 1 AND p.budsjettpoststatus_enum = 1")
+    List<Tuple> sumInnUtFradatoTilDatoTildelteBudsjettposter(LocalDate fraDato, LocalDate tilDato);
+
 
     @NativeQuery(value = "SELECT sum(p.inn_paa_konto_integer), sum(p.ut_fra_konto_integer), count(p.uuid) " +
         "FROM post p " +
@@ -189,7 +216,9 @@ public interface PostRepository extends JpaRepository<Post, UUID>,
     )
     Tuple sumInnOgUtOgAntallFradatoTildatoKategori(LocalDate fraDatoLocalDate, LocalDate tilDatoLocalDate, UUID kategori_uuid);
 
-    List<Post> findByKategoriUuid(UUID kategori_uuid);
+// endregion
+
+
 }
 
 

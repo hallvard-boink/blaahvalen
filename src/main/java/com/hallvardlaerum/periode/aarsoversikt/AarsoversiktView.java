@@ -34,7 +34,7 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
 
 
 // ===========================
-// region 0.Constructor og init
+// region 0 Constructor og init
 // ===========================
 
     public AarsoversiktView() {
@@ -87,23 +87,22 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
 
 
 // ===========================
-// region 1.Tilpass søkeområde med liste
+// region 1 Opprett søkeområde med grid
 // ===========================
-
 
 
     @Override
     protected VerticalLayout opprettSoekeomraade() {
         super.opprettSoekeomraade_leggTilTittel();
-        super.opprettSoekeomraade_leggTilVerktoyMeny();
 
+        super.opprettSoekeomraade_leggTilVerktoyMeny();
         super.opprettSoekeomraade_leggTilVerktoyMeny_opprettEksporterTilCSVMenuItem();
         super.opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterFraCSVMenuItem();
         opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem();
         opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleMaanedsoversikterMenuItem();
-
         super.opprettSoekeomraade_leggTilVerktoyMeny_opprettSeparator();
         super.opprettSoekeomraade_leggTilVerktoyMeny_byttOrienteringAvSplitLayoutMenuItem();
+
         super.opprettSoekeomraade_leggTilSoekeGrid();
         return super.opprettSoeomraade_settSammenDetHele();
     }
@@ -127,11 +126,17 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
         hentVerktoeySubMeny().addItem("Importer årsoversikter fra gamle Blåhvalen", e -> importerAarsoversikterFraGamleBlaahvalenCSV());
     }
 
-    private void importerAarsoversikterFraGamleBlaahvalenCSV() {
-        AarsoversiktFraGamleBlaahvalenCSVImportassistent aarsoversiktFraGamleBlaahvalenCSVImportassistent = new AarsoversiktFraGamleBlaahvalenCSVImportassistent();
-        CSVImportmester csvImportmester = new CSVImportmester(aarsoversiktFraGamleBlaahvalenCSVImportassistent);
-        csvImportmester.velgImportfilOgKjoerImport(aarsoversiktService);
-    }
+
+
+// endregion
+
+
+
+
+// ===========================
+// region 2 Oppdater og aktiver
+// ===========================
+
 
     @Override
     public void instansAktiverKnapperadRedigeringsfelt(Boolean aktiverBoolean) {
@@ -139,6 +144,28 @@ public class AarsoversiktView extends PeriodeViewMal implements InitieringsEgnet
         super.oppdaterSummerOgPeriodeposterButton.setEnabled(aktiverBoolean);
         super.lastNedPDFAnchor.setEnabled(aktiverBoolean);
     }
+
+
 // endregion
+
+
+
+
+// ===========================
+// region 5 Hjelpeprosedyrer
+// ===========================
+
+    private void importerAarsoversikterFraGamleBlaahvalenCSV() {
+        AarsoversiktFraGamleBlaahvalenCSVImportassistent aarsoversiktFraGamleBlaahvalenCSVImportassistent = new AarsoversiktFraGamleBlaahvalenCSVImportassistent();
+        CSVImportmester csvImportmester = new CSVImportmester(aarsoversiktFraGamleBlaahvalenCSVImportassistent);
+        csvImportmester.velgImportfilOgKjoerImport(aarsoversiktService);
+    }
+
+// endregion
+
+
+
+
+
 
 }

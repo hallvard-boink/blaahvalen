@@ -2,6 +2,8 @@ package com.hallvardlaerum.post.budsjettpost;
 
 import com.hallvardlaerum.kategori.Kategori;
 import com.hallvardlaerum.kategori.KategoriMedSumOgAntall;
+import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
+import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.Periode;
@@ -10,6 +12,7 @@ import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
+import com.vaadin.flow.component.notification.Notification;
 import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Service;
 
@@ -107,5 +110,72 @@ public class BudsjettpostService extends PostServiceMal implements InitieringsEg
 
         return kategoriMedSumOgAntall;
 
+    }
+
+    /**
+     * Denne henter selv markerte Aarsoversikt, eller bruker årets
+     */
+    public void kopierFasteUtgifterFraIForrigeAar() {
+        Periode iaarPeriode = Allvitekyklop.hent().getAarsoversiktRedigeringsomraade().hentEntitet();
+        if (iaarPeriode == null) {
+            iaarPeriode = Allvitekyklop.hent().getAarsoversiktService().finnAarsoversiktFraAarString(Integer.toString(LocalDate.now().getYear()));
+            if (iaarPeriode == null) {
+                Notification.show("Du må opprette årets årsoversikt, ellers virker ikke dette. Avbryter.",4000, Notification.Position.MIDDLE);
+                return;
+            }
+        }
+
+        int ifjorInteger = iaarPeriode.getDatoFraLocalDate().getYear()-1;
+        Periode ifjorPeriode = Allvitekyklop.hent().getAarsoversiktService().finnAarsoversiktFraAarString(Integer.toString(ifjorInteger));
+        if (ifjorPeriode == null) {
+            Notification.show("Du må ha en årsoversikt fra " + ifjorInteger + " også, ellers virker ikke dette. Avbryter.",4000, Notification.Position.MIDDLE);
+            return;
+        }
+
+
+        List<Post> fasteUtgifterList = Allvitekyklop.hent().getBudsjettpostService().finnFasteUtgifterIPeriode(ifjorPeriode);
+        ArrayList<Post> nyePosterArrayList = new ArrayList<>();
+        for (Post fastUtgiftPost:fasteUtgifterList) {
+            Post nyPost = opprettDuplikat(fastUtgiftPost);
+            nyPost.setDatoLocalDate(nyPost.getDatoLocalDate().plusYears(1));
+            nyePosterArrayList.add(nyPost);
+        }
+        lagreAlle(nyePosterArrayList);
+
+    }
+
+    private List<Post> finnFasteUtgifterIPeriode(Periode aarsoversiktPeriode) {
+        if (aarsoversiktPeriode==null) {
+            Loggekyklop.bruk().loggADVARSEL("Aarsoversiktperiode er null, avbryter");
+            return new ArrayList<>();
+        } else if (aarsoversiktPeriode.getDatoFraLocalDate()==null || aarsoversiktPeriode.getDatoTilLocalDate()==null) {
+            Loggekyklop.bruk().loggADVARSEL("Aarsoversiktperiode har feil dato:" + aarsoversiktPeriode.hentBeskrivendeNavn());
+            return new ArrayList<>();
+        }
+
+        return Allvitekyklop.hent().getPostRepository().finnBudsjettposterFraDatoTilDatoKategoriFastUtgift(aarsoversiktPeriode.getDatoFraLocalDate(), aarsoversiktPeriode.getDatoTilLocalDate());
+    }
+
+    public Post opprettDuplikat(Post budsjettpost){
+        Post nyPost = opprettEntitet();
+        kopierDataMellomBudsjettposter(budsjettpost,nyPost);
+        return nyPost;
+    }
+
+
+    public void kopierDataMellomBudsjettposter(Post fraBudsjettpost, Post tilBudsjettpost) {
+        if (fraBudsjettpost != null && tilBudsjettpost != null) {
+            tilBudsjettpost.setPostklasseEnum(PostklasseEnum.BUDSJETTPOST);
+            tilBudsjettpost.setBudsjettpoststatusEnum(fraBudsjettpost.getBudsjettpoststatusEnum());
+            tilBudsjettpost.setKategori(fraBudsjettpost.getKategori());
+            tilBudsjettpost.setBeskrivelseString(fraBudsjettpost.getBeskrivelseString());
+            tilBudsjettpost.setDatoLocalDate(fraBudsjettpost.getDatoLocalDate());
+            tilBudsjettpost.setErRegelmessigBoolean(fraBudsjettpost.getErRegelmessigBoolean());
+            tilBudsjettpost.setEstimatpresisjonEnum(fraBudsjettpost.getEstimatpresisjonEnum());
+            tilBudsjettpost.setInnPaaKontoInteger(fraBudsjettpost.getInnPaaKontoInteger());
+            tilBudsjettpost.setUtFraKontoInteger(fraBudsjettpost.getUtFraKontoInteger());
+            tilBudsjettpost.setPrioritetEnum(fraBudsjettpost.getPrioritetEnum());
+            tilBudsjettpost.setRekkefoelgeInteger(fraBudsjettpost.getRekkefoelgeInteger());
+        }
     }
 }

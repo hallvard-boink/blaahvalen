@@ -42,15 +42,13 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
     protected Button oppdaterSummerOgPeriodeposterButton;
 
 
-    // ===========================
-    // region 0.Constructur og init
-    // ===========================
-
+// ===========================
+// region 0 Constructur og init
+// ===========================
 
 
     public PeriodeViewMal() {
         super();
-
     }
 
     /**
@@ -102,38 +100,6 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
 
 
 
-// ===========================
-// region 2. Tilpass redigeringsfelter og knapper
-// ===========================
-
-
-
-    protected void tilpassKnapperadRedigeringsfelt() {
-        tilpassKnapperadRedigeringsfelt_OppdaterSummerButton();
-        tilpassKnapperadRedigeringsfelt_LastNedPDFRapport();
-
-    }
-
-    private void tilpassKnapperadRedigeringsfelt_LastNedPDFRapport() {
-        PeriodeRapportMester.opprettDefaultFilnavn(); //for å opprette filen
-        lastNedPDFAnchor = Filkyklop.hent().hentNedlastingsButtonAnchor(
-                PeriodeRapportMester.hentFilnavnString(),
-                "Vis PDF",
-                e -> skrivUtPerioderapport()
-        );
-        lastNedPDFAnchor.setEnabled(false);
-        hentKnapperadRedigeringsfelt().addToEnd(lastNedPDFAnchor);
-    }
-
-    private void tilpassKnapperadRedigeringsfelt_OppdaterSummerButton() {
-        oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
-        oppdaterSummerOgPeriodeposterButton.addClickListener(e -> periodeservice.oppdaterPeriodensPeriodeposterOgSummer());
-        oppdaterSummerOgPeriodeposterButton.setEnabled(false);
-        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerOgPeriodeposterButton);
-    }
-
-
-// endregion
 
 
 // ===========================
@@ -152,9 +118,17 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
 
 
 // ===========================
-// region 1.Tilpass søkeområde med liste
+// region 1 Tilpass søkeområde med grid
 // ===========================
 
+    @Override
+    public void instansOpprettGrid() {
+        Grid<Periode> grid = super.hentGrid();
+        grid.addColumn(Periode::getDatoFraLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer()).setWidth("100px").setFlexGrow(0);
+        grid.addColumn(Periode::getBeskrivelseString).setHeader("Beskrivelse");
+        grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END).setWidth("150px").setFlexGrow(0);
+
+    }
 
     public void initierGridMedPagedSearch() {
         super.initierCallbackDataProviderIGrid(
@@ -171,7 +145,6 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
                         periodeservice.getEntityFilterSpecification())
         );
     }
-
 
 
     @Override
@@ -203,14 +176,10 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
     }
 
 
-    @Override
-    public void instansOpprettGrid() {
-        Grid<Periode> grid = super.hentGrid();
-        grid.addColumn(Periode::getDatoFraLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer()).setWidth("100px").setFlexGrow(0);
-        grid.addColumn(Periode::getBeskrivelseString).setHeader("Beskrivelse");
-        grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END).setWidth("150px").setFlexGrow(0);
+    // ===========================
+    // region 1.1 Renderers i grid
+    // ===========================
 
-    }
 
 
     private ComponentRenderer<Span, Periode> opprettResultatRenderer() {
@@ -240,6 +209,49 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         });
     }
 
+    // endregion
+
+
+// endregion
+
+
+
+// ===========================
+// region 2 Tilpass redigeringsfelter og knapper
+// ===========================
+
+
+    protected void tilpassKnapperadRedigeringsfelt() {
+        tilpassKnapperadRedigeringsfelt_OpprettOppdaterSummerButton();
+        tilpassKnapperadRedigeringsfelt_OpprettLastNedPDFRapportAnchor();
+    }
+
+    private void tilpassKnapperadRedigeringsfelt_OpprettLastNedPDFRapportAnchor() {
+        PeriodeRapportMester.opprettDefaultFilnavn(); //for å opprette filen
+        lastNedPDFAnchor = Filkyklop.hent().hentNedlastingsButtonAnchor(
+                PeriodeRapportMester.hentFilnavnString(),
+                "Vis PDF",
+                e -> skrivUtPerioderapport()
+        );
+        lastNedPDFAnchor.setEnabled(false);
+        hentKnapperadRedigeringsfelt().addToEnd(lastNedPDFAnchor);
+    }
+
+    private void tilpassKnapperadRedigeringsfelt_OpprettOppdaterSummerButton() {
+        oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
+        oppdaterSummerOgPeriodeposterButton.addClickListener(e -> periodeservice.oppdaterPeriodensPeriodeposterOgSummer());
+        oppdaterSummerOgPeriodeposterButton.setEnabled(false);
+        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerOgPeriodeposterButton);
+    }
+
+
+
+// endregion
+
+
+// ===========================
+// region 5 Hjelpeprosedyrer
+// ===========================
 
 
     protected void skrivUtPerioderapport(){
@@ -254,6 +266,9 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         new PeriodeRapportMester().lagrePeriodeSomPDF(periode, periodeposterArrayList, periodedelAvKostnadspakkeRadArrayList);
     }
 
-    // endregion
+// endregion
+
+
+
 
 }

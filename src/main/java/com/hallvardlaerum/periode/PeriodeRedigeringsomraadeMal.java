@@ -72,9 +72,18 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
     protected PeriodetittelHorizontalLayout periodetittelHorizontalLayout;
 
 
+
+// ===========================
+// region 0 Constructor og init
+// ===========================
+
+
+
     public PeriodeRedigeringsomraadeMal() {
 
     }
+
+
 
     public void initierPeriodeRedigeringsomraadeMal(PeriodetypeEnum periodetypeEnum,
                                                     PeriodepostServiceMal periodepostService,
@@ -108,73 +117,15 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         }
     }
 
+// endregion
 
-    @Override
-    public void instansOppdaterEkstraRedigeringsfelter() {
-        instansOppdaterEkstraRedigeringsfelter_oppdaterTittelMedTidsperiode();
-        instansOppdaterEkstraRedigeringsfelter_oppdaterPeriodepostGrid();
-        instansOppdaterEkstraRedigeringsfelter_hentSummer();
-    }
 
-    private void instansOppdaterEkstraRedigeringsfelter_oppdaterTittelMedTidsperiode() {
-        if (hentEntitet() == null) {
-            periodetittelHorizontalLayout.oppdaterTittel("");
-        } else {
-            periodetittelHorizontalLayout.oppdaterTittel(hentEntitet().getDatoFraLocalDate());
-        }
-    }
 
-    private void instansOppdaterEkstraRedigeringsfelter_oppdaterPeriodepostGrid() {
-        if (hentEntitet() == null) {
-            kategorierGrid.setItems(new ArrayList<>());
-        } else {
-            kategorierGrid.setItems(periodepostService.finnHovedperiodeposter(hentEntitet()));
-        }
-    }
 
-    private void instansOppdaterEkstraRedigeringsfelter_hentSummer() {
-        Periode periode = hentEntitet();
-        if (periode == null) {
-            sumBudsjettInntekterSpan.settInteger(null);
-            sumBudsjettUtgifterSpan.settInteger(null);
-            sumBudsjettResultatSpan.settInteger(null);
 
-            sumRegnskapInntekterSpan.settInteger(null);
-            sumRegnskapUtgifterSpan.settInteger(null);
-            sumRegnskapResultatSpan.settInteger(null);
-
-            sumDifferanseBudsjettRegnskapInntekterSpan.settInteger(null);
-            sumDifferanseBudsjettRegnskapUtgifterSpan.settInteger(null);
-            sumDifferanseBudsjettRegnskapResultatSpan.settInteger(null);
-
-            sumUkategorisertInnSpan.settInteger(null);
-            sumUkategorisertUtSpan.settInteger(null);
-
-            sumRegnskapInntekterMedOverfoeringerSpan.settInteger(null);
-            sumRegnskapUtgifterMedOverfoeringerSpan.settInteger(null);
-            sumRegnskapResultatMedOverfoeringerSpan.settInteger(null);
-
-        } else {
-            sumBudsjettInntekterSpan.settInteger(periode.getSumBudsjettInntektInteger());
-            sumBudsjettUtgifterSpan.settInteger(periode.getSumBudsjettUtgifterInteger());
-            sumBudsjettResultatSpan.settInteger(periode.getSumBudsjettResultatInteger());
-
-            sumRegnskapInntekterSpan.settInteger(periode.getSumRegnskapInntektInteger());
-            sumRegnskapUtgifterSpan.settInteger(periode.getSumRegnskapUtgifterInteger());
-            sumRegnskapResultatSpan.settInteger(periode.getSumRegnskapResultatInteger());
-
-            sumDifferanseBudsjettRegnskapInntekterSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapInntekter());
-            sumDifferanseBudsjettRegnskapUtgifterSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapUtgifter());
-            sumDifferanseBudsjettRegnskapResultatSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapResultat());
-
-            sumUkategorisertInnSpan.settInteger(periode.getSumUkategorisertInnInteger());
-            sumUkategorisertUtSpan.settInteger(periode.getSumUkategorisertUtInteger());
-
-            sumRegnskapInntekterMedOverfoeringerSpan.settInteger(periode.getSumRegnskapInntektMedOverfoeringerInteger());
-            sumRegnskapUtgifterMedOverfoeringerSpan.settInteger(periode.getSumRegnskapUtgifterMedOverfoeringerInteger());
-            sumRegnskapResultatMedOverfoeringerSpan.settInteger(periode.getSumRegnskapResultatMedOverfoeringerInteger());
-        }
-    }
+// ===========================
+// region 1 Opprett felter
+// ===========================
 
 
     @Override
@@ -182,16 +133,12 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         instansOpprettFelter_leggTilHovedTab();
         instansOpprettFelter_leggTilKategorierTab();
         instansOpprettFelter_leggTilEkstraTab();
-        testing_leggTilSjekkSummerButton();
+        //testing_leggTilSjekkSummerButton();
         settFokusKomponent(beskrivelseTextArea);
 
     }
 
-    protected void testing_leggTilSjekkSummerButton() {
-        Button sjekkSummerButton = new Button("Sjekk summer");
-        sjekkSummerButton.addClickListener(e -> new PeriodeTester(hentEntitet()));
-        leggTilRedigeringsfelter(hovedtabString, sjekkSummerButton);
-    }
+
 
     protected void instansOpprettFelter_leggTilKategorierTab() {
         kategorierGrid = new Grid<>();
@@ -213,15 +160,6 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         hentFormLayoutFraTab(kategoriertabString).setSizeFull();
     }
 
-    private Button opprettTilEksporterGridraderTilExcelButton() {
-        Button eksporerGridraderTilExcelButton = new Button("Eksporter grid til Excel");
-        eksporerGridraderTilExcelButton.addClickListener(e -> {
-            List<Periodepost> rader = kategorierGrid.getListDataView().getItems().toList();
-            ExcelEksportkyklop.hent().eksporterArrayListAvEntiteterSomXLS(new ArrayList<>(rader), "GridInnhold_Periodeposter_" + Datokyklop.hent().hentNaavaerendeTidspunktSomDatoTidSekund() + ".xlsx");
-        });
-        return eksporerGridraderTilExcelButton;
-    }
-
     protected ComponentRenderer<Span, Periodepost> opprettSumRegnskapRenderer() {
         return new ComponentRenderer<>(periodepost -> opprettSpanFraInteger(periodepost.getSumRegnskapInteger()));
     }
@@ -230,13 +168,6 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         return new ComponentRenderer<>(periodepost -> opprettSpanFraInteger(periodepost.getSumBudsjettInteger()));
     }
 
-    protected Span opprettSpanFraInteger(Integer integer) {
-        if (integer == null) {
-            return new Span("");
-        } else {
-            return new Span(HelTallMester.formaterIntegerSomStortTall(integer));
-        }
-    }
 
 
     protected void instansOpprettFelter_leggTilHovedTab() {
@@ -328,6 +259,17 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         leggTilDatofeltTidOpprettetOgRedigert(ekstratabString);
     }
 
+// endregion
+
+
+
+
+
+// ===========================
+// region 2 Oppdatering og Binder
+// ===========================
+
+
     @Override
     public void instansByggOppBinder() {
         Binder<Periode> binder = hentBinder();
@@ -336,6 +278,133 @@ public class PeriodeRedigeringsomraadeMal extends RedigeringsomraadeMal<Periode>
         binder.bind(datoTilDatePicker, Periode::getDatoTilLocalDate, Periode::setDatoTilLocalDate);
         binder.bind(beskrivelseTextArea, Periode::getBeskrivelseString, Periode::setBeskrivelseString);
     }
+
+
+
+    @Override
+    public void instansOppdaterEkstraRedigeringsfelter() {
+        instansOppdaterEkstraRedigeringsfelter_oppdaterTittelMedTidsperiode();
+        instansOppdaterEkstraRedigeringsfelter_oppdaterPeriodepostGrid();
+        instansOppdaterEkstraRedigeringsfelter_hentSummer();
+    }
+
+    private void instansOppdaterEkstraRedigeringsfelter_oppdaterTittelMedTidsperiode() {
+        if (hentEntitet() == null) {
+            periodetittelHorizontalLayout.oppdaterTittel("");
+        } else {
+            periodetittelHorizontalLayout.oppdaterTittel(hentEntitet().getDatoFraLocalDate());
+        }
+    }
+
+    private void instansOppdaterEkstraRedigeringsfelter_oppdaterPeriodepostGrid() {
+        if (hentEntitet() == null) {
+            kategorierGrid.setItems(new ArrayList<>());
+        } else {
+            kategorierGrid.setItems(periodepostService.finnHovedperiodeposter(hentEntitet()));
+        }
+    }
+
+    private void instansOppdaterEkstraRedigeringsfelter_hentSummer() {
+        Periode periode = hentEntitet();
+        if (periode == null) {
+            sumBudsjettInntekterSpan.settInteger(null);
+            sumBudsjettUtgifterSpan.settInteger(null);
+            sumBudsjettResultatSpan.settInteger(null);
+
+            sumRegnskapInntekterSpan.settInteger(null);
+            sumRegnskapUtgifterSpan.settInteger(null);
+            sumRegnskapResultatSpan.settInteger(null);
+
+            sumDifferanseBudsjettRegnskapInntekterSpan.settInteger(null);
+            sumDifferanseBudsjettRegnskapUtgifterSpan.settInteger(null);
+            sumDifferanseBudsjettRegnskapResultatSpan.settInteger(null);
+
+            sumUkategorisertInnSpan.settInteger(null);
+            sumUkategorisertUtSpan.settInteger(null);
+
+            sumRegnskapInntekterMedOverfoeringerSpan.settInteger(null);
+            sumRegnskapUtgifterMedOverfoeringerSpan.settInteger(null);
+            sumRegnskapResultatMedOverfoeringerSpan.settInteger(null);
+
+        } else {
+            sumBudsjettInntekterSpan.settInteger(periode.getSumBudsjettInntektInteger());
+            sumBudsjettUtgifterSpan.settInteger(periode.getSumBudsjettUtgifterInteger());
+            sumBudsjettResultatSpan.settInteger(periode.getSumBudsjettResultatInteger());
+
+            sumRegnskapInntekterSpan.settInteger(periode.getSumRegnskapInntektInteger());
+            sumRegnskapUtgifterSpan.settInteger(periode.getSumRegnskapUtgifterInteger());
+            sumRegnskapResultatSpan.settInteger(periode.getSumRegnskapResultatInteger());
+
+            sumDifferanseBudsjettRegnskapInntekterSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapInntekter());
+            sumDifferanseBudsjettRegnskapUtgifterSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapUtgifter());
+            sumDifferanseBudsjettRegnskapResultatSpan.settInteger(periode.getSumDifferanseBudsjettRegnskapResultat());
+
+            sumUkategorisertInnSpan.settInteger(periode.getSumUkategorisertInnInteger());
+            sumUkategorisertUtSpan.settInteger(periode.getSumUkategorisertUtInteger());
+
+            sumRegnskapInntekterMedOverfoeringerSpan.settInteger(periode.getSumRegnskapInntektMedOverfoeringerInteger());
+            sumRegnskapUtgifterMedOverfoeringerSpan.settInteger(periode.getSumRegnskapUtgifterMedOverfoeringerInteger());
+            sumRegnskapResultatMedOverfoeringerSpan.settInteger(periode.getSumRegnskapResultatMedOverfoeringerInteger());
+        }
+    }
+
+// endregion
+
+
+
+
+
+// ===========================
+// region 9 Testing
+// ===========================
+
+    protected void testing_leggTilSjekkSummerButton() {
+        Button sjekkSummerButton = new Button("Sjekk summer");
+        sjekkSummerButton.addClickListener(e -> new PeriodeTester(hentEntitet()));
+        leggTilRedigeringsfelter(hovedtabString, sjekkSummerButton);
+    }
+
+
+
+// endregion
+
+
+
+
+// ===========================
+// region 8 Hjelpeprosedyrer
+// ===========================
+
+
+
+    private Button opprettTilEksporterGridraderTilExcelButton() {
+        Button eksporerGridraderTilExcelButton = new Button("Eksporter grid til Excel");
+        eksporerGridraderTilExcelButton.addClickListener(e -> {
+            List<Periodepost> rader = kategorierGrid.getListDataView().getItems().toList();
+            ExcelEksportkyklop.hent().eksporterArrayListAvEntiteterSomXLS(new ArrayList<>(rader), "GridInnhold_Periodeposter_" + Datokyklop.hent().hentNaavaerendeTidspunktSomDatoTidSekund() + ".xlsx");
+        });
+        return eksporerGridraderTilExcelButton;
+    }
+
+    protected Span opprettSpanFraInteger(Integer integer) {
+        if (integer == null) {
+            return new Span("");
+        } else {
+            return new Span(HelTallMester.formaterIntegerSomStortTall(integer));
+        }
+    }
+
+
+// endregion
+
+
+
+
+
+
+
+
+
 
 
 }

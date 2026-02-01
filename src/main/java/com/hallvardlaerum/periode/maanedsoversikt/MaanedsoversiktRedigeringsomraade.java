@@ -42,6 +42,44 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
     private RedigerEntitetDialog<Post, Periode> redigerBudsjettpostDialog;
 
 
+
+// ===========================
+// region 0 Constructor og Init
+// ===========================
+
+    public MaanedsoversiktRedigeringsomraade() {
+    }
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+    public void init() {
+        if (!erInitiert) {
+            MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraadeTilDialog = new MaanedsoversiktpostRedigeringsomraade();
+            maanedsoversiktpostRedigeringsomraadeTilDialog.init();
+            super.initierPeriodeRedigeringsomraadeMal(PeriodetypeEnum.MAANEDSOVERSIKT,
+                    Allvitekyklop.hent().getMaanedsoversiktpostService(),
+                    maanedsoversiktpostRedigeringsomraadeTilDialog,
+                    Allvitekyklop.hent().getMaanedsoversiktService(),
+                    PeriodepostTypeEnum.MAANEDSOVERSIKTPOST,
+                    Allvitekyklop.hent().getMaanedsoversiktView()
+            );
+            budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
+            erInitiert = true;
+        }
+    }
+
+
+// endregion
+
+
+// ===========================
+// region 1 Opprett felter
+// ===========================
+
+
     @Override
     public void instansOpprettFelter() {
         super.instansOpprettFelter();
@@ -150,6 +188,13 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
 
     }
 
+// endregion
+
+
+// ===========================
+// region Oppdatering og CRUD
+// ===========================
+
 
     @Override
     public void instansOppdaterEkstraRedigeringsfelter() {
@@ -189,6 +234,13 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
         foreslaatteBudsjettposterGrid.setItems(budsjettpostService.finnFraPeriodeOgBudsjettstatus(hentEntitet(), BudsjettpoststatusEnum.FORESLAATT));
     }
 
+    // endregion
+
+
+    // ===========================
+    // region 5 Rediger månedsbudsjett
+    // ===========================
+
 
     private void tildelEllerFjernBudsjettpost(ItemClickEvent<Post> e) {
         Post budsjettpost = e.getItem();
@@ -227,30 +279,6 @@ public class MaanedsoversiktRedigeringsomraade extends PeriodeRedigeringsomraade
             }
         }).setHeader("Sum");
         return grid;
-    }
-
-    public MaanedsoversiktRedigeringsomraade() {
-    }
-
-    @Override
-    public boolean erInitiert() {
-        return erInitiert;
-    }
-
-    public void init() {
-        if (!erInitiert) {
-            MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraadeTilDialog = new MaanedsoversiktpostRedigeringsomraade();
-            maanedsoversiktpostRedigeringsomraadeTilDialog.init();
-            super.initierPeriodeRedigeringsomraadeMal(PeriodetypeEnum.MAANEDSOVERSIKT,
-                    Allvitekyklop.hent().getMaanedsoversiktpostService(),
-                    maanedsoversiktpostRedigeringsomraadeTilDialog,
-                    Allvitekyklop.hent().getMaanedsoversiktService(),
-                    PeriodepostTypeEnum.MAANEDSOVERSIKTPOST,
-                    Allvitekyklop.hent().getMaanedsoversiktView()
-            );
-            budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
-            erInitiert = true;
-        }
     }
 
 

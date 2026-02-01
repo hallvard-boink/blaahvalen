@@ -123,7 +123,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         instansOpprettFelter_leggTilFasteUtgifterTab();
         instansOpprettFelter_leggTilKostnadspakkerTab();
         instansOpprettFelter_leggTilEkstraTab();
-        super.testing_leggTilSjekkSummerButton();
+        //super.testing_leggTilSjekkSummerButton();
     }
 
 

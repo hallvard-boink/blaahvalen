@@ -182,6 +182,6 @@ public class KategoriService extends EntitetserviceMal<Kategori, KategoriReposit
 
 
     public List<Kategori> finnKategorierTilFastePoster() {
-        return kategoriRepository.findAllByBrukesTilFastePosterAndErAktivOrderByTittelAscUndertittelAsc(true,true);
+        return kategoriRepository.findAllByBrukesTilFastePosterAndErAktivAndNivaaOrderByTittelAscUndertittelAsc(true,true,1);
     }
 }

@@ -44,7 +44,7 @@ public interface KategoriRepository extends JpaRepository<Kategori, UUID>, JpaSp
                 "k2.nivaa =0;")
     List<Kategori> finnHovedKategorierDetFinnesPosterForFraDatoTilDato(LocalDate fraLocalDate, LocalDate tilLocalDate);
 
-    List<Kategori> findAllByBrukesTilFastePosterAndErAktivOrderByTittelAscUndertittelAsc(boolean brukesTilFastePoster, boolean erAktiv);
+    List<Kategori> findAllByBrukesTilFastePosterAndErAktivAndNivaaOrderByTittelAscUndertittelAsc(boolean brukesTilFastePoster, boolean erAktiv, Integer nivaa);
 
 
 }

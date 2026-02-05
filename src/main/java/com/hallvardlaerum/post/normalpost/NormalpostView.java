@@ -342,8 +342,8 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
         egenbeskrivelseFilterTextField = leggTilFilterfelt(4,new TextField(), "tekst");
 
         kategoriFilterComboBox = leggTilFilterfelt(5, new ComboBox<>(),"Velg");
-        kategoriFilterComboBox.setItems(kategoriService.finnAlle());
-        kategoriFilterComboBox.setItemLabelGenerator(Kategori::hentBeskrivendeNavn);
+        kategoriFilterComboBox.setItems(kategoriService.finnAlleUnderkategorier());
+        kategoriFilterComboBox.setItemLabelGenerator(Kategori::hentKortnavn);
 
         kostnadspakkeFilterComboBox = leggTilFilterfelt(6, new ComboBox<>(),"Velg");
         kostnadspakkeFilterComboBox.setItems(kostnadspakkeService.finnAlleKostnadspakker());

@@ -71,6 +71,8 @@ public class AarsoversiktpostRedigeringsomraade extends PeriodepostRedigeringsom
         budsjettposterGrid.addItemDoubleClickListener(e -> budsjettPostRedigerEntitetDialog.vis(e.getItem()));
 
 
+
+
     }
 
 }

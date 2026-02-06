@@ -11,6 +11,12 @@ public class Versjonskyklop extends Versjonskyklopmal implements InitieringsEgne
     @Override
     public void byggOppVersjoner() {
         super.leggTilVersjon(
+                "1.1.0",
+                "2026-02-05",
+                "Summer poster",
+                "La til hjelpevindu for å søke i og summere normalposter når faste budsjettposter skal oppdateres");
+
+        super.leggTilVersjon(
                 "1.0.5",
                 "2026-02-01",
                 "Første oppdatering",

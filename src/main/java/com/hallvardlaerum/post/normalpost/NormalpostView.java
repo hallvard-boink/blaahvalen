@@ -406,7 +406,6 @@ public class NormalpostView extends MasterDetailViewmal<Post, PostRepository> im
         }
 
         super.brukFiltreIDataprovider(filtre);
-        //super.oppdaterAntallRaderNederstIGrid();
 
     }
 

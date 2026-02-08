@@ -129,7 +129,7 @@ public class PeriodepostViewMal extends MasterDetailViewmal<Periodepost, Periode
 
         kategoriFilterComboBox = leggTilFilterfelt(1, new ComboBox<>(),"valg");
         kategoriFilterComboBox.setItemLabelGenerator(Kategori::hentKortnavn);
-        kategoriFilterComboBox.setItems(kategoriService.finnAlle());
+        kategoriFilterComboBox.setItems(kategoriService.finnAlleHovedkategorier());
 
         if (periodepostTypeEnum==PeriodepostTypeEnum.PERIODEOVERSIKTPOST) {
             tittelFilterTextField = leggTilFilterfelt(2, new TextField(),"tekst");

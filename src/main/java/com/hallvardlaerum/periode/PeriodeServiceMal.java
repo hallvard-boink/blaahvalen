@@ -52,6 +52,11 @@ public class PeriodeServiceMal extends EntitetserviceMal<Periode, PeriodeReposit
         super.initEntitetserviceMal(Periode.class, periodeRepository);
     }
 
+
+    public List<Periode> finnAlleSortertEtterDatoFallende(){
+        return periodeRepository.findByOrderByDatoFraLocalDateDesc();
+    }
+
     public void oppdaterAllePerioderAvSammeType(PeriodetypeEnum periodetypeEnum) {
         List<Periode> periodeList = finnAllePerioderEtterPeriodetypeEnum(periodetypeEnum);
         for (Periode periode:periodeList) {

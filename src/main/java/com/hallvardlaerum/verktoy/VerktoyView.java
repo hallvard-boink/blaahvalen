@@ -2,6 +2,9 @@ package com.hallvardlaerum.verktoy;
 
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
+import com.hallvardlaerum.periodepost.Periodepost;
+import com.hallvardlaerum.periodepost.PeriodepostGrid;
+import com.hallvardlaerum.post.normalpost.NormalpostGrid;
 import com.hallvardlaerum.verktoy.testing.TestDataFabrikk;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -31,10 +34,21 @@ public class VerktoyView extends VerticalLayout implements InitieringsEgnet {
     public void init(){
         if (!erInitiert) {
             testDataFabrikk = new TestDataFabrikk();
+
             leggTilKnapper();
+            leggTilHallvardsGrid();
+
             setSizeFull();
             erInitiert = true;
         }
+    }
+
+    private void leggTilHallvardsGrid(){
+        //NormalpostGrid normalpostGrid =new NormalpostGrid(NormalpostGrid.Type.FOR_KATEGORISERING);
+        //add(normalpostGrid);
+
+        PeriodepostGrid periodepostGrid = new PeriodepostGrid();
+        add(periodepostGrid);
     }
 
     private void leggTilKnapper(){

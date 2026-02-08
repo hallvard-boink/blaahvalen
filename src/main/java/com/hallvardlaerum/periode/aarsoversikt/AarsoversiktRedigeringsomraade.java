@@ -18,6 +18,8 @@ import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeRedigeringsomra
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
+import com.hallvardlaerum.post.normalpost.PostSummeringsDialog;
+import com.hallvardlaerum.post.normalpost.SummeringsDialogEgnet;
 import com.hallvardlaerum.skalTilHavaara.FrekvensPerAarEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.button.Button;
@@ -65,7 +67,7 @@ import java.util.List;
  */
 @Component
 @UIScope
-public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal implements InitieringsEgnet {
+public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal implements InitieringsEgnet, SummeringsDialogEgnet {
     private boolean erInitiert = false;
     private Grid<Periodepost> kostnadspakkerGrid;
     private Grid<KategoriMedSumOgAntall> kategoriMedSumOgAntallGrid;
@@ -76,6 +78,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     private BudsjettpostService budsjettpostService;
     private List<Post> draggedItemsList;
     private ConfirmDialog kopierFasteutgifterFraIfjorConfirmDialog;
+    protected PostSummeringsDialog postSummeringsDialog;
 
 // ===========================
 // region 0.Constructor og init
@@ -109,7 +112,6 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
 
 
 // endregion
-
 
 
 // ===========================
@@ -214,7 +216,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         Kategori nyKategori = Allvitekyklop.hent().getKategoriService().opprettEntitet();
 
         nyKategori.setTittel(markertKategori.getTittel());
-        nyKategori.setNivaa(2);
+        nyKategori.setNivaa(1);
         nyKategori.setKategoriType(markertKategori.getKategoriType());
         nyKategori.setKategoriRetning(markertKategori.getKategoriRetning());
         nyKategori.setErAktiv(true);
@@ -238,11 +240,32 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilGjorKvartalsvisButton());
         horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilSlettBudsjettpostButton());
         horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilKopierTilDeAndreButton());
+        horizontalLayout.addToEnd(instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilVisNormalpostSoekeDialogButtonOgInitierDialog());
 
         return horizontalLayout;
     }
 
 
+    private Button instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilVisNormalpostSoekeDialogButtonOgInitierDialog() {
+        postSummeringsDialog = new PostSummeringsDialog();
+        postSummeringsDialog.init(this);
+
+        Button button = new Button("Søk poster");
+        button.addClickListener(e -> postSummeringsDialog.open());
+        return button;
+    }
+
+    @Override
+    public void oppdaterEtterSummeringsDialog(Integer sumInteger) {
+        Post budsjettpost;
+        if (budsjettpostGrid.getSelectionModel().getFirstSelectedItem().isPresent()) {
+            budsjettpost = budsjettpostGrid.getSelectionModel().getFirstSelectedItem().get();
+            budsjettpost.setUtFraKontoInteger(sumInteger);
+            budsjettpostService.lagre(budsjettpost);
+            oppdaterBudsjettpostgridMedValgteKategori();
+            budsjettpostGrid.getSelectionModel().select(budsjettpost);
+        }
+    }
 
     private Button instansOpprettFelter_leggTilFasteUtgifterTab_opprettKnapperad_leggTilKopierTilDeAndreButton() {
         Button button = new Button("Kopier til de andre");
@@ -334,13 +357,13 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         });
 
         budsjettpostGrid.addDragEndListener(e -> {
-            draggedItemsList=null;
+            draggedItemsList = null;
             budsjettpostGrid.setDropMode(null);
         });
 
-        budsjettpostGrid.addItemClickListener( e -> {
+        budsjettpostGrid.addItemClickListener(e -> {
             if (e.isShiftKey()) {
-                Notification.show("Bruk heller CTRL-klikk for markere flere samtidig!",4000, Notification.Position.MIDDLE);
+                Notification.show("Bruk heller CTRL-klikk for markere flere samtidig!", 4000, Notification.Position.MIDDLE);
             }
         });
 
@@ -362,7 +385,6 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         });
 
 
-
         // drag and drop
         kategoriMedSumOgAntallGrid.setRowsDraggable(true);
 
@@ -373,7 +395,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         });
 
         kategoriMedSumOgAntallGrid.addDragEndListener(e -> {
-            draggedItemsList=null;
+            draggedItemsList = null;
             kategoriMedSumOgAntallGrid.setDropMode(null);
         });
 
@@ -419,11 +441,8 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     }
 
 
-
-
 // endregion
 // endregion
-
 
 
 // ===========================
@@ -471,7 +490,6 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
 // endregion
 
 
-
 // ===========================
 // region 5 Faste utgifter
 // ===========================
@@ -509,12 +527,12 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     }
 
     private void markerRadIKategoriMedSumOgAntallGrid(KategoriMedSumOgAntall markertKategoriMSA) {
-        if (markertKategoriMSA==null) {
+        if (markertKategoriMSA == null) {
             return;
         }
 
         List<KategoriMedSumOgAntall> kategoriMSAer = kategoriMedSumOgAntallGrid.getListDataView().getItems().toList();
-        for (KategoriMedSumOgAntall kategoriMedSumOgAntall:kategoriMSAer) {
+        for (KategoriMedSumOgAntall kategoriMedSumOgAntall : kategoriMSAer) {
             if (kategoriMedSumOgAntall.getKategori().equals(markertKategoriMSA.getKategori())) {
                 kategoriMedSumOgAntallGrid.select(kategoriMedSumOgAntall);
                 break;
@@ -583,7 +601,6 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     }
 
 
-
     private void budsjettpostGrid_markerRader(ItemClickEvent<Post> e) {
         Post klikketBudsjettpost = e.getItem();
         GridSelectionModel<Post> sm = budsjettpostGrid.getSelectionModel();
@@ -603,7 +620,7 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
         Post startBudsjettpost = budsjettpostGrid.getSelectionModel().getFirstSelectedItem().orElse(budsjettpostGrid.getListDataView().getItem(0));
         int startIndeksInteger = budsjettpostGrid.getListDataView().getItemIndex(startBudsjettpost).orElse(0);
         int sluttIndeksInteger = budsjettpostGrid.getListDataView().getItemIndex(klikketBudsjettpost).orElse(0);
-        for (int i=startIndeksInteger; i<sluttIndeksInteger; i++) {
+        for (int i = startIndeksInteger; i < sluttIndeksInteger; i++) {
             Post post = budsjettpostGrid.getListDataView().getItem(i);
             if (skalMarkeres) {
                 budsjettpostGrid.getSelectionModel().select(post);
@@ -615,21 +632,18 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
     }
 
 
-    private void oppdaterBudsjettposterMedNyKategori(Kategori nyKategori, List<Post> budsjettposter){
-        if (nyKategori==null || budsjettposter==null) {
+    private void oppdaterBudsjettposterMedNyKategori(Kategori nyKategori, List<Post> budsjettposter) {
+        if (nyKategori == null || budsjettposter == null) {
             return;
         }
 
-        for (Post budsjettpost:budsjettposter) {
+        for (Post budsjettpost : budsjettposter) {
             budsjettpost.setKategori(nyKategori);
         }
         budsjettpostService.lagreAlle(budsjettposter);
         instansOppdaterEkstraRedigeringsfelter();
 
     }
-
-
-
 
 
     private void oppdaterBudsjettpostgridMedValgteKategori() {
@@ -647,8 +661,6 @@ public class AarsoversiktRedigeringsomraade extends PeriodeRedigeringsomraadeMal
 
         budsjettpostGrid.setItems(budsjettpostService.finnEtterPeriodeOgKategori(hentEntitet(), kategori));
     }
-
-
 
 
 }

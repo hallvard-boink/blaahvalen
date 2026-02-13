@@ -1,4 +1,4 @@
-package com.hallvardlaerum.periodepost.periodeoversiktpost;
+package com.hallvardlaerum.periodepost.kostnadspakke;
 
 import com.hallvardlaerum.periodepost.Periodepost;
 

@@ -4,7 +4,7 @@
     <!-- Project from https://start.vaadin.com/9589daae-52bc-43b5-b593-bbaca67bb5a5 -->
     <groupId>com.hallvardlaerum</groupId>
     <artifactId>blaahvalen</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <!-- <packaging>jar</packaging> -->
     <packaging>war</packaging>
     
@@ -34,27 +34,20 @@
     
     <dependencies>
 
-        <!--
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        -->
-
         <dependency>
             <groupId>net.sourceforge.dynamicreports</groupId>
             <artifactId>dynamicreports-core</artifactId>
             <version>6.20.1</version>
         </dependency>
 
-        <!--
+
+<!-- Kommenter ut denne under utvikling, og fjern kommentering ved deploy
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope>
         </dependency>
-        -->
+ -->
 
         <dependency>
             <groupId>com.hallvardlaerum.libs</groupId>

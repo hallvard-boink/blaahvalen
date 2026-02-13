@@ -1,6 +1,7 @@
 package com.hallvardlaerum.periodepost;
 
 import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriType;
 import com.hallvardlaerum.libs.database.RepositoryTillegg;
 import com.hallvardlaerum.periode.Periode;
 import jakarta.persistence.Tuple;
@@ -17,14 +18,24 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
         RepositoryTillegg<Periodepost> {
 
 
-    List<Periodepost> findByPeriodeAndKategori(Periode periode, Kategori kategori);
 
     Periodepost findByTittelString(String kostnadspakketittelString);
 
+
+
+    List<Periodepost> findByPeriodeAndKategori(Periode periode, Kategori kategori);
+
+    List<Periodepost> findByPeriodepostTypeEnum(PeriodepostTypeEnum periodepostTypeEnum);
+
     List<Periodepost> findByPeriodepostTypeEnumOrderByTittelStringDesc(PeriodepostTypeEnum periodepostTypeEnum);
 
+    /**
+     * Periodeposter har ikke egne datofelter, så de MÅ være koblet på en periode
+     * @param periodepostTypeEnum Periodeposttype, f.eks. maanedsoversiktpost
+     * @param periode Periode
+     * @return liste med periodepost
+     */
     List<Periodepost> findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum periodepostTypeEnum, Periode periode);
-
 
 
     @NativeQuery(value = "SELECT pp.* " +
@@ -34,24 +45,11 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
             "WHERE " +
                 "p.uuid = ?1 " +
                 "AND k.nivaa = ?2 " +
+                "AND k.kategori_type != 3 AND k.kategori_type != 4 " +
             "ORDER BY " +
                 "pp.sum_regnskap_integer DESC," +
-                "pp.sum_budsjett_integer DESC;"
-    )
+                "pp.sum_budsjett_integer DESC;")
     List<Periodepost> finnEtterPeriodeOgKategorinivaa(UUID periodeUUID, Integer kategoriNivaa);
-
-
-    @NativeQuery(value =
-        "SELECT " +
-            "pp.*  " +
-        "FROM " +
-            "periodepost pp " +
-            "LEFT JOIN kategori k ON pp.kategori_uuid = k.uuid " +
-            "LEFT JOIN periode p ON pp.periode_uuid = p.uuid " +
-        "WHERE " +
-            "p.dato_fra_local_date = ?1 " +
-            "AND k.tittel = ?2")
-    List<Periodepost> finnFraPeriodedatostartOgKategoritittel(LocalDate datoFra, String kategoritittel);
 
 
     @NativeQuery(value =
@@ -67,5 +65,11 @@ public interface PeriodepostRepository extends JpaRepository<Periodepost, UUID>,
     List<Tuple> finnOgOppsummerKostnadspakkerForDatospenn(LocalDate datoFra, LocalDate datoTil);
 
 
+    @NativeQuery(value =
+        "SELECT pp.* " +
+        "FROM periodepost pp JOIN kategori k ON pp.kategori_uuid = k.uuid " +
+        "WHERE k.kategori_type = 4")
+    List<Periodepost> finnEtterKategoriType(KategoriType kategoriType);
 
+    List<Periodepost> findByKategori(Kategori kategori);
 }

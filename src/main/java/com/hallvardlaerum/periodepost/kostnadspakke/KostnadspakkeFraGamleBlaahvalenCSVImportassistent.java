@@ -1,4 +1,4 @@
-package com.hallvardlaerum.periodepost.periodeoversiktpost;
+package com.hallvardlaerum.periodepost.kostnadspakke;
 
 import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.eksportimport.CSVImportassistentMal;
@@ -9,15 +9,15 @@ import com.hallvardlaerum.verktoy.Allvitekyklop;
 
 import java.util.ArrayList;
 
-public class PeriodeoversiktpostFraGamleBlaahvalenCSVImportassistent extends CSVImportassistentMal<Periodepost> {
-    private PeriodeoversiktpostService periodeoversiktpostService;
+public class KostnadspakkeFraGamleBlaahvalenCSVImportassistent extends CSVImportassistentMal<Periodepost> {
+    private KostnadspakkeService kostnadspakkeService;
     private AarsoversiktService aarsoversiktService;
     private KategoriService kategoriService;
 
     @Override
     public void forberedImport() {
         Loggekyklop.bruk().forberedTilImportloggTilFil();
-        periodeoversiktpostService = Allvitekyklop.hent().getPeriodeoversiktpostService();
+        kostnadspakkeService = Allvitekyklop.hent().getKostnadspakkeService();
         aarsoversiktService = Allvitekyklop.hent().getAarsoversiktService();
         kategoriService = Allvitekyklop.hent().getKategoriService();
     }
@@ -26,14 +26,14 @@ public class PeriodeoversiktpostFraGamleBlaahvalenCSVImportassistent extends CSV
     public Periodepost konverterFraTekstRadOgLagre(ArrayList<String> feltnavnCSVArrayList, String[] celler) {
         lesInnFeltnavnogCeller(feltnavnCSVArrayList,celler);
 
-        Periodepost periodeoversiktpost = periodeoversiktpostService.opprettEntitet();
+        Periodepost periodeoversiktpost = kostnadspakkeService.opprettEntitet();
 
         periodeoversiktpost.setPeriode(aarsoversiktService.finnAarsoversiktFraAarString(hentVerdi("år")));
         periodeoversiktpost.setTittelString(hentVerdi("tittel"));
         periodeoversiktpost.setBeskrivelseString(hentVerdi("beskrivelse"));
         periodeoversiktpost.setKategori(kategoriService.finnEtterUndertittel(hentVerdi("kategori.undertittel")));
 
-        periodeoversiktpostService.lagre(periodeoversiktpost);
+        kostnadspakkeService.lagre(periodeoversiktpost);
         return periodeoversiktpost;
     }
 

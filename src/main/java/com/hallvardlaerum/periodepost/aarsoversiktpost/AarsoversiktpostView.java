@@ -7,6 +7,8 @@ import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 import com.hallvardlaerum.periodepost.PeriodepostViewMal;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -16,8 +18,6 @@ import com.vaadin.flow.spring.annotation.UIScope;
 //@Menu(order=25, title="Årsoversiktpost")
 public class AarsoversiktpostView extends PeriodepostViewMal implements InitieringsEgnet {
     private AarsoversiktpostService aarsoversiktpostService;
-    private AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade;
-    private AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog;
     private Button oppdaterSummerButton;
     private boolean erInitiert = false;
 
@@ -37,10 +37,12 @@ public class AarsoversiktpostView extends PeriodepostViewMal implements Initieri
     public void init(){
         if (!erInitiert) {
             this.aarsoversiktpostService = Allvitekyklop.hent().getAarsoversiktpostService();
-            this.aarsoversiktpostRedigeringsomraade = Allvitekyklop.hent().getAarsoversiktpostRedigeringsomraade();
-            this.aarsoversiktpostRedigeringsomraade.settView(this);
-            this.aarsoversiktpostRedigeringsomraadeTilDialog = Allvitekyklop.hent().getAarsoversiktpostRedigeringsomraadeTilDialog();
-            this.aarsoversiktpostRedigeringsomraadeTilDialog.settView(this);
+            AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade = Allvitekyklop.hent().getAarsoversiktpostRedigeringsomraade();
+            aarsoversiktpostRedigeringsomraade.settView(this);
+
+
+            AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog = new AarsoversiktpostRedigeringsomraade();
+            aarsoversiktpostRedigeringsomraadeTilDialog.init();
 
             super.initierPeriodepostViewMal(
                     PeriodepostTypeEnum.AARSOVERSIKTPOST,
@@ -52,16 +54,50 @@ public class AarsoversiktpostView extends PeriodepostViewMal implements Initieri
 
 
             leggTilOgTilpassKnapper();
-            hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importCSVFraGamleBlaahvalen());
+            //Verktøymenyen er håndtert ved å overkjøre super.opprettSoekeomraade()
 
             erInitiert = true;
         }
 
     }
 
+    @Override
+    protected VerticalLayout opprettSoekeomraade(){
+        super.opprettSoekeomraade_leggTilTittel();
+        super.opprettSoekeomraade_leggTilVerktoyMeny();
+
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettEksporterTilCSVMenuItem();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterFraCSVMenuItem();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleAarsoversiktposterMenuItem();
+
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettSeparator();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_byttOrienteringAvSplitLayoutMenuItem();
+        super.opprettSoekeomraade_leggTilSoekeGrid();
+        return super.opprettSoeomraade_settSammenDetHele();
+    }
+
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem() {
+        hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importCSVFraGamleBlaahvalen());
+    }
+
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleAarsoversiktposterMenuItem() {
+        slettAlleMenuItem = super.verktoeySubMenu.addItem("Slett alle årsoversiktposter");
+        slettAlleMenuItem.addClickListener(e -> new ConfirmDialog(
+                "Slette alle årsoversiktposter?",
+                "Vil du virkelig slette alle årsoversiktpostene i databasen?",
+                "Ja, sett i gang",
+                ee -> {
+                    aarsoversiktpostService.slettAlleAarsoversiktposter();
+                    oppdaterSoekeomraadeFinnAlleRader();
+                    oppdaterRedigeringsomraade();
+                },
+                "Nei, er du GAL!",
+                ee -> {}).open());
+    }
+
     private void importCSVFraGamleBlaahvalen() {
         new CSVImportmester(new AarsoversiktpostFraGamleBlaahvalenCSVImportAssistent()).velgImportfilOgKjoerImport(aarsoversiktpostService);
-
     }
 
     private void leggTilOgTilpassKnapper() {

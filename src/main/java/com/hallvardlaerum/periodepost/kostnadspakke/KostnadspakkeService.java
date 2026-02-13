@@ -1,5 +1,6 @@
- package com.hallvardlaerum.periodepost.periodeoversiktpost;
+ package com.hallvardlaerum.periodepost.kostnadspakke;
 
+ import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
  import com.hallvardlaerum.libs.felter.HelTallMester;
  import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
  import com.hallvardlaerum.periode.Periode;
@@ -14,12 +15,13 @@
  import org.springframework.stereotype.Service;
 
  import java.math.BigDecimal;
+ import java.time.LocalDate;
  import java.util.ArrayList;
  import java.util.List;
  import java.util.UUID;
 
  @Service
-public class PeriodeoversiktpostService extends PeriodepostServiceMal implements InitieringsEgnet {
+public class KostnadspakkeService extends PeriodepostServiceMal implements InitieringsEgnet {
     private boolean erInitiert;
     private NormalpostService normalpostService;
     private PeriodepostRepository periodepostRepository;
@@ -28,17 +30,17 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
     public void init() {
         if (!erInitiert) {
             super.initPeriodepostServiceMal(
-                Allvitekyklop.hent().getPeriodeoversiktpostRedigeringsomraade(),
+                Allvitekyklop.hent().getKostnadspakkeRedigeringsomraade(),
                 PeriodepostTypeEnum.PERIODEOVERSIKTPOST
             );
             normalpostService = Allvitekyklop.hent().getNormalpostService();
-            periodepostRepository = super.hentRepository();
+            periodepostRepository = Allvitekyklop.hent().getPeriodepostRepository();
             erInitiert = true;
         }
     }
 
 
-    public PeriodeoversiktpostService() {
+    public KostnadspakkeService() {
         super();
     }
 
@@ -46,6 +48,15 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
     public boolean erInitiert() {
         return erInitiert;
     }
+
+     public void oppdaterAlleKostnadspakker() {
+         Loggekyklop.bruk().loggINFO("Oppdaterer kostnadspakker...");
+         List<Periodepost> kostnadspakkeList = periodepostRepository.findByPeriodepostTypeEnum(PeriodepostTypeEnum.PERIODEOVERSIKTPOST);
+         for (Periodepost kostnadspakke:kostnadspakkeList) {
+             oppdaterSumUtgifterFraTilknyttedePoster(kostnadspakke);
+             lagre(kostnadspakke);
+         }
+     }
 
     public void oppdaterSumUtgifterFraTilknyttedePoster(Periodepost kostnadspakke) {
         if (kostnadspakke==null) {
@@ -80,7 +91,18 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
 
     }
 
+     /**
+      * Denne brukes av AarsoversiktRedigeringsomraade sin kostnadspakketab
+      * @param periode periode
+      * @return liste av periodepost
+      */
+    public List<Periodepost> hentKostnadspakkerForPerioden(Periode periode) {
+        return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.PERIODEOVERSIKTPOST, periode);
+    }
 
+    /**
+     * Denne brukes av MaanedsoversiktRedigeringsomraade sin KostnadspakkeTab
+     */
     public ArrayList<PeriodedelAvKostnadspakkeRad> hentKostnadspakkerForPeriodenMedPeriodensSum(Periode periode) {
         List<Tuple> tupleList = finnKostnadspakkeUUIDogSummerForPeriode(periode);
         ArrayList<PeriodedelAvKostnadspakkeRad> periodedelAvKostnadspakkeRadArrayList = new ArrayList<>();
@@ -111,5 +133,22 @@ public class PeriodeoversiktpostService extends PeriodepostServiceMal implements
     }
 
 
+     public void slettAlleKostnadspakker() {
+         List<Periodepost> kostnadspakker = hentRepository().findByPeriodepostTypeEnum(PeriodepostTypeEnum.PERIODEOVERSIKTPOST);
+         hentRepository().deleteAll(kostnadspakker);
+     }
 
-}
+
+     public List<Periodepost> finnKostnadspakkerFraSammeAar(LocalDate datoLocalDate) {
+        if (datoLocalDate==null) {
+            return finnAlleKostnadspakker();
+        }
+        Periode aarsOversikt =  Allvitekyklop.hent().getAarsoversiktService().finnAarsoversiktFraDato(datoLocalDate);
+        if (aarsOversikt==null) {
+            Loggekyklop.bruk().loggADVARSEL("Du mangler årsoversikt for dato " + datoLocalDate + ". Legg den til nå.");
+            return finnAlleKostnadspakker();
+        } else {
+            return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.PERIODEOVERSIKTPOST,aarsOversikt);
+        }
+     }
+ }

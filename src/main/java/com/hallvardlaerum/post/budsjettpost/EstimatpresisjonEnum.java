@@ -2,7 +2,9 @@ package com.hallvardlaerum.post.budsjettpost;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 
-public enum EstimatpresisjonEnum implements EnumAktig {
+import java.util.List;
+
+public enum EstimatpresisjonEnum implements EnumAktig<EstimatpresisjonEnum> {
     LAV("Lav","F.eks. gjettet på"),
 
     MIDDELS("Middels","F.eks. estimert med regnestykke med sammenligningsgrunnlag, "+
@@ -48,6 +50,16 @@ public enum EstimatpresisjonEnum implements EnumAktig {
         return tittel;
     }
 
+    @Override
+    public String hentTooltip() {
+        return EnumAktig.opprettTooltip(hentVerdier());
+    }
+
+    @Override
+    public List<EstimatpresisjonEnum> hentVerdier() {
+        return List.of(EstimatpresisjonEnum.values());
+    }
+
 
     public String getTittelMedBeskrivelse() {
         return tittel + " (" + beskrivelse + ")";
@@ -56,4 +68,6 @@ public enum EstimatpresisjonEnum implements EnumAktig {
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
+
+
 }

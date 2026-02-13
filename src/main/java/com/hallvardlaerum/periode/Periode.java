@@ -1,6 +1,7 @@
 package com.hallvardlaerum.periode;
 
 import com.hallvardlaerum.libs.database.AbstraktEntitet;
+import com.hallvardlaerum.libs.database.EntitetMedBarnAktig;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.periodepost.Periodepost;
@@ -8,10 +9,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Periode extends AbstraktEntitet {
+public class Periode extends AbstraktEntitet implements EntitetMedBarnAktig<Periodepost> {
 
     @SkalEksporteres
     private PeriodetypeEnum periodetypeEnum;
@@ -45,7 +47,10 @@ public class Periode extends AbstraktEntitet {
     private Integer sumRegnskapResultatInteger;
 
     @SkalEksporteres
-    private Integer sumDifferanseResultatBudsjettRegnskap;
+    private Integer sumUkategorisertInnInteger;
+
+    @SkalEksporteres
+    private Integer sumUkategorisertUtInteger;
 
     @SkalEksporteres
     private Integer sumRegnskapInntektMedOverfoeringerInteger;
@@ -56,7 +61,7 @@ public class Periode extends AbstraktEntitet {
     @SkalEksporteres
     private Integer sumRegnskapResultatMedOverfoeringerInteger;
 
-    @OneToMany(fetch =  FetchType.EAGER, mappedBy = "periode", cascade = CascadeType.REMOVE)
+    @OneToMany(fetch =  FetchType.LAZY, mappedBy = "periode", cascade = CascadeType.REMOVE)
     private List<Periodepost> periodeposterList;
 
     public List<Periodepost> getPeriodeposterList() {
@@ -64,6 +69,11 @@ public class Periode extends AbstraktEntitet {
     }
 
     public Periode() {
+    }
+
+    @Override
+    public ArrayList<Periodepost> hentBarn() {
+        return new ArrayList<>(getPeriodeposterList());
     }
 
     @Override
@@ -160,14 +170,6 @@ public class Periode extends AbstraktEntitet {
         this.sumRegnskapResultatInteger = sumRegnskapResultatInteger;
     }
 
-    public Integer getSumDifferanseResultatBudsjettRegnskap() {
-        return sumDifferanseResultatBudsjettRegnskap;
-    }
-
-    public void setSumDifferanseResultatBudsjettRegnskap(Integer sumDifferanseResultatBudsjettRegnskap) {
-        this.sumDifferanseResultatBudsjettRegnskap = sumDifferanseResultatBudsjettRegnskap;
-    }
-
     public Integer getSumRegnskapInntektMedOverfoeringerInteger() {
         return sumRegnskapInntektMedOverfoeringerInteger;
     }
@@ -191,4 +193,45 @@ public class Periode extends AbstraktEntitet {
     public void setSumRegnskapResultatMedOverfoeringerInteger(Integer sumRegnskapResultatMedOverfoeringerInteger) {
         this.sumRegnskapResultatMedOverfoeringerInteger = sumRegnskapResultatMedOverfoeringerInteger;
     }
+
+    public Integer getSumUkategorisertInnInteger() {
+        return sumUkategorisertInnInteger;
+    }
+
+    public void setSumUkategorisertInnInteger(Integer sumUkategorisertInnInteger) {
+        this.sumUkategorisertInnInteger = sumUkategorisertInnInteger;
+    }
+
+    public Integer getSumUkategorisertUtInteger() {
+        return sumUkategorisertUtInteger;
+    }
+
+    public void setSumUkategorisertUtInteger(Integer sumUkategorisertUtInteger) {
+        this.sumUkategorisertUtInteger = sumUkategorisertUtInteger;
+    }
+
+    public Integer getSumDifferanseBudsjettRegnskapInntekter(){
+        if (sumBudsjettInntektInteger!=null && sumRegnskapInntektInteger!=null) {
+            return sumBudsjettInntektInteger-sumRegnskapInntektInteger;
+        } else {
+            return null;
+        }
+    }
+
+    public Integer getSumDifferanseBudsjettRegnskapUtgifter(){
+        if (sumBudsjettUtgifterInteger!= null && sumRegnskapUtgifterInteger!=null) {
+            return sumBudsjettUtgifterInteger-sumRegnskapUtgifterInteger;
+        } else {
+            return null;
+        }
+    }
+
+    public Integer getSumDifferanseBudsjettRegnskapResultat(){
+        if (sumBudsjettResultatInteger!=null && sumRegnskapResultatInteger!=null) {
+            return sumBudsjettResultatInteger-sumRegnskapResultatInteger;
+        } else {
+            return null;
+        }
+    }
+
 }

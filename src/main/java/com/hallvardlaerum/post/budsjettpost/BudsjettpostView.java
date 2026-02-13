@@ -14,6 +14,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -38,6 +39,50 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
     private IntegerField utfrakontoFilterIntegerField;
     private ComboBox<BudsjettpoststatusEnum> budsjettpoststatusFilterComboBox;
 
+    @Override
+    public void init() {
+        if (!erInitiert) {
+            this.budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
+            this.kategoriService = Allvitekyklop.hent().getKategoriService();
+            BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade = Allvitekyklop.hent().getBudsjettpostRedigeringsomraade();
+            budsjettpostRedigeringsomraade.settView(this);
+
+            super.opprettLayout(budsjettpostService, budsjettpostRedigeringsomraade, SplitLayout.Orientation.VERTICAL);
+            initierGridMedNormalSoek();
+            hentVindutittel().setText("Budsjettposter");
+
+            // Tilpasning av verktøyMeny er gjort ved å overkjøre super.opprettSoekeomraade();
+
+            erInitiert = true;
+        }
+    }
+
+
+    @Override
+    protected VerticalLayout opprettSoekeomraade() {
+        super.opprettSoekeomraade_leggTilTittel();
+        super.opprettSoekeomraade_leggTilVerktoyMeny();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettTestDataMenuItem();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettEksporterTilCSVMenuItem();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterFraCSVMenuItem();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleBudsdjettposterMenuItem();
+
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettSeparator();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_byttOrienteringAvSplitLayoutMenuItem();
+
+        super.opprettSoekeomraade_leggTilSoekeGrid();
+        return this.opprettSoeomraade_settSammenDetHele();
+    }
+
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem() {
+        hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
+    }
+
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleBudsdjettposterMenuItem(){
+        slettAlleMenuItem = verktoeySubMenu.addItem("Slett alle budsjettposter");
+        slettAlleMenuItem.addClickListener(e ->budsjettpostService.slettAllePosterAvDennePostklasseEnum());
+    }
 
 
     @Override
@@ -101,25 +146,6 @@ public class BudsjettpostView extends MasterDetailViewmal<Post, PostRepository> 
         budsjettpoststatusFilterComboBox.setItems(BudsjettpoststatusEnum.values());
         budsjettpoststatusFilterComboBox.setItemLabelGenerator(BudsjettpoststatusEnum::getTittel);
 
-    }
-
-    @Override
-    public void init() {
-        if (!erInitiert) {
-            this.budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
-            this.kategoriService = Allvitekyklop.hent().getKategoriService();
-            BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade = Allvitekyklop.hent().getBudsjettpostRedigeringsomraade();
-            budsjettpostRedigeringsomraade.settView(this);
-
-            super.opprettLayout(budsjettpostService, budsjettpostRedigeringsomraade, SplitLayout.Orientation.VERTICAL);
-            initierGridMedNormalSoek();
-            hentVindutittel().setText("Budsjettposter");
-
-
-            hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
-
-            erInitiert = true;
-        }
     }
 
     private void importerCSVFraGamleBlaahvalen() {

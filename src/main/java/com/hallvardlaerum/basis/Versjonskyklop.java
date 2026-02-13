@@ -10,6 +10,31 @@ public class Versjonskyklop extends Versjonskyklopmal implements InitieringsEgne
 
     @Override
     public void byggOppVersjoner() {
+        super.leggTilVersjon(
+                "1.1.0",
+                "2026-02-05",
+                "Summer poster",
+                "La til hjelpevindu for å søke i og summere normalposter når faste budsjettposter skal oppdateres");
+
+        super.leggTilVersjon(
+                "1.0.5",
+                "2026-02-01",
+                "Første oppdatering",
+                "Rettet feil ved opprettelse av årets månedsoversikter, og la til 'kopier faste utgifter fra ifjor'");
+
+        super.leggTilVersjon(
+                "1.0.0",
+                "2026-01-31",
+                "Første release",
+                "Denne versjonen er ganske godt testet, og mange bugs er fjernet. Den skal tåle å ha skarpe poster.");
+
+        super.leggTilVersjon(
+                "0.9.0",
+                "2026-01-19",
+                "Nesten produksjonsklar",
+                "Denne versjonen har all funksjonalitet for 1.0 på plass, inkludert kostnadspakker og budsjettposter");
+
+
         super.leggTilVersjon("0.5.6","2026-01-01","Før rydding i serviceklasser og repositories","");
         super.leggTilVersjon("0.5.5","2025-12-31","Kostnadspakkemester","Støtte for HentSiste og HentNestSiste kostnadspakke. Og ymse bugfiks.");
         super.leggTilVersjon("0.5.4","2025-12-29","Finpusset kategorisering av poster","Hoved- og underkategorier, samt kostnadspakker");
@@ -46,7 +71,7 @@ public class Versjonskyklop extends Versjonskyklopmal implements InitieringsEgne
     }
 
     public void initier(){
-        versjonskyklop.setApplikasjonsNavnString("Blåhvalen 2025");
+        versjonskyklop.setApplikasjonsNavnString("Rådyret");
         versjonskyklop.setApplikasjonsKortnavnString("blaahvalen");
         versjonskyklop.setApplikasjonsBeskrivelseString("Regnskap og budsjett for Tina og Hallvard.");
 

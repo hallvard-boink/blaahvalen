@@ -4,7 +4,9 @@ import com.hallvardlaerum.libs.database.EnumAktig;
 import com.hallvardlaerum.libs.felter.DatopresisjonEnum;
 import com.hallvardlaerum.periodepost.PeriodepostTypeEnum;
 
-public enum PeriodetypeEnum implements EnumAktig {
+import java.util.List;
+
+public enum PeriodetypeEnum implements EnumAktig<PeriodetypeEnum> {
 
     AARSOVERSIKT("Årsoversikt","Oversikt over regnskap og budsjett for et helt år",
             DatopresisjonEnum.AAR,PeriodepostTypeEnum.AARSOVERSIKTPOST),
@@ -45,6 +47,16 @@ public enum PeriodetypeEnum implements EnumAktig {
         return tittel;
     }
 
+    @Override
+    public String hentTooltip() {
+        return EnumAktig.opprettTooltip(hentVerdier());
+    }
+
+    @Override
+    public List<PeriodetypeEnum> hentVerdier() {
+        return List.of(PeriodetypeEnum.values());
+    }
+
 
     public String getTittelMedBeskrivelse() {
         return tittel + " (" + beskrivelse + ")";
@@ -69,4 +81,6 @@ public enum PeriodetypeEnum implements EnumAktig {
     public void setPeriodepostTypeEnum(PeriodepostTypeEnum periodepostTypeEnum) {
         this.periodepostTypeEnum = periodepostTypeEnum;
     }
+
+
 }

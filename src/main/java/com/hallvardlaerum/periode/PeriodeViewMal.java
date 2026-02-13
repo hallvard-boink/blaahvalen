@@ -1,22 +1,24 @@
 package com.hallvardlaerum.periode;
 
-import com.hallvardlaerum.libs.database.EntitetserviceAktig;
 import com.hallvardlaerum.libs.database.SearchCriteria;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.DatopresisjonEnum;
 import com.hallvardlaerum.libs.felter.HelTallMester;
+import com.hallvardlaerum.libs.filerogopplasting.Filkyklop;
 import com.hallvardlaerum.libs.ui.MasterDetailViewmal;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.libs.ui.ViewmalAktig;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostServiceMal;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodedelAvKostnadspakkeRad;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
+import com.hallvardlaerum.periodepost.kostnadspakke.PeriodedelAvKostnadspakkeRad;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.hallvardlaerum.verktoy.PeriodeRapportMester;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -29,17 +31,24 @@ import java.util.ArrayList;
 
 
 public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeRepository> {
-    private EntitetserviceAktig<Periode, PeriodeRepository> periodeservice;
+    private PeriodeServiceMal periodeservice;
     private PeriodetypeEnum periodetypeEnum;
 
     private DatePicker fraDatoFilterDatePicker;
     private TextField beskrivelseFilterTextField;
     private IntegerField resultatFilterIntegerField;
 
+    protected Anchor lastNedPDFAnchor;
+    protected Button oppdaterSummerOgPeriodeposterButton;
+
+
+// ===========================
+// region 0 Constructur og init
+// ===========================
+
 
     public PeriodeViewMal() {
         super();
-
     }
 
     /**
@@ -51,7 +60,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
      */
     public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
                                    ViewmalAktig<Periode, ?> viewmalAktig,
-                                   EntitetserviceAktig<Periode,PeriodeRepository> periodeservice,
+                                   PeriodeServiceMal periodeservice,
                                    RedigeringsomraadeAktig<Periode> redigeringsomraade
                                    ) {
 
@@ -74,7 +83,7 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
      */
     public void initPeriodeViewMal(PeriodetypeEnum periodetypeEnum,
                                    ViewmalAktig<Periode, ?> viewmalAktig,
-                                   EntitetserviceAktig<Periode,PeriodeRepository> periodeservice,
+                                   PeriodeServiceMal periodeservice,
                                    RedigeringsomraadeAktig<Periode> redigeringsomraade,
                                    Double splittPlasseringDouble) {
         this.periodetypeEnum = periodetypeEnum;
@@ -87,6 +96,15 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         initierGridMedPagedSearch();
     }
 
+// endregion
+
+
+
+
+
+// ===========================
+// region SKAL SANERES i HAVAARA
+// ===========================
 
 
     @Override
@@ -95,6 +113,22 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         periode.setPeriodetypeEnum(periodetypeEnum);
     }
 
+// endregion
+
+
+
+// ===========================
+// region 1 Tilpass søkeområde med grid
+// ===========================
+
+    @Override
+    public void instansOpprettGrid() {
+        Grid<Periode> grid = super.hentGrid();
+        grid.addColumn(Periode::getDatoFraLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer()).setWidth("100px").setFlexGrow(0);
+        grid.addColumn(Periode::getBeskrivelseString).setHeader("Beskrivelse");
+        grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END).setWidth("150px").setFlexGrow(0);
+
+    }
 
     public void initierGridMedPagedSearch() {
         super.initierCallbackDataProviderIGrid(
@@ -110,6 +144,14 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
                         query.getLimit(),
                         periodeservice.getEntityFilterSpecification())
         );
+    }
+
+
+    @Override
+    public void instansOpprettFilterFelter() {
+        fraDatoFilterDatePicker = leggTilFilterfelt(0,new DatePicker(),"<dato");
+        beskrivelseFilterTextField = leggTilFilterfelt(1, new TextField(),"tekst");
+        resultatFilterIntegerField = leggTilFilterfelt(2, new IntegerField(),"<tall");
     }
 
     @Override
@@ -134,14 +176,9 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
     }
 
 
-    @Override
-    public void instansOpprettGrid() {
-        Grid<Periode> grid = super.hentGrid();
-        grid.addColumn(Periode::getDatoFraLocalDate).setHeader("Dato").setRenderer(opprettDatoRenderer()).setWidth("100px").setFlexGrow(0);
-        grid.addColumn(Periode::getBeskrivelseString).setHeader("Beskrivelse");
-        grid.addColumn(Periode::getSumRegnskapResultatInteger).setHeader("Resultat").setRenderer(opprettResultatRenderer()).setTextAlign(ColumnTextAlign.END).setWidth("150px").setFlexGrow(0);
-
-    }
+    // ===========================
+    // region 1.1 Renderers i grid
+    // ===========================
 
 
 
@@ -172,12 +209,50 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         });
     }
 
-    @Override
-    public void instansOpprettFilterFelter() {
-        fraDatoFilterDatePicker = leggTilFilterfelt(0,new DatePicker(),"<dato");
-        beskrivelseFilterTextField = leggTilFilterfelt(1, new TextField(),"tekst");
-        resultatFilterIntegerField = leggTilFilterfelt(2, new IntegerField(),"<tall");
+    // endregion
+
+
+// endregion
+
+
+
+// ===========================
+// region 2 Tilpass redigeringsfelter og knapper
+// ===========================
+
+
+    protected void tilpassKnapperadRedigeringsfelt() {
+        tilpassKnapperadRedigeringsfelt_OpprettOppdaterSummerButton();
+        tilpassKnapperadRedigeringsfelt_OpprettLastNedPDFRapportAnchor();
     }
+
+    private void tilpassKnapperadRedigeringsfelt_OpprettLastNedPDFRapportAnchor() {
+        PeriodeRapportMester.opprettDefaultFilnavn(); //for å opprette filen
+        lastNedPDFAnchor = Filkyklop.hent().hentNedlastingsButtonAnchor(
+                PeriodeRapportMester.hentFilnavnString(),
+                "Vis PDF",
+                e -> skrivUtPerioderapport()
+        );
+        lastNedPDFAnchor.setEnabled(false);
+        hentKnapperadRedigeringsfelt().addToEnd(lastNedPDFAnchor);
+    }
+
+    private void tilpassKnapperadRedigeringsfelt_OpprettOppdaterSummerButton() {
+        oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
+        oppdaterSummerOgPeriodeposterButton.addClickListener(e -> periodeservice.oppdaterPeriodensPeriodeposterOgSummer());
+        oppdaterSummerOgPeriodeposterButton.setEnabled(false);
+        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerOgPeriodeposterButton);
+    }
+
+
+
+// endregion
+
+
+// ===========================
+// region 5 Hjelpeprosedyrer
+// ===========================
+
 
     protected void skrivUtPerioderapport(){
         Periode periode = hentRedigeringsomraadeAktig().getEntitet();
@@ -185,10 +260,15 @@ public class PeriodeViewMal extends MasterDetailViewmal<Periode, PeriodeReposito
         PeriodepostServiceMal periodepostService = Allvitekyklop.hent().getMaanedsoversiktpostService(); //virker for Aarsoversikt også
         ArrayList<Periodepost> periodeposterArrayList = new ArrayList<>(periodepostService.finnHovedperiodeposter(periode));
 
-        PeriodeoversiktpostService kostnadspakkeservice = Allvitekyklop.hent().getPeriodeoversiktpostService();
+        KostnadspakkeService kostnadspakkeservice = Allvitekyklop.hent().getKostnadspakkeService();
         ArrayList<PeriodedelAvKostnadspakkeRad> periodedelAvKostnadspakkeRadArrayList = kostnadspakkeservice.hentKostnadspakkerForPeriodenMedPeriodensSum(periode);
 
         new PeriodeRapportMester().lagrePeriodeSomPDF(periode, periodeposterArrayList, periodedelAvKostnadspakkeRadArrayList);
     }
+
+// endregion
+
+
+
 
 }

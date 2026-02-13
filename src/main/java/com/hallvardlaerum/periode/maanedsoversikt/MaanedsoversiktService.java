@@ -4,9 +4,12 @@ package com.hallvardlaerum.periode.maanedsoversikt;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
-import com.hallvardlaerum.periode.*;
+import com.hallvardlaerum.periode.Periode;
+import com.hallvardlaerum.periode.PeriodeServiceMal;
+import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periode.aarsoversikt.AarsoversiktService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
+import com.vaadin.flow.component.notification.Notification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,6 +20,7 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
     private AarsoversiktService aarsoversiktService;
     private boolean erInitiert = false;
     private MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade;
+
 
 
     public Periode finnMaanedsoversiktFraAarMnd(String aarMnd){
@@ -66,6 +70,12 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
 
 
     public void opprettMaanedsoversikterForHeleAaret() {
+        Periode maanedsoversiktPeriode = maanedsoversiktRedigeringsomraade.hentEntitet();
+        if (maanedsoversiktPeriode == null) {
+            Notification.show("Marker en månedsoversikt først",3000, Notification.Position.MIDDLE);
+            return;
+        }
+
         Periode aarsoversiktPeriode = aarsoversiktService.finnAarsoversiktFraMaanedsoversikt(maanedsoversiktRedigeringsomraade.hentEntitet());
         if (aarsoversiktPeriode==null) {
             Loggekyklop.hent().loggADVARSEL("Fant ikke årsoversikt som passet med månedsoversikten med datoFra " +
@@ -90,4 +100,15 @@ public class MaanedsoversiktService extends PeriodeServiceMal implements Initier
 
     }
 
+
+
+    public void slettAlleMaanedsoversikter() {
+        super.slettAllePerioderMedPeriodeposter(PeriodetypeEnum.MAANEDSOVERSIKT);
+    }
+
+
+    public void oppdaterAlleMaanedsoversikter() {
+        Loggekyklop.bruk().loggINFO("Oppdaterer månedsoversikter...");
+        oppdaterAllePerioderAvSammeType(PeriodetypeEnum.MAANEDSOVERSIKT);
+    }
 }

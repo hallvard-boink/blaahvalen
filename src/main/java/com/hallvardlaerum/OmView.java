@@ -16,10 +16,10 @@ import com.hallvardlaerum.periode.maanedsoversikt.MaanedsoversiktService;
 import com.hallvardlaerum.periodepost.PeriodepostRepository;
 import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostRedigeringsomraade;
 import com.hallvardlaerum.periodepost.aarsoversiktpost.AarsoversiktpostService;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeService;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostRedigeringsomraade;
 import com.hallvardlaerum.periodepost.maanedsoversiktpost.MaanedsoversiktpostService;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostRedigeringsomraade;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodeoversiktpostService;
+import com.hallvardlaerum.periodepost.kostnadspakke.KostnadspakkeRedigeringsomraade;
 import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostRedigeringsomraade;
 import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
@@ -27,6 +27,7 @@ import com.hallvardlaerum.post.normalpost.NormalpostRedigeringsomraade;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.PermitAll;
@@ -43,11 +44,11 @@ public class OmView extends MainViewmal {
                   KategoriRepository kategoriRepository, KategoriService kategoriService, KategoriRedigeringsomraade kategoriRedigeringsomraade,
                   AarsoversiktService aarsoversiktService, AarsoversiktRedigeringsomraade aarsoversiktRedigeringsomraade,
                   MaanedsoversiktService maanedsoversiktService, MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraade,
-                  MaanedsoversiktpostService maanedsoversiktpostService, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraade, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraadeTilDialog,
-                  AarsoversiktpostService aarsoversiktpostService, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraadeTilDialog,
+                  MaanedsoversiktpostService maanedsoversiktpostService, MaanedsoversiktpostRedigeringsomraade maanedsoversiktpostRedigeringsomraade,
+                  AarsoversiktpostService aarsoversiktpostService, AarsoversiktpostRedigeringsomraade aarsoversiktpostRedigeringsomraade,
                   NormalpostService normalpostService, NormalpostRedigeringsomraade normalPostRedigeringsomraade,
                   BudsjettpostService budsjettpostService, BudsjettpostRedigeringsomraade budsjettpostRedigeringsomraade,
-                  PeriodeoversiktpostService periodeoversiktpostService, PeriodeoversiktpostRedigeringsomraade periodeoversiktpostRedigeringsomraade
+                  KostnadspakkeService kostnadspakkeService, KostnadspakkeRedigeringsomraade kostnadspakkeRedigeringsomraade
       )
     {
         super();
@@ -57,52 +58,52 @@ public class OmView extends MainViewmal {
             if (!erInitiert) {
                 erInitiert = true;
 
-                Loggekyklop.hent().settNivaaINFO();
-
+                Loggekyklop.hent().settNivaaDEBUG();
                 Filkyklop.hent().initierRotmappeFile("blaahvalen");
                 Versjonskyklop.hent().initier(); // for å initiere versjonskyklop
 
-                Allvitekyklop.hent().setKategoriRepository(kategoriRepository);
-                Allvitekyklop.hent().setKategoriService(kategoriService);
-                Allvitekyklop.hent().setKategoriRedigeringsomraade(kategoriRedigeringsomraade);
+                Allvitekyklop ak = Allvitekyklop.hent();
 
-                Allvitekyklop.hent().setPeriodeRepository(periodeRepository);
-                Allvitekyklop.hent().setPeriodepostRepository(periodepostRepository);
-                Allvitekyklop.hent().setPostRepository(postRepository);
+                ak.setKategoriRepository(kategoriRepository);
+                ak.setKategoriService(kategoriService);
+                ak.setKategoriRedigeringsomraade(kategoriRedigeringsomraade);
 
-                Allvitekyklop.hent().setAarsoversiktService(aarsoversiktService);
-                Allvitekyklop.hent().setAarsoversiktRedigeringsomraade(aarsoversiktRedigeringsomraade);
+                ak.setPeriodeRepository(periodeRepository);
+                ak.setPeriodepostRepository(periodepostRepository);
+                ak.setPostRepository(postRepository);
 
-                Allvitekyklop.hent().setMaanedsoversiktService(maanedsoversiktService);
-                Allvitekyklop.hent().setMaanedsoversiktRedigeringsomraade(maanedsoversiktRedigeringsomraade);
+                ak.setAarsoversiktService(aarsoversiktService);
+                ak.setAarsoversiktRedigeringsomraade(aarsoversiktRedigeringsomraade);
 
-                Allvitekyklop.hent().setAarsoversiktpostService(aarsoversiktpostService);
-                Allvitekyklop.hent().setAarsoversiktpostRedigeringsomraade(aarsoversiktpostRedigeringsomraade);
-                Allvitekyklop.hent().setAarsoversiktpostRedigeringsomraadeTilDialog(aarsoversiktpostRedigeringsomraadeTilDialog);
+                ak.setMaanedsoversiktService(maanedsoversiktService);
+                ak.setMaanedsoversiktRedigeringsomraade(maanedsoversiktRedigeringsomraade);
 
-                Allvitekyklop.hent().setMaanedsoversiktpostService(maanedsoversiktpostService);
-                Allvitekyklop.hent().setMaanedsoversiktpostRedigeringsomraade(maanedsoversiktpostRedigeringsomraade);
-                Allvitekyklop.hent().setMaanedsoversiktpostRedigeringsomraadeTilDialog(maanedsoversiktpostRedigeringsomraadeTilDialog);
+                ak.setAarsoversiktpostService(aarsoversiktpostService);
+                ak.setAarsoversiktpostRedigeringsomraade(aarsoversiktpostRedigeringsomraade);
 
-                Allvitekyklop.hent().setNormalpostService(normalpostService);
-                Allvitekyklop.hent().setNormalpostRedigeringsomraade(normalPostRedigeringsomraade);
+                ak.setMaanedsoversiktpostService(maanedsoversiktpostService);
+                ak.setMaanedsoversiktpostRedigeringsomraade(maanedsoversiktpostRedigeringsomraade);
 
-                Allvitekyklop.hent().setBudsjettpostService(budsjettpostService);
-                Allvitekyklop.hent().setBudsjettpostRedigeringsomraade(budsjettpostRedigeringsomraade);
+                ak.setNormalpostService(normalpostService);
+                ak.setNormalpostRedigeringsomraade(normalPostRedigeringsomraade);
 
-                Allvitekyklop.hent().setPeriodeoversiktpostService(periodeoversiktpostService);
-                Allvitekyklop.hent().setPeriodeoversiktpostRedigeringsomraade(periodeoversiktpostRedigeringsomraade);
+                ak.setBudsjettpostService(budsjettpostService);
+                ak.setBudsjettpostRedigeringsomraade(budsjettpostRedigeringsomraade);
+
+                ak.setKostnadspakkeService(kostnadspakkeService);
+                ak.setKostnadspakkeRedigeringsomraade(kostnadspakkeRedigeringsomraade);
+
 
                 Backupkyklop.hent().leggTilEntitetservice(kategoriService);
-                Backupkyklop.hent().leggTilEntitetservice(maanedsoversiktService); //sjekk at alle poster (også årsoversikter) blir eksportert
-                Backupkyklop.hent().leggTilEntitetservice(maanedsoversiktpostService);  //sjekk at alle poster (også årsoversiktposter) blir eksportert
-                //Backupkyklop.hent().leggTilEntitetservice(aarsoversiktService);
-                //Backupkyklop.hent().leggTilEntitetservice(aarsoversiktpostService);
+                Backupkyklop.hent().leggTilEntitetservice(maanedsoversiktService); //denne når alle, også årsoversikter
+                Backupkyklop.hent().leggTilEntitetservice(maanedsoversiktpostService);  //denne når alle, også årsoversiktposter
                 Backupkyklop.hent().leggTilEntitetservice(normalpostService);
 
                 Allvitekyklop.hent().initierAlleObjekter();
 
                 opprettLayout(Versjonskyklop.hent());
+                leggTilBanner();
+
             }
 
             //TODO: Når er det behov for å hente redigeringsomraade fra serviceklassen? Sjekk havaara mot childTable
@@ -110,16 +111,18 @@ public class OmView extends MainViewmal {
         });
 
 
+
+
     }
 
-
-
-    public static void showOmView() { // Også for å unngå "not in context"-feilmeldingene
-        UI current = UI.getCurrent();
-        if (current != null) {
-            current.access(() -> current.navigate(OmView.class));
-        }
+    private void leggTilBanner() {
+        Image img = new Image("images/banner.jpeg", "Banner");
+        img.setAlt("Banner");
+        img.setWidth("1000px"); // optional
+        img.setHeight("400px");
+        hentBannerplassHorizontalLayout().add(img);
     }
+
 
 }
 

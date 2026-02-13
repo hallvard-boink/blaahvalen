@@ -2,7 +2,9 @@ package com.hallvardlaerum.post;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 
-public enum PostklasseEnum implements EnumAktig {
+import java.util.List;
+
+public enum PostklasseEnum implements EnumAktig<PostklasseEnum> {
 
     NORMALPOST("Normalpost","Vanlig post fra bankens kontoutskrifter, eller delposter vi har lagt til selv"),
     BUDSJETTPOST("Budsjettpost","Post som beskriver forventede utgifter eller inntekter");
@@ -44,6 +46,16 @@ public enum PostklasseEnum implements EnumAktig {
         return tittel;
     }
 
+    @Override
+    public String hentTooltip() {
+        return EnumAktig.opprettTooltip(hentVerdier());
+    }
+
+    @Override
+    public List<PostklasseEnum> hentVerdier() {
+        return List.of(PostklasseEnum.values());
+    }
+
 
     public String getTittelMedBeskrivelse() {
         return tittel + " (" + beskrivelse + ")";
@@ -52,6 +64,7 @@ public enum PostklasseEnum implements EnumAktig {
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
+
 
 
 }

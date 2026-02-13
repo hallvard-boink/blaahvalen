@@ -1,11 +1,14 @@
 package com.hallvardlaerum.periode.maanedsoversikt;
 
 import com.hallvardlaerum.libs.eksportimport.CSVImportmester;
+import com.hallvardlaerum.libs.ui.RedigerEntitetDialog;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodeViewMal;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -15,9 +18,16 @@ import com.vaadin.flow.spring.annotation.UIScope;
 //@Menu(order=20, title="Månedsoversikt")
 public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEgnet {
     private MaanedsoversiktService maanedsoversiktService;
-    private Button oppdaterSummerOgPeriodeposterButton;
-    private Button skrivUtMaanedsoversiktButton;
     private boolean erInitiert = false;
+    private RedigerEntitetDialog<Periode, Periode> redigerMaanedsoversiktDialog;
+    private ConfirmDialog bekreftSlettingAvMaanedsoversikterConfirmDialog;
+
+
+// ===========================
+// region 0.Constructor og Init
+// ===========================
+
+
 
     public MaanedsoversiktView() {
         super();
@@ -34,7 +44,6 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
     public void init(){
         if (!erInitiert) {
             Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade().settView(this);
-            Allvitekyklop.hent().getMaanedsoversiktpostRedigeringsomraadeTilDialog().settView(this);
 
             maanedsoversiktService = Allvitekyklop.hent().getMaanedsoversiktService();
             super.initPeriodeViewMal(
@@ -44,38 +53,87 @@ public class MaanedsoversiktView extends PeriodeViewMal implements InitieringsEg
                     Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade(),
                     40D
                     );
-            leggTilOgTilpassKnapper();
-            hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
 
+            super.tilpassKnapperadRedigeringsfelt();
+            //Har overkjørt super.opprettSoekeomraade() og tilpasser verktøymenyen der.
+
+            MaanedsoversiktRedigeringsomraade maanedsoversiktRedigeringsomraadeTilDialog = new MaanedsoversiktRedigeringsomraade();
+            maanedsoversiktRedigeringsomraadeTilDialog.init();
+            redigerMaanedsoversiktDialog = new RedigerEntitetDialog<>(
+                    Allvitekyklop.hent().getMaanedsoversiktService(),
+                    Allvitekyklop.hent().getMaanedsoversiktService(),
+                    "Redigere månedsoversikt",
+                    "",
+                    maanedsoversiktRedigeringsomraadeTilDialog,
+                    Allvitekyklop.hent().getMaanedsoversiktRedigeringsomraade()
+            );
+            super.hentGrid().addItemDoubleClickListener(e -> redigerMaanedsoversiktDialog.vis(e.getItem()));
 
             erInitiert = true;
         }
+    }
+
+// endregion
+
+
+    // ===========================
+    // region 1.Tilpass Søkeområdet
+    // ===========================
+
+
+    @Override
+    protected VerticalLayout opprettSoekeomraade(){
+        super.opprettSoekeomraade_leggTilTittel();
+        super.opprettSoekeomraade_leggTilVerktoyMeny();
+
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettEksporterTilCSVMenuItem();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterFraCSVMenuItem();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettMaanedsoversikter();
+        opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleMaanedsoversikterMenuItem();
+
+        super.opprettSoekeomraade_leggTilVerktoyMeny_opprettSeparator();
+        super.opprettSoekeomraade_leggTilVerktoyMeny_byttOrienteringAvSplitLayoutMenuItem();
+        super.opprettSoekeomraade_leggTilSoekeGrid();
+        return super.opprettSoeomraade_settSammenDetHele();
+    }
+
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettImporterCSVFraBlaahvalenMenuItem() {
+        hentVerktoeySubMeny().addItem("Importer CSV fra gamle Blåhvalen", e -> importerCSVFraGamleBlaahvalen());
+    }
+
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettMaanedsoversikter() {
+        hentVerktoeySubMeny().addItem("Opprett månedsoversikter", e -> maanedsoversiktService.opprettMaanedsoversikterForHeleAaret());
+    }
+
+    private void opprettSoekeomraade_leggTilVerktoyMeny_opprettSlettAlleMaanedsoversikterMenuItem() {
+        slettAlleMenuItem = super.verktoeySubMenu.addItem("Slett alle månedsoversikter");
+        bekreftSlettingAvMaanedsoversikterConfirmDialog = new ConfirmDialog(
+                "Slette alle månedsoversikter?",
+                "Vil du virkelig slette månedsoversikter med månedsoversiktposter?",
+                "Ja, sett i gang",
+                ee -> {
+                    maanedsoversiktService.slettAlleMaanedsoversikter();
+                    oppdaterSoekeomraadeFinnAlleRader();
+                    oppdaterRedigeringsomraade();
+                },
+                "Nei, er du GAL!",
+                e -> bekreftSlettingAvMaanedsoversikterConfirmDialog.close());
+        slettAlleMenuItem.addClickListener(e -> bekreftSlettingAvMaanedsoversikterConfirmDialog.open());
     }
 
     private void importerCSVFraGamleBlaahvalen() {
         new CSVImportmester(new MaanedsoversiktFraGamleBlaahvalenCSVImportassistent()).velgImportfilOgKjoerImport(maanedsoversiktService);
     }
 
-    private void leggTilOgTilpassKnapper() {
-        oppdaterSummerOgPeriodeposterButton = new Button("Oppdater summer");
-        oppdaterSummerOgPeriodeposterButton.addClickListener(e -> maanedsoversiktService.oppdaterDetaljertPeriodensPeriodeposterOgSummer());
-        oppdaterSummerOgPeriodeposterButton.setEnabled(false);
-        hentKnapperadRedigeringsfelt().addToEnd(oppdaterSummerOgPeriodeposterButton);
-
-        skrivUtMaanedsoversiktButton = new Button("Lagre PDF");
-        skrivUtMaanedsoversiktButton.addClickListener(e -> super.skrivUtPerioderapport());
-        skrivUtMaanedsoversiktButton.setEnabled(false);
-        hentKnapperadRedigeringsfelt().addToEnd(skrivUtMaanedsoversiktButton);
-        hentVerktoeySubMeny().addItem("Opprett månedsoversikter", e -> maanedsoversiktService.opprettMaanedsoversikterForHeleAaret());
-
-    }
-
-
     @Override
     public void instansAktiverKnapperadRedigeringsfelt(Boolean aktiverBoolean) {
         super.instansAktiverKnapperadRedigeringsfelt(aktiverBoolean);
-        skrivUtMaanedsoversiktButton.setEnabled(aktiverBoolean);
-        oppdaterSummerOgPeriodeposterButton.setEnabled(aktiverBoolean);
+        super.lastNedPDFAnchor.setEnabled(aktiverBoolean);
+        super.oppdaterSummerOgPeriodeposterButton.setEnabled(aktiverBoolean);
     }
+
+// endregion
+
 
 }

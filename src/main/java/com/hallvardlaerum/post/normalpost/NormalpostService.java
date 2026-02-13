@@ -2,46 +2,115 @@ package com.hallvardlaerum.post.normalpost;
 
 
 import com.hallvardlaerum.kategori.Kategori;
-import com.hallvardlaerum.kategori.KategoriService;
 import com.hallvardlaerum.libs.database.EntitetAktig;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
+import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.verktoy.InitieringsEgnet;
+import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.post.Post;
 import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.post.PostServiceMal;
 import com.hallvardlaerum.post.PostklasseEnum;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import org.springframework.data.domain.PageRequest;
+import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
+/**
+ * Entitetservicer skal ha metoder på norsk, og fungerer som en oversetter mot repository
+ */
 @Service
 public class NormalpostService extends PostServiceMal implements InitieringsEgnet {
-    private KategoriService kategoriService;
     private ArrayList<Ekstrafeltrad> ekstrafeltradArrayList;
     private Boolean erInitiert = false;
     private PostRepository postRepository;
 
 
-    //TODO: Hva brukes denne til?
-    @Override
-    public Post opprettEntitetMedForelder() {
-        return opprettEntitet();
-        //Skulle det ha vært satt inn en forelder her? Fra hvor???
+// ===================
+// === Finn poster ===
+// region Finn poster
+
+    public List<Post> finnEtterDatoOgTekstfrabankenOgNormalposttypeenum(LocalDate datoLocalDate, String tekstFraBankenString, NormalposttypeEnum normalposttypeEnum) {
+        return postRepository.findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(datoLocalDate, tekstFraBankenString, normalposttypeEnum);
     }
 
-    @Override
-    public Post opprettEntitet() {
-        Post normalpost = leggTilUUID(new Post());
-        normalpost.setPostklasseEnum(PostklasseEnum.NORMALPOST);
-        return normalpost;
+    public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
+        return postRepository.findByKostnadsPakke(kostnadspakke);
     }
+
+// endregion
+
+
+
+
+// =======================
+// === Finn enkeltpost ===
+// region Finn enkeltpost
+
+    public Post finnEtterDatoOgTekstfrabankenOgBeskrivelseNormalposttypeenum(LocalDate dato, String tekstFraBankenString, String beskrivelseString) {
+        if (dato == null || tekstFraBankenString == null) {
+            return null;
+        }
+
+        List<Post> poster = postRepository.findByDatoLocalDateAndTekstFraBankenStringAndBeskrivelseString(dato, tekstFraBankenString, beskrivelseString);
+        if (poster.isEmpty()) {
+            Loggekyklop.bruk().loggADVARSEL("Fant ikke post for dato:" + dato + ", tekstfrabanken:" + tekstFraBankenString + ", beskrivelseString:" + beskrivelseString + ". Avbryter");
+            return null;
+        } else if (poster.size() > 1) {
+            Loggekyklop.bruk().loggADVARSEL("Fant mer enn en post for dato:" + dato + ", tekstfrabanken:" + tekstFraBankenString + ", beskrivelseString:" + beskrivelseString + ". Avbryter");
+            return null;
+        } else {
+            return poster.getFirst();
+        }
+    }
+
+// endregion
+
+
+
+// ==============
+// === Summer ===
+// region Summer
+
+    public Integer sumInnPeriodeNormalposterUtenkategori(Periode periode) {
+        if (periode == null) {
+            return null;
+        }
+        return postRepository.sumInnFraDatoTilDatoNormalposterUtenKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+    }
+
+    public Integer sumUtPeriodeNormalposterUtenkategori(Periode periode) {
+        if (periode == null) {
+            return null;
+        }
+        return postRepository.sumUtFraDatoTilDatoNormalposterUtenKategori(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
+    }
+
+    public Integer sumInnEllerUtFradatoTildatoKategoritittel(LocalDate fraDato, LocalDate tilDato, String kategoritittel) {
+        Tuple tuple = postRepository.sumNormalPosterFradatoTilDatoKategoritittel(fraDato, tilDato, kategoritittel);
+        if (tuple == null) {
+            return 0;
+        }
+
+        Integer innInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(0, BigDecimal.class), true);
+        Integer utInteger = HelTallMester.konverterBigdecimalTilInteger(tuple.get(1, BigDecimal.class), true);
+
+        return innInteger + utInteger;
+    }
+
+// endregion
+
+
+
+// ======================
+// === CRUD og import ===
+// region CRUD og import
 
 
     @Override
@@ -49,50 +118,52 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
         if (field==null) {
             return false;
         }
+        if (field.getName().equalsIgnoreCase("kategori")) {
+            behandleSpesialfeltVedImport_importerKategorifra_UUID(entitet,field,nyVerdi, importradString);
+            return true;
 
-        if (field.getName().equalsIgnoreCase("Kategori")) {
-            Optional<Kategori> kategoriOptional = kategoriService.finnEtterTittel(nyVerdi);
-            if (kategoriOptional.isPresent()) {
-                try {
-                    field.set(entitet,kategoriOptional.get());
-                    return true;
-                } catch (IllegalAccessException e) {
-                    Loggekyklop.hent().loggTilFilINFO("Klarte ikke å sette Kategori med entiteten " + kategoriOptional.get().hentBeskrivendeNavn() + ". Importrad: " + importradString);
-                    return false;
-                }
-            } else {
-                Loggekyklop.hent().loggTilFilINFO("Klarte ikke å finne Kategori med navn " + nyVerdi + ". Importrad: " + importradString);
-                return false;
+        } else if (field.getName().equalsIgnoreCase("kostnadspakke")) {
+            behandleSpesialfeltVedImport_importerPeriodepost(entitet,field,nyVerdi,importradString);
+            return true;
+
+        } else {
+            return false;
+        }
+    }
+
+    private void behandleSpesialfeltVedImport_importerKategorifra_UUID(Object entitet, Field field, String nyVerdi, String importradString) {
+        Kategori kategori = Allvitekyklop.hent().getKategoriService().finnEtterUUID(nyVerdi);
+        if (kategori!=null) {
+            try {
+                field.set(entitet,kategori);
+            } catch (IllegalAccessException e) {
+                Loggekyklop.bruk().loggADVARSEL("Fant kategori, men klarte ikke å sette den: " + kategori.hentBeskrivendeNavn() + ". Hele raden:" + importradString);
             }
-        }
-
-        return false;
-
-    }
-
-
-    @Override
-    public boolean erInitiert() {
-        return erInitiert;
-    }
-
-    public NormalpostService() {
-    }
-
-    @Override
-    public void init() {
-        if (!erInitiert) {
-            super.initPostServiceMal(PostklasseEnum.NORMALPOST);
-            this.kategoriService = Allvitekyklop.hent().getKategoriService();
-            this.postRepository = Allvitekyklop.hent().getPostRepository();
-            erInitiert=true;
+        } else {
+            Loggekyklop.bruk().loggADVARSEL("Fant ikke kategori med UUID " + nyVerdi + ". Hele raden:" + importradString);
         }
     }
+
+
+
+    private void behandleSpesialfeltVedImport_importerPeriodepost(Object entitet, Field field, String nyVerdi, String importradString) {
+        Periodepost periodepost = Allvitekyklop.hent().getMaanedsoversiktpostService().finnEtterUUID(nyVerdi); //klarer å håndtere årsoversiktposter og
+        if (periodepost!=null) {
+            try {
+                field.set(entitet,periodepost);
+            } catch (IllegalAccessException e) {
+                Loggekyklop.bruk().loggADVARSEL("Fant periodepost, men klarte ikke å sette den: " + periodepost.hentBeskrivendeNavn() + ". Hele raden:" + importradString);
+            }
+        } else {
+            Loggekyklop.bruk().loggADVARSEL("Fant ikke periodepost med UUID " + nyVerdi + ". Hele raden:" + importradString);
+        }
+    }
+
 
     @Override
     public boolean lagreEkstrafeltTilSenere(EntitetAktig entitet, String feltnavnString, String verdiStreng, String importradString) {
-        Ekstrafeltrad ekstrafeltrad = hentEllerOpprettEkstraFeltrad((Post)entitet);
-        if (ekstrafeltrad==null) {
+        Ekstrafeltrad ekstrafeltrad = hentEllerOpprettEkstraFeltrad((Post) entitet);
+        if (ekstrafeltrad == null) {
             return false;
         } else {
             ekstrafeltrad.setImportradString(importradString);
@@ -116,83 +187,13 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
     }
 
 
-
-    public void importerInnholdIEkstraFeltArrayList(){
-        if (ekstrafeltradArrayList==null || ekstrafeltradArrayList.isEmpty()) {
-            Loggekyklop.hent().loggADVARSEL("EkstrafeltradArrayList er tom, avbryter import av innholdet");
-            return;
-        }
-
-        System.out.println("EkstrafeltradArraylist har " + ekstrafeltradArrayList.size() + " rader.");
-
-        for (Ekstrafeltrad ekstrafeltrad: ekstrafeltradArrayList) {
-            if (ekstrafeltrad.getPost()!=null) {
-                importerForelderpostFraKortnavn(ekstrafeltrad);
-                settSammenEkstraInfo(ekstrafeltrad);
-                lagre(ekstrafeltrad.getPost());
-            }
-        }
-
-    }
-
-    private void settSammenEkstraInfo(Ekstrafeltrad ekstrafeltrad) {
-        StringBuilder sb = new StringBuilder();
-        if (ekstrafeltrad.getEkstraInfoString()!=null && !ekstrafeltrad.getEkstraInfoString().isEmpty()) {
-            sb.append(ekstrafeltrad.getEkstraInfoString()).append("\n");
-        }
-        if (ekstrafeltrad.getValutaString()!=null && !ekstrafeltrad.getValutaString().isEmpty()){
-            sb.append("Valuta: ").append(ekstrafeltrad.getValutaString()).append("\n");
-        }
-        if (ekstrafeltrad.getKursString()!=null && !ekstrafeltrad.getKursString().isEmpty()) {
-            sb.append("Kurs: ").append(ekstrafeltrad.getKursString()).append("\n");
-        }
-        if(ekstrafeltrad.getOriginaltBeloepString()!=null && !ekstrafeltrad.getOriginaltBeloepString().isEmpty()) {
-            sb.append("Originalt beløp: ").append(ekstrafeltrad.getOriginaltBeloepString()).append("\n");
-        }
-        ekstrafeltrad.getPost().setEkstraInfoString(sb.toString());
-    }
-
-    private void importerForelderpostFraKortnavn(Ekstrafeltrad ekstrafeltrad) {
-        if (ekstrafeltrad.getForelderpostkortnavnString()==null || ekstrafeltrad.getForelderpostkortnavnString().isEmpty()) {
-            return;
-        }
-
-        if (ekstrafeltrad.getPost()==null) {
-            Loggekyklop.hent().loggADVARSEL("Post eller forelderpostkortnavnString er tom, avbryter.");
-            return;
-        }
-
-
-        List<Post> forelderposter = super.findByDatoLocalDateAndTekstFraBankenStringAndNormalposttypeEnum(
-                ekstrafeltrad.getPost().getDatoLocalDate(),
-                ekstrafeltrad.getPost().getTekstFraBankenString(),
-                NormalposttypeEnum.UTELATES
-        );
-
-        if (forelderposter.size()==1) {
-            ekstrafeltrad.getPost().setForelderPostUUID(forelderposter.getFirst().getUuid().toString());
-            lagre(ekstrafeltrad.getPost());
-        } else {
-            String strOpplysninger = "Dato = " + ekstrafeltrad.getPost().getDatoLocalDate() + ", " +
-                    "TekstFraBankenString = " + ekstrafeltrad.getPost().getTekstFraBankenString() + ", " +
-                    "NormalposttypeEnum = UTELATES";
-            if (forelderposter.size()>1) {
-                Loggekyklop.hent().loggADVARSEL("Fant mer enn en post med opplysningene " + strOpplysninger + ", kobler ikke til forelderpost");
-            } else if (forelderposter.isEmpty()) {
-                Loggekyklop.hent().loggADVARSEL("Fant ingen poster med opplysningene " + strOpplysninger + ", kobler ikke til forelderpost");
-            }
-        }
-
-    }
-
-
-    private Ekstrafeltrad hentEllerOpprettEkstraFeltrad(Post post){
-        if (post==null) {
+    private Ekstrafeltrad hentEllerOpprettEkstraFeltrad(Post post) {
+        if (post == null) {
             return null;
         }
 
         Ekstrafeltrad ekstrafeltrad;
-        if (ekstrafeltradArrayList==null) {
+        if (ekstrafeltradArrayList == null) {
             ekstrafeltradArrayList = new ArrayList<>();
             ekstrafeltrad = new Ekstrafeltrad(post);
             ekstrafeltradArrayList.add(ekstrafeltrad);
@@ -207,18 +208,53 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
             ekstrafeltradArrayList.add(ekstrafeltrad);
             return ekstrafeltrad;
         }
-
     }
 
 
-
-    public Stream<Post> finnAlleSomStream(PageRequest springPageRequest) {
-        return postRepository.findAll(springPageRequest).stream();
+    @Override
+    public Post opprettEntitet() {
+        Post normalpost = leggTilUUID(new Post());
+        normalpost.setPostklasseEnum(PostklasseEnum.NORMALPOST);
+        return normalpost;
     }
 
-    public List<Post> finnPosterIKostnadspakken(Periodepost kostnadspakke) {
-        return postRepository.findByKostnadsPakke(kostnadspakke);
+
+    //TODO: Hva brukes denne til?
+    @Override
+    public Post opprettEntitetMedForelder() {
+        return opprettEntitet();
+        //Skulle det ha vært satt inn en forelder her? Fra hvor???
     }
+
+
+// endregion
+
+
+
+
+// =================================
+// === Constructor og Initiering ===
+// region Constructor og initiering
+
+    @Override
+    public boolean erInitiert() {
+        return erInitiert;
+    }
+
+    public NormalpostService() {
+    }
+
+    @Override
+    public void init() {
+        if (!erInitiert) {
+            super.initPostServiceMal(PostklasseEnum.NORMALPOST);
+            this.postRepository = Allvitekyklop.hent().getPostRepository();
+            erInitiert = true;
+        }
+    }
+
+
+// endregion
 
 
     private static class Ekstrafeltrad {
@@ -238,40 +274,20 @@ public class NormalpostService extends PostServiceMal implements InitieringsEgne
             return post;
         }
 
-        public String getForelderpostkortnavnString() {
-            return forelderpostkortnavnString;
-        }
-
         public void setForelderpostkortnavnString(String forelderpostkortnavnString) {
             this.forelderpostkortnavnString = forelderpostkortnavnString;
-        }
-
-        public String getKursString() {
-            return kursString;
         }
 
         public void setKursString(String kursString) {
             this.kursString = kursString;
         }
 
-        public String getOriginaltBeloepString() {
-            return originaltBeloepString;
-        }
-
         public void setOriginaltBeloepString(String originaltBeloepString) {
             this.originaltBeloepString = originaltBeloepString;
         }
 
-        public String getValutaString() {
-            return valutaString;
-        }
-
         public void setValutaString(String valutaString) {
             this.valutaString = valutaString;
-        }
-
-        public String getEkstraInfoString() {
-            return ekstraInfoString;
         }
 
         public void setEkstraInfoString(String ekstraInfoString) {

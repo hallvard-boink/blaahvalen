@@ -62,7 +62,6 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
         }
 
         LocalDate fraLocalDate = LocalDate.of(maanedsOversikt.getDatoFraLocalDate().getYear(),1,1);
-
         List<Periode> aarsoversiktList = super.finnEtterPeriodetypeOgFradato(PeriodetypeEnum.AARSOVERSIKT, fraLocalDate);
         if (aarsoversiktList.isEmpty()) {
             return null;
@@ -72,10 +71,33 @@ public class AarsoversiktService extends PeriodeServiceMal implements Initiering
             }
             return aarsoversiktList.getFirst();
         }
-
-
     }
 
 
+    public void slettAlleAarsoversikter() {
+        super.slettAllePerioderMedPeriodeposter(PeriodetypeEnum.AARSOVERSIKT);
+    }
 
+    public void oppdaterAlleAarsoversikter() {
+        Loggekyklop.bruk().loggINFO("Oppdaterer årsoversikter...");
+        oppdaterAllePerioderAvSammeType(PeriodetypeEnum.AARSOVERSIKT);
+    }
+
+    public Periode finnAarsoversiktFraDato(LocalDate datoLocalDate) {
+        if (datoLocalDate==null) {
+            return null;
+        }
+        LocalDate fraLocalDate = LocalDate.of(datoLocalDate.getYear(),1,1);
+
+        List<Periode> aarsoversikter = hentRepository().findByPeriodetypeEnumAndDatoFraLocalDate(PeriodetypeEnum.AARSOVERSIKT,fraLocalDate);
+        if (aarsoversikter.isEmpty()) {
+            Loggekyklop.bruk().loggINFO("Fant ikke aarsoversikt for dato " + datoLocalDate);
+            return null;
+        } else {
+            if (aarsoversikter.size()>1) {
+                Loggekyklop.bruk().loggINFO("Fant mer enn en aarsoversikt for dato " + datoLocalDate + ", returnerer den første. Sjekk årsoversiktene dine, du har nok duplikater.");
+            }
+            return aarsoversikter.getFirst();
+        }
+    }
 }

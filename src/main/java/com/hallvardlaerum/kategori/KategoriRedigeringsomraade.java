@@ -28,6 +28,8 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
     private Checkbox erOppsummerendeUnderkategoriCheckbox;
     private Checkbox erAktivCheckbox;
     private ComboBox<Kategori> hovedKategoriComboBox;
+    private ComboBox<Kategori> motsattKategoriComboBox;
+    private IntegerField nivaaIntegerField;
 
 
     private boolean erInitiert = false;
@@ -37,12 +39,12 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
     }
 
     @Override
-    public void init(){
+    public void init() {
         if (!erInitiert) {
             super.initRedigeringsomraadeMal();
             instansOpprettFelter();
             instansByggOppBinder();
-            erInitiert=true;
+            erInitiert = true;
         }
     }
 
@@ -56,6 +58,17 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
 
     }
 
+
+    @Override
+    public void aktiver(Boolean blnAktiver) {
+        super.aktiver(blnAktiver);
+        KategoriView kategoriView = Allvitekyklop.hent().getKategoriView();
+        if (kategoriView != null && kategoriView.dupliserButton != null) {
+            Allvitekyklop.hent().getKategoriView().dupliserButton.setEnabled(blnAktiver);
+        }
+
+    }
+
     @Override
     public void instansOpprettFelter() {
         String hovedtabString = "Hoved";
@@ -64,19 +77,19 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
         tittelTextField = new TextField("Tittel");
         undertittelTextField = new TextField("Undertittel");
         leggTilRedigeringsfelter(hovedtabString, tittelTextField, undertittelTextField);
-        settColspan(tittelTextField,2);
-        settColspan(undertittelTextField,2);
+        settColspan(tittelTextField, 2);
+        settColspan(undertittelTextField, 2);
 
         beskrivelseTextArea = leggTilRedigeringsfelt(new TextArea("Beskrivelse"));
         leggTilRedigeringsfelter(hovedtabString, beskrivelseTextArea);
-        settColspan(beskrivelseTextArea,4);
+        settColspan(beskrivelseTextArea, 4);
 
         erAktivCheckbox = new Checkbox("Er aktiv");
         brukesTilBudsjettCheckbox = new Checkbox("Brukes til budsjett");
         brukesTilFastePosterCheckbox = new Checkbox("Brukes til faste poster");
         brukesTilRegnskapCheckbox = new Checkbox("Brukes til regnskap");
         erOppsummerendeUnderkategoriCheckbox = new Checkbox("Er oppsummerende underkategori");
-        leggTilRedigeringsfelter(hovedtabString,erAktivCheckbox, brukesTilBudsjettCheckbox,  brukesTilFastePosterCheckbox, brukesTilRegnskapCheckbox, erOppsummerendeUnderkategoriCheckbox);
+        leggTilRedigeringsfelter(hovedtabString, erAktivCheckbox, brukesTilBudsjettCheckbox, brukesTilFastePosterCheckbox, brukesTilRegnskapCheckbox, erOppsummerendeUnderkategoriCheckbox);
 
         kategoriRetningComboBox = new ComboBox<>("Retning");
         kategoriRetningComboBox.setItems(KategoriRetning.values());
@@ -92,9 +105,17 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
         hovedKategoriComboBox.setItems(Allvitekyklop.hent().getKategoriService().finnAlleHovedkategorier());
         hovedKategoriComboBox.setItemLabelGenerator(Kategori::getTittel);
 
-        leggTilRedigeringsfelter(hovedtabString, kategoriRetningComboBox, kategoriTypeComboBox);
+        motsattKategoriComboBox = new ComboBox<>("Motsatt kategori");
+        motsattKategoriComboBox.setItems(Allvitekyklop.hent().getKategoriService().finnAlle());
+        motsattKategoriComboBox.setItemLabelGenerator(Kategori::hentBeskrivendeNavn);
 
-        leggTilRedigeringsfelter(ekstratabString, rekkefoelgeIntegerField, hovedKategoriComboBox);
+        nivaaIntegerField = new IntegerField("Nivå");
+        nivaaIntegerField.setTooltipText("Denne kan være 0 (for periodeposter) eller 1 (for poster)");
+
+
+        leggTilRedigeringsfelter(hovedtabString, kategoriRetningComboBox, kategoriTypeComboBox, nivaaIntegerField);
+
+        leggTilRedigeringsfelter(ekstratabString, rekkefoelgeIntegerField, hovedKategoriComboBox, motsattKategoriComboBox);
         leggTilDatofeltTidOpprettetOgRedigert(ekstratabString);
 
         settFokusKomponent(tittelTextField);
@@ -115,6 +136,9 @@ public class KategoriRedigeringsomraade extends RedigeringsomraadeMal<Kategori> 
         binder.bind(kategoriTypeComboBox, Kategori::getKategoriType, Kategori::setKategoriType);
         binder.bind(rekkefoelgeIntegerField, Kategori::getRekkefoelge, Kategori::setRekkefoelge);
         binder.bind(erAktivCheckbox, Kategori::getErAktiv, Kategori::setErAktiv);
+        binder.bind(hovedKategoriComboBox, Kategori::getHovedKategori, Kategori::setHovedKategori);
+        binder.bind(motsattKategoriComboBox, Kategori::getMotsattKategori, Kategori::setMotsattKategori);
+        binder.bind(nivaaIntegerField, Kategori::getNivaa, Kategori::setNivaa);
 
     }
 }

@@ -2,6 +2,7 @@ package com.hallvardlaerum.kategori;
 
 import com.hallvardlaerum.libs.database.AbstraktEntitet;
 import com.hallvardlaerum.libs.database.EntitetMedBarnAktig;
+import com.hallvardlaerum.libs.database.EntitetMedForelderAktig;
 import com.hallvardlaerum.libs.eksportimport.SkalEksporteres;
 import com.hallvardlaerum.post.Post;
 import jakarta.persistence.*;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Post> {
+public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Post>, EntitetMedForelderAktig<Kategori> {
 
     @SkalEksporteres
     private String tittel;
@@ -57,6 +58,9 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
     @ManyToOne(targetEntity = Kategori.class, cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private Kategori hovedKategori;
 
+    @ManyToOne(targetEntity = Kategori.class, cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    private Kategori motsattKategori;
+
     @Override
     public ArrayList<Post> hentBarn() {
         return new ArrayList<>(poster);
@@ -77,23 +81,52 @@ public class Kategori extends AbstraktEntitet implements EntitetMedBarnAktig<Pos
             sb.append(undertittel);
         }
         sb.append(" [");
-        sb.append(kategoriType.getTittel()).append(", ");
-        sb.append(kategoriRetning.getTittel()).append("]");
+
+        if (kategoriType==null) {
+            sb.append("ukjent type");
+        } else {
+            sb.append(kategoriType.getTittel());
+        }
+
+        if (kategoriRetning==null) {
+            sb.append(", ukjent retning");
+        } else {
+            sb.append(", ").append(kategoriRetning.getTittel());
+        }
+        sb.append("]");
+
         return sb.toString();
     }
 
     public String hentKortnavn(){
-        if (undertittel!=null && !undertittel.isEmpty()) {
+        if (undertittel!=null && !undertittel.isEmpty() && !undertittel.equals("-")) {
             return tittel + ": " + undertittel;
         } else {
             return tittel;
         }
     }
 
+    @Override
+    public void setForelder(Kategori forelder) {
+        setHovedKategori(forelder);
+    }
+
+    @Override
+    public Kategori getForelder() {
+        return getHovedKategori();
+    }
 
 
     // === Getters and setters ====
 
+
+    public Kategori getMotsattKategori() {
+        return motsattKategori;
+    }
+
+    public void setMotsattKategori(Kategori motsattKategori) {
+        this.motsattKategori = motsattKategori;
+    }
 
     public Boolean getErOppsummerendeUnderkategori() {
         return erOppsummerendeUnderkategori;

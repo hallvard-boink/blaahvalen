@@ -4,10 +4,12 @@ package com.hallvardlaerum.verktoy;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
 import com.hallvardlaerum.libs.felter.Datokyklop;
 import com.hallvardlaerum.libs.felter.HelTallMester;
+import com.hallvardlaerum.libs.filerogopplasting.Filkyklop;
+import com.hallvardlaerum.libs.filerogopplasting.StandardmappeEnum;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
 import com.hallvardlaerum.periodepost.Periodepost;
-import com.hallvardlaerum.periodepost.periodeoversiktpost.PeriodedelAvKostnadspakkeRad;
+import com.hallvardlaerum.periodepost.kostnadspakke.PeriodedelAvKostnadspakkeRad;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.builder.column.Columns;
 import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
@@ -19,6 +21,7 @@ import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JRDataSource;
 
 import java.awt.*;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -35,11 +38,14 @@ public class PeriodeRapportMester {
     private static String tittelString;
     private static String filnavnString;
 
+    /**
+     * Oppretter en rapport som viser perioden (Årsoversikt eller Månedsoversikt) med relevante periodeposter og kostnadspakker
+    */
     public void lagrePeriodeSomPDF(
             Periode periode,
             ArrayList<Periodepost> periodepostSortertArrayList,
-            ArrayList<PeriodedelAvKostnadspakkeRad> maanedsradkostnadspakkerArrayList) {
-
+            ArrayList<PeriodedelAvKostnadspakkeRad> maanedsradkostnadspakkerArrayList)
+    {
         this.periodepostSortertArrayList = periodepostSortertArrayList;
         this.maanedsradkostnadspakkerArrayList = maanedsradkostnadspakkerArrayList;
 
@@ -75,13 +81,36 @@ public class PeriodeRapportMester {
                             cmp.pageXofY(),
                             cmp.text(" Regnskapsprogrammet Blaahvalen. Periodeoversikt oppdatert " + periode.getRedigertDatoTid()).setStyle(smallTextStyle)
                     )
-                    .toPdf(new FileOutputStream(filnavnString));
+                    .toPdf(hentFileOutPutStream(filnavnString));
 
-        } catch (DRException | FileNotFoundException e) {
+        } catch (DRException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static void opprettDefaultFilnavn(){
+        filnavnString = "Perioderapport.pdf";
+        Filkyklop.hent().hentElleropprettFil(StandardmappeEnum.TEMP, filnavnString); //for å opprette filen hvis den ikke finnes ennå
+
+    }
+
+    // Denne sender filen til root for Blaahvalen
+    private FileOutputStream hentFileOutPutStream(String simpeltfilnavnString){
+        File fil = Filkyklop.hent().hentElleropprettFil(StandardmappeEnum.TEMP,simpeltfilnavnString);
+        try {
+            return new FileOutputStream(fil);
+        } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
+    public static String hentFilnavnString(){
+        if (filnavnString==null) {
+            opprettDefaultFilnavn();
+        }
+        return filnavnString;
+    }
 
     private JasperReportBuilder opprettListePeriodeposter() {
         return report()
@@ -132,7 +161,7 @@ public class PeriodeRapportMester {
     private static VerticalListBuilder opprettOppsummering_inklOverfoeringSummer(Periode periode) {
         return cmp.verticalList()
                 .add(
-                        cmp.text("Med overføringer"),
+                        cmp.text("Med overføringer").setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapInntektMedOverfoeringerInteger())),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapUtgifterMedOverfoeringerInteger())),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapResultatMedOverfoeringerInteger()))
@@ -143,10 +172,10 @@ public class PeriodeRapportMester {
     private static VerticalListBuilder opprettOppsummering_differanseSummer(Periode periode) {
         return cmp.verticalList()
                 .add(
-                        cmp.text("Differanse"),
-                        cmp.text(" "),
-                        cmp.text(" "),
-                        cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumDifferanseResultatBudsjettRegnskap())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT)
+                        cmp.text("Differanse").setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
+                        cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumDifferanseBudsjettRegnskapInntekter())),
+                        cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumDifferanseBudsjettRegnskapUtgifter())),
+                        cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumDifferanseBudsjettRegnskapResultat())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT)
                 )
                 .setStyle(stl.style().setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT));
     }
@@ -154,7 +183,7 @@ public class PeriodeRapportMester {
     private static VerticalListBuilder opprettOppsummering_regnskapSummer(Periode periode) {
         return cmp.verticalList()
                 .add(
-                        cmp.text("Regnskap"),
+                        cmp.text("Regnskap").setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapInntektInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapUtgifterInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumRegnskapResultatInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT)
@@ -165,7 +194,7 @@ public class PeriodeRapportMester {
     private static VerticalListBuilder opprettOppsummering_budsjettSummer(Periode periode) {
         return cmp.verticalList()
                 .add(
-                        cmp.text("Budsjett"),
+                        cmp.text("Budsjett").setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettInntektInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettUtgifterInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT),
                         cmp.text(HelTallMester.formaterIntegerSomStortTall(periode.getSumBudsjettResultatInteger())).setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT)
@@ -192,16 +221,7 @@ public class PeriodeRapportMester {
         } else {
             tittelString = "Ukjent periodetype " + periode.getDatoFraLocalDate();
         }
-
-        filnavnString = "ukjent.pdf";
-        if (periode.getPeriodetypeEnum() == PeriodetypeEnum.MAANEDSOVERSIKT) {
-            filnavnString = "Maanedsoversikt_" +
-                    Datokyklop.hent().formaterLocalDate_YYYY_MM(periode.getDatoFraLocalDate());
-        } else if (periode.getPeriodetypeEnum() == PeriodetypeEnum.AARSOVERSIKT) {
-            filnavnString = "Aarsoversikt_" +
-                    Datokyklop.hent().formaterLocalDate_YYYY(periode.getDatoFraLocalDate());
-        }
-        filnavnString = filnavnString + "_utskrevet_" + Datokyklop.hent().hentDagensDatoSomEnkelDato();
+        opprettDefaultFilnavn();
     }
 
     private void opprettStiler() {

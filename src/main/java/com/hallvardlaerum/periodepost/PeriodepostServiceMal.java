@@ -1,25 +1,33 @@
 package com.hallvardlaerum.periodepost;
 
 import com.hallvardlaerum.kategori.Kategori;
+import com.hallvardlaerum.kategori.KategoriRetning;
+import com.hallvardlaerum.kategori.KategoriType;
 import com.hallvardlaerum.libs.database.EntitetserviceMal;
 import com.hallvardlaerum.libs.feiloglogging.Loggekyklop;
-import com.hallvardlaerum.libs.felter.HelTallMester;
 import com.hallvardlaerum.libs.ui.RedigeringsomraadeAktig;
 import com.hallvardlaerum.periode.Periode;
 import com.hallvardlaerum.periode.PeriodetypeEnum;
-import com.hallvardlaerum.post.PostklasseEnum;
+import com.hallvardlaerum.post.budsjettpost.BudsjettpostService;
 import com.hallvardlaerum.post.normalpost.NormalpostService;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import jakarta.persistence.Tuple;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, PeriodepostRepository> {
     private PeriodepostRepository periodepostRepository;
     private RedigeringsomraadeAktig<Periodepost> periodepostRedigeringsomraade;
     private PeriodepostTypeEnum periodepostTypeEnum;
     private NormalpostService normalpostService;
+    private BudsjettpostService budsjettpostService;
+
+
+// ===========================
+// === Constructor og Init ===
+//region Constructor og Init
 
     public PeriodepostServiceMal() {
 
@@ -27,24 +35,145 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
 
 
     public void initPeriodepostServiceMal(
-        RedigeringsomraadeAktig<Periodepost> periodepostRedigeringsomraade, PeriodepostTypeEnum periodepostTypeEnum)
-    {
+            RedigeringsomraadeAktig<Periodepost> periodepostRedigeringsomraade, PeriodepostTypeEnum periodepostTypeEnum) {
         this.periodepostRepository = Allvitekyklop.hent().getPeriodepostRepository();
         super.initEntitetserviceMal(Periodepost.class, periodepostRepository);
         this.periodepostRedigeringsomraade = periodepostRedigeringsomraade;
         this.periodepostTypeEnum = periodepostTypeEnum;
 
         normalpostService = Allvitekyklop.hent().getNormalpostService();
+        budsjettpostService = Allvitekyklop.hent().getBudsjettpostService();
     }
+//endregion
+
+
+// ============================
+// === Slette periodeposter ===
+// region Slette flere
 
     public void slettAlle(List<Periodepost> periodepostList) {
         periodepostRepository.deleteAll(periodepostList);
         periodepostRepository.flush();
     }
 
-    public List<Periodepost> finnFraPeriodeOgKategori(Periode periode, Kategori kategori) {
-        return periodepostRepository.findByPeriodeAndKategori(periode, kategori);
+
+    public void slettUkategorisertForPeriode(Periode periode, KategoriRetning kategoriRetning) {
+        if (periode == null || kategoriRetning == null) {
+            return;
+        }
+
+        //Kategori ukategorisertKategori = Allvitekyklop.hent().getKategoriService().finnEllerOpprettKategoriUKATEGORISERT(kategoriRetning);
+        Kategori ukategorisertKategori = Allvitekyklop.hent().getKategoriService()
+                .finnEllerOpprettFraKategoriTypeOgKategoriretningOgNivaa(KategoriType.UKATEGORISERT, kategoriRetning, 0);
+
+        Periodepost ukategorisertPeriodepost = finnEllerOpprettOgOppdaterPeriodepostUkategorisert(periode, ukategorisertKategori);
+        if (ukategorisertPeriodepost != null) {
+            slett(ukategorisertPeriodepost);
+        }
     }
+
+//endregion
+
+
+// ==========================
+// === Finne periodeposter ===
+// region Finne periodeposter
+
+    public List<Periodepost> finnPeriodeposterEtterKategori(Kategori fjernesKategori) {
+        return periodepostRepository.findByKategori(fjernesKategori);
+    }
+
+
+    public Periodepost finnStandardFraPeriodeOgKategori(Periode periode, Kategori kategori) {
+        if (kategori.getNivaa() != 0) {
+            kategori = Allvitekyklop.hent().getKategoriService().finnHovedKategoriEtterTittel(kategori.getTittel());
+        }
+
+        List<Periodepost> periodeposter = periodepostRepository.findByPeriodeAndKategori(periode, kategori);
+        if (periodeposter.isEmpty()) {
+            return null;
+        } else {
+            if (periodeposter.size() > 1) {
+                Loggekyklop.bruk().loggADVARSEL("Fant mer enn en standard periodepost i perioden " + periode.hentBeskrivendeNavn() + " med kategorien " + kategori.hentBeskrivendeNavn());
+            }
+            return periodeposter.getFirst();
+        }
+    }
+
+
+    public List<Periodepost> finnHovedperiodeposter(Periode entitet) {
+        return periodepostRepository.finnEtterPeriodeOgKategorinivaa(entitet.getUuid(), 0);
+    }
+
+    public List<Periodepost> finnAlleTyperEtterPeriode(Periode periode) {
+        if (periode == null) {
+            return new ArrayList<>();
+        }
+
+        if (periode.getPeriodetypeEnum() == PeriodetypeEnum.AARSOVERSIKT) {
+            return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.AARSOVERSIKTPOST, periode);
+
+        } else if (periode.getPeriodetypeEnum() == PeriodetypeEnum.MAANEDSOVERSIKT) {
+            return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.AARSOVERSIKTPOST, periode);
+
+        } else {
+            Loggekyklop.bruk().loggFEIL("Hverken Årsoversikt eller Månedsoversikt");
+            return new ArrayList<>();
+        }
+    }
+
+//endregion
+
+
+// ==========================================
+// === Finne og evt. opprette periodepost ===
+// region Finne og evt. opprette periodepost
+
+
+    public Periodepost finnEllerOpprettOgOppdaterPeriodepostUkategorisert(Periode periode, Kategori kategoriUkategorisert) {
+
+        Periodepost periodepostUkategorisert = finnPeriodepostUkategorisert(periode, kategoriUkategorisert);
+        if (periodepostUkategorisert == null) {
+            periodepostUkategorisert = opprettEntitet();
+            periodepostUkategorisert.setKategori(kategoriUkategorisert);
+            periodepostUkategorisert.setPeriode(periode);
+            lagre(periodepostUkategorisert);
+        }
+
+        if (periodepostUkategorisert.getKategori().getKategoriRetning() == KategoriRetning.INN) {
+            periodepostUkategorisert.setSumRegnskapInteger(normalpostService.sumInnPeriodeNormalposterUtenkategori(periode));
+        } else if (periodepostUkategorisert.getKategori().getKategoriRetning() == KategoriRetning.UT) {
+            periodepostUkategorisert.setSumRegnskapInteger(normalpostService.sumUtPeriodeNormalposterUtenkategori(periode));
+        } else {
+            Loggekyklop.bruk().loggFEIL("UkategorisertKategori har ikke riktig retning");
+        }
+        return periodepostUkategorisert;
+
+    }
+
+    public Periodepost finnPeriodepostUkategorisert(Periode periode, Kategori kategoriUkategorisert) {
+        if (periode == null || kategoriUkategorisert == null) {
+            Loggekyklop.bruk().loggFEIL("Periode eller kategoriUkategorisert er null, avbryter");
+            return null;
+        }
+
+        List<Periodepost> periodepostList = periodepostRepository.findByPeriodeAndKategori(periode, kategoriUkategorisert);
+        if (periodepostList.isEmpty()) {
+            return null;
+        } else {
+            if (periodepostList.size() > 1) {
+                Loggekyklop.bruk().loggINFO("Fant for mange periodeposter for periode " + periode.hentBeskrivendeNavn() + " og kategori " + kategoriUkategorisert.hentBeskrivendeNavn());
+            }
+            return periodepostList.getFirst();
+        }
+    }
+
+//endregion
+
+
+// ==========================
+// === CRUD ===
+// region CRUD og import
 
     @Override
     public Periodepost opprettEntitet() {
@@ -52,6 +181,53 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
         periodepost.setPeriodepostTypeEnum(periodepostTypeEnum);
         return periodepost;
     }
+
+    @Override
+    public boolean behandleSpesialfeltVedImport(Object entitet, Field field, String nyVerdi, String importradString) {
+        if (field.getName().equals("kategori")) {
+            behandleSpesialfeltVedImport_importerKategori(entitet,field,nyVerdi, importradString);
+            return true;
+        } else if (field.getName().equals("periode")) {
+            behandleSpesialfeltVedImport_importerPeriode(entitet,field,nyVerdi,importradString);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    private void behandleSpesialfeltVedImport_importerKategori(Object entitet, Field field, String nyVerdi, String importradString) {
+        Kategori kategori = Allvitekyklop.hent().getKategoriService().finnEtterUUID(nyVerdi);
+        if (kategori!=null) {
+            try {
+                field.set(entitet,kategori);
+            } catch (IllegalAccessException e) {
+                Loggekyklop.bruk().loggADVARSEL("Fant kategori, men klarte ikke å sette den: " + kategori.hentBeskrivendeNavn() + ". Hele raden:" + importradString);
+            }
+        } else {
+            Loggekyklop.bruk().loggADVARSEL("Fant ikke kategori med UUID " + nyVerdi + ". Hele raden:" + importradString);
+        }
+    }
+
+    private void behandleSpesialfeltVedImport_importerPeriode(Object entitet, Field field, String nyVerdi, String importradString) {
+        Periode periode = Allvitekyklop.hent().getMaanedsoversiktService().finnEtterUUID(nyVerdi); //klarer å håndtere årsoversikter og
+        if (periode!=null) {
+            try {
+                field.set(entitet,periode);
+            } catch (IllegalAccessException e) {
+                Loggekyklop.bruk().loggADVARSEL("Fant periode, men klarte ikke å sette den: " + periode.hentBeskrivendeNavn() + ". Hele raden:" + importradString);
+            }
+        } else {
+            Loggekyklop.bruk().loggADVARSEL("Fant ikke periode med UUID " + nyVerdi + ". Hele raden:" + importradString);
+        }
+    }
+
+//endregion
+
+
+// =======================
+// === Oppdatere summer ===
+// region Oppdater summer
 
     public void oppdaterOgLagreSummerForValgteVanligePeriodepost() {
         oppdaterOgLagreSummerForVanligePeriodeposter(periodepostRedigeringsomraade.getEntitet());
@@ -61,132 +237,66 @@ public class PeriodepostServiceMal extends EntitetserviceMal<Periodepost, Period
     }
 
     public void oppdaterOgLagreSummerForVanligePeriodeposter(Periodepost periodepost) {
-        if (periodepost.getKategori()==null) {
+        if (periodepost.getKategori() == null) {
             return;
         }
-        List<Tuple> tuples = normalpostService.sumPosterFradatoTilDatoKategoritittel(
-                periodepost.getPeriode().getDatoFraLocalDate(),
-                periodepost.getPeriode().getDatoTilLocalDate(),
-                periodepost.getKategori().getTittel());
+        LocalDate fraLocalDate = periodepost.getPeriode().getDatoFraLocalDate();
+        LocalDate tilLocalDate = periodepost.getPeriode().getDatoTilLocalDate();
+        String kategoriTittel = periodepost.getKategori().getTittel();
 
-        if (tuples==null) {
-            periodepost.setSumBudsjettInteger(0);
-            periodepost.setSumRegnskapInteger(0);
+        periodepost.setSumRegnskapInteger(normalpostService.sumInnEllerUtFradatoTildatoKategoritittel(fraLocalDate, tilLocalDate, kategoriTittel));
+        periodepost.setSumBudsjettInteger(budsjettpostService.sumInnEllerUtFradatoTildatoKategoritittel(fraLocalDate, tilLocalDate, kategoriTittel));
 
-        } else {
-            if (tuples.size()>2) {
-                Loggekyklop.bruk().loggADVARSEL("Fant mer enn 2 tuple ved oppsummering av periodepost. Dette skal ikke skje, men fortsetter likevel.");
-            }
-
-            for (Tuple tuple:tuples) {
-                oppdaterOgLagreSummerForVanligePeriodeposter_oppdaterSummer_tuple(periodepost,tuple);
-            }
-
-        }
         lagre(periodepost);
     }
 
-    private void oppdaterOgLagreSummerForVanligePeriodeposter_oppdaterSummer_tuple(Periodepost periodepost, Tuple tuple) {
-        Byte postklasseenumByte = tuple.get(0, Byte.class);
-        BigDecimal sumBigDecimalInn = tuple.get(1, BigDecimal.class);
-        BigDecimal sumBigDecimalUt = tuple.get(2, BigDecimal.class);
-        if (postklasseenumByte==null && sumBigDecimalInn == null && sumBigDecimalUt == null) {
-            return;
-        }
+//endregion
 
-        PostklasseEnum postklasseEnum = PostklasseEnum.konverterFraByte(postklasseenumByte);
-        if (postklasseEnum==null) {
-            Loggekyklop.hent().loggFEIL("Klarte ikke finne postklasseEnum fra tuple i oppdaterSummer_tuple" +
-                    "Bytekode er " + postklasseenumByte + ", mens postklasseEnum er null ");
-            return;
-        }
 
-        Integer sumInnInteger = HelTallMester.konverterBigdecimalTilInteger(sumBigDecimalInn);
-        if (sumInnInteger==null) {
-            sumInnInteger = 0;
-        }
-        Integer sumUtInteger = HelTallMester.konverterBigdecimalTilInteger(sumBigDecimalUt);
-        if (sumUtInteger==null) {
-            sumUtInteger = 0;
-        }
-
-        if (postklasseEnum==PostklasseEnum.NORMALPOST) {
-            periodepost.setSumRegnskapInteger(sumInnInteger + sumUtInteger);
-        } else if (postklasseEnum == PostklasseEnum.BUDSJETTPOST) {
-            periodepost.setSumBudsjettInteger(sumInnInteger + sumUtInteger);
-        }
-    }
-
+// ====================================
+// === Lage tekst fra periodeposter ===
+// region Lage tekst fra periodeposter
 
     public String presenterPeriodeposterMenIkkeVisPeriode(List<Periodepost> periodepostList) {
-        if (periodepostList==null || periodepostList.isEmpty()) {
+        if (periodepostList == null || periodepostList.isEmpty()) {
             return "(tom liste)";
         } else {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i<periodepostList.size(); i++) {
+            sb.append("\n");
+            for (int i = 0; i < periodepostList.size(); i++) {
                 Periodepost periodepost = periodepostList.get(i);
-                String kategori = "(kategori ikke satt)";
-                if (periodepost.getKategori()!=null) {
-                    kategori = periodepost.getKategori().getTittel();
+                String kategoriString = "(kategori ikke satt)";
+                if (periodepost.getKategori() != null) {
+                    kategoriString = periodepost.getKategori().getTittel();
                 }
-                sb.append(kategori).append(" ");
-                if (periodepost.getSumBudsjettInteger()==null) {
-                    sb.append("b:null ");
+                sb.append(kategoriString).append(" ");
+
+                if (periodepost.getSumBudsjettInteger() == null) {
+                    sb.append("budsjett: null ");
                 } else {
-                    sb.append("b:").append(periodepost.getSumBudsjettInteger());
+                    sb.append("budsjett: ").append(periodepost.getSumBudsjettInteger()).append(" ");
                 }
-                if (periodepost.getSumRegnskapInteger()==null) {
-                    sb.append("r:null ");
+                if (periodepost.getSumRegnskapInteger() == null) {
+                    sb.append("regnskap: null ");
                 } else {
-                    sb.append("r:").append(periodepost.getSumRegnskapInteger());
+                    sb.append("regnskap: ").append(periodepost.getSumRegnskapInteger()).append(" ");
                 }
-                if (i>0){sb.append(", ");}
+                if (i > 0) {
+                    sb.append("\n");
+                }
             }
             return sb.toString();
         }
     }
 
-
-    public List<Periodepost> finnHovedperiodeposter(Periode entitet) {
-        return periodepostRepository.finnEtterPeriodeOgKategorinivaa(entitet.getUuid(), 0);
-    }
-
-    public List<Periodepost> finnEtterPeriode(Periode periode) {
-        if (periode==null) {
-            return new ArrayList<>();
-        }
-
-        if (periode.getPeriodetypeEnum()== PeriodetypeEnum.AARSOVERSIKT) {
-            return periodepostRepository.findByPeriodepostTypeEnumAndPeriode(PeriodepostTypeEnum.PERIODEOVERSIKTPOST, periode);
-
-        } else if (periode.getPeriodetypeEnum()==PeriodetypeEnum.MAANEDSOVERSIKT) {
-            List<Tuple> tuples = periodepostRepository.finnOgOppsummerKostnadspakkerForDatospenn(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-            return finnKostnadspakker_konverterFraTuples(tuples);
-
-        } else {
-            List<Tuple> tuples = periodepostRepository.finnOgOppsummerKostnadspakkerForDatospenn(periode.getDatoFraLocalDate(), periode.getDatoTilLocalDate());
-            return finnKostnadspakker_konverterFraTuples(tuples);
+    protected void oppdaterAllePeriodeposterAvSammeType(PeriodepostTypeEnum periodepostTypeEnum) {
+        List<Periodepost> periodepostList = periodepostRepository.findByPeriodepostTypeEnum(periodepostTypeEnum);
+        for (Periodepost periodepost:periodepostList) {
+            oppdaterOgLagreSummerForVanligePeriodeposter(periodepost);
         }
     }
 
-    /**
-     * Her regner jeg med at første tuple inneholder uuid for kostnadspakke
-     * @param tuples rådata fra native query
-     * @return Liste med periodeposter
-     */
-    private ArrayList<Periodepost>finnKostnadspakker_konverterFraTuples(List<Tuple> tuples) {
-        ArrayList<Periodepost> kostnadspakker = new ArrayList<>();
-        if (tuples==null) {
-            return kostnadspakker;
-        }
+//endregion
 
-        for (Tuple tuple:tuples) {
-            UUID uuid = tuple.get(0, UUID.class);
-            if (uuid!=null) {
-                Optional<Periodepost> kostnadspakkeOptional = periodepostRepository.findById(uuid);
-                kostnadspakkeOptional.ifPresent(kostnadspakker::add);
-            }
-        }
-        return kostnadspakker;
-    }
+
 }

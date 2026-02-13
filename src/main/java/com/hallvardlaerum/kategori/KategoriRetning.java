@@ -2,7 +2,9 @@ package com.hallvardlaerum.kategori;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 
-public enum KategoriRetning implements EnumAktig {
+import java.util.List;
+
+public enum KategoriRetning implements EnumAktig<KategoriRetning> {
     INN ("Inn","Inntekter, lønn og salg av ting"),
     UT("Ut","Utgifter, kostnader, alt sånn"),
     UKJENT("Ukjent","Vet ikke om det er inntekter eller utgifter. Brukes på Ukategorisert eller Skal ikke kategoriseres");
@@ -38,6 +40,16 @@ public enum KategoriRetning implements EnumAktig {
         return tittel;
     }
 
+    @Override
+    public String hentTooltip() {
+        return EnumAktig.opprettTooltip(hentVerdier());
+    }
+
+    @Override
+    public List<KategoriRetning> hentVerdier() {
+        return List.of(KategoriRetning.values());
+    }
+
 
     public String getTittelMedBeskrivelse() {
         return tittel + ": " + beskrivelse;
@@ -46,4 +58,6 @@ public enum KategoriRetning implements EnumAktig {
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
+
+
 }

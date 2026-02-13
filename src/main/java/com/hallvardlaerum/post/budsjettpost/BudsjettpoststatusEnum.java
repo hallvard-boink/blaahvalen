@@ -2,7 +2,9 @@ package com.hallvardlaerum.post.budsjettpost;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 
-public enum BudsjettpoststatusEnum implements EnumAktig {
+import java.util.List;
+
+public enum BudsjettpoststatusEnum implements EnumAktig<BudsjettpoststatusEnum> {
     FORESLAATT("Foreslått","Tenkt på, ønsket, kanskje planlagt, men ikke satt inn i et konkret budsjett"),
     TILDELT("Tildelt","Tildelt i et konkret månedsbudsjett");
 
@@ -42,6 +44,16 @@ public enum BudsjettpoststatusEnum implements EnumAktig {
         return tittel;
     }
 
+    @Override
+    public String hentTooltip() {
+        return EnumAktig.opprettTooltip(hentVerdier());
+    }
+
+    @Override
+    public List<BudsjettpoststatusEnum> hentVerdier() {
+        return List.of(BudsjettpoststatusEnum.values());
+    }
+
 
     public String getTittelMedBeskrivelse() {
         return tittel + " (" + beskrivelse + ")";
@@ -50,5 +62,7 @@ public enum BudsjettpoststatusEnum implements EnumAktig {
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
+
+
 
 }

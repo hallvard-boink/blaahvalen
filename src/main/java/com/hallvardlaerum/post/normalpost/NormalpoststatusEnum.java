@@ -2,7 +2,9 @@ package com.hallvardlaerum.post.normalpost;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 
-public enum NormalpoststatusEnum implements EnumAktig {
+import java.util.List;
+
+public enum NormalpoststatusEnum implements EnumAktig<NormalpoststatusEnum> {
 
     UBEHANDLET("Ubehandlet","Posten er akkurat blitt importert, og er ikke bearbeidet ennå."),
     UNDER_ARBEID("Under arbeid","Posten er ikke ferdig bearbeidet, må fortsette senere."),
@@ -47,6 +49,16 @@ public enum NormalpoststatusEnum implements EnumAktig {
         return tittel;
     }
 
+    @Override
+    public String hentTooltip() {
+        return EnumAktig.opprettTooltip(hentVerdier());
+    }
+
+    @Override
+    public List<NormalpoststatusEnum> hentVerdier() {
+        return List.of(NormalpoststatusEnum.values());
+    }
+
 
     public String getTittelMedBeskrivelse() {
         return tittel + ": " + beskrivelse;
@@ -55,4 +67,6 @@ public enum NormalpoststatusEnum implements EnumAktig {
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
+
+
 }

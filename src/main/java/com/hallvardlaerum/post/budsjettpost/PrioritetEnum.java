@@ -2,9 +2,11 @@ package com.hallvardlaerum.post.budsjettpost;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 
-public enum PrioritetEnum implements EnumAktig {
+import java.util.List;
+
+public enum PrioritetEnum implements EnumAktig<PrioritetEnum> {
     MAA("1 - Må","Denne må gjennomføres uansett"),
-    BØR("2 - Bør","Vi kan klare oss uten, men bør helst ta denne"),
+    BOER("2 - Bør","Vi kan klare oss uten, men bør helst ta denne"),
     KAN("3 - Kan","Denne kan vi fint vente med");
 
     private String tittel;
@@ -44,6 +46,16 @@ public enum PrioritetEnum implements EnumAktig {
         return tittel;
     }
 
+    @Override
+    public String hentTooltip() {
+        return EnumAktig.opprettTooltip(hentVerdier());
+    }
+
+    @Override
+    public List<PrioritetEnum> hentVerdier() {
+        return List.of(PrioritetEnum.values());
+    }
+
 
     public String getTittelMedBeskrivelse() {
         return tittel + " (" + beskrivelse + ")";
@@ -52,4 +64,6 @@ public enum PrioritetEnum implements EnumAktig {
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
+
+
 }

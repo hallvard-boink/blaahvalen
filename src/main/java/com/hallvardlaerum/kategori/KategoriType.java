@@ -2,7 +2,9 @@ package com.hallvardlaerum.kategori;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 
-public enum KategoriType implements EnumAktig {
+import java.util.List;
+
+public enum KategoriType implements EnumAktig<KategoriType> {
     STANDARD("Standard","De fleste kategoriene"), // [0]
     KREDITTKORT("Kredittkort","Tina eller Hallvards kredittkortregninger"), // [1]
     OVERFOERING("Overføring","Alle type refusjoner, utlegg, overføring mellom konti m.m."),  // [2]
@@ -42,8 +44,20 @@ public enum KategoriType implements EnumAktig {
         return tittel;
     }
 
+    @Override
+    public String hentTooltip() {
+        return EnumAktig.opprettTooltip(hentVerdier());
+    }
+
+    @Override
+    public List<KategoriType> hentVerdier() {
+        return List.of(KategoriType.values());
+    }
+
 
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
+
+
 }

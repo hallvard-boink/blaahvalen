@@ -2,8 +2,10 @@ package com.hallvardlaerum.post.normalpost;
 
 import com.hallvardlaerum.libs.database.EnumAktig;
 
-//TODO: Fjerne kredittkortpost?
-public enum NormalposttypeEnum implements EnumAktig {
+import java.util.List;
+
+
+public enum NormalposttypeEnum implements EnumAktig<NormalposttypeEnum> {
     NORMAL("Normal","Vanlig post, slik den fremgår av kontoutskriften fra banken"),
     DELPOST("Delpost","Er splittet ut fra en annen post, og er mer detaljert enn en vanlig post. Forelderposten skal være satt til status 'Utelates'"),
     UTELATES("Utelates","Tas med for historikkens del, men skal ikke tas med i utregninger."),
@@ -31,6 +33,16 @@ public enum NormalposttypeEnum implements EnumAktig {
         return tittel;
     }
 
+    @Override
+    public String hentTooltip() {
+        return EnumAktig.opprettTooltip(hentVerdier());
+    }
+
+    @Override
+    public List<NormalposttypeEnum> hentVerdier() {
+        return List.of(NormalposttypeEnum.values());
+    }
+
 
     public String getTittelMedBeskrivelse() {
         return tittel + ": " + beskrivelse;
@@ -54,4 +66,6 @@ public enum NormalposttypeEnum implements EnumAktig {
     public void setBeskrivelse(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
+
+
 }

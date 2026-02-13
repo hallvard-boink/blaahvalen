@@ -1,56 +1,31 @@
 package com.hallvardlaerum.post.normalpost;
 
-import com.hallvardlaerum.kategori.Kategori;
-import com.hallvardlaerum.libs.database.EntityFilterSpecification;
-import com.hallvardlaerum.libs.database.SearchCriteria;
-import com.hallvardlaerum.libs.felter.Datokyklop;
-import com.hallvardlaerum.libs.ui.BooleanCombobox;
-import com.hallvardlaerum.libs.ui.Gridkyklop;
+import com.hallvardlaerum.libs.ui.HallvardsGrid;
 import com.hallvardlaerum.periodepost.Periodepost;
 import com.hallvardlaerum.periodepost.PeriodepostGrid;
 import com.hallvardlaerum.post.Post;
-import com.hallvardlaerum.post.PostklasseEnum;
+import com.hallvardlaerum.post.PostRepository;
 import com.hallvardlaerum.verktoy.Allvitekyklop;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.value.ValueChangeMode;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
-import org.springframework.data.domain.Sort;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class PostSummeringsDialog extends Dialog {
-    protected Grid<Post> normalpostGrid;
+    protected NormalpostGrid normalpostGrid;
     protected Grid<Periodepost> periodepostGrid;
     protected NormalpostService postService;
     protected IntegerField sumIntegerField;
     protected IntegerField gjennomsnittIntegerField;
-
-    private ConfigurableFilterDataProvider<Post, Void, String> filterProvider;
     private SummeringsDialogEgnet summeringsDialogEgnet;
 
 // ===========================
@@ -113,7 +88,7 @@ public class PostSummeringsDialog extends Dialog {
             } else {
                 normalpostGrid.select(valgtPost);
             }
-            oppdaterSumOgGjennomsnittFraMarkerteRader_NormalpostGrid();
+            oppdaterSumOgGjennomsnittFraMarkerteRader_PostGrid(normalpostGrid);
         });
 
         normalpostGrid.setSelectionMode(Grid.SelectionMode.MULTI);
@@ -167,7 +142,7 @@ public class PostSummeringsDialog extends Dialog {
         fjernAlleMarkeringer.addClickListener(e -> {
             normalpostGrid.getSelectionModel().deselectAll();
             periodepostGrid.getSelectionModel().deselectAll();
-            oppdaterSumOgGjennomsnittFraMarkerteRader_NormalpostGrid();
+            oppdaterSumOgGjennomsnittFraMarkerteRader_PostGrid(normalpostGrid);
         });
         return fjernAlleMarkeringer;
     }
@@ -203,19 +178,23 @@ public class PostSummeringsDialog extends Dialog {
 
 
 
-    private void oppdaterSumOgGjennomsnittFraMarkerteRader_NormalpostGrid() {
+    private void oppdaterSumOgGjennomsnittFraMarkerteRader_PostGrid(HallvardsGrid<Post, PostRepository> grid) {
 
-        Integer sumInteger = 0;
-        List<Post> valgtePoster = normalpostGrid.getSelectionModel().getSelectedItems().stream().toList();
+        int sumInteger = 0;
+        List<Post> valgtePoster = grid.getSelectionModel().getSelectedItems().stream().toList();
         for (Post post : valgtePoster) {
             sumInteger = sumInteger + post.getUtFraKontoInteger();
         }
         sumIntegerField.setValue(sumInteger);
-        gjennomsnittIntegerField.setValue(sumInteger / valgtePoster.size());
+        if (valgtePoster.isEmpty()) {
+            gjennomsnittIntegerField.setValue(0);
+        } else {
+            gjennomsnittIntegerField.setValue(sumInteger / valgtePoster.size());
+        }
     }
 
     private void oppdaterSumOgGjennomsnittFraMarkerteRader_PeriodepostGrid() {
-        Integer sumInteger = 0;
+        int sumInteger = 0;
         List<Periodepost> valgtePoster = periodepostGrid.getSelectionModel().getSelectedItems().stream().toList();
         for (Periodepost periodepost : valgtePoster) {
             if (periodepost.getSumRegnskapInteger()>0) {
